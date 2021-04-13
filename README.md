@@ -51,7 +51,7 @@ with deployed contract address and the above web3.js-init-code sample, you are g
 
 ## How to test dapp
 
-read [doc here](docs/test-simple-dapp).
+read [doc here](docs/test-simple-dapp.md).
 
 
 
