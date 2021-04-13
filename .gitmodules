@@ -1,0 +1,11 @@
+[submodule "godwoken"]
+	path = godwoken
+	url = https://github.com/nervosnetwork/godwoken.git
+	branch = v0.1.x
+[submodule "lumos"]
+	path = lumos
+	url = https://github.com/nervosnetwork/lumos.git
+[submodule "godwoken-examples"]
+	path = godwoken-examples
+	url = https://github.com/RetricSu/godwoken-examples.git
+	branch = polyman

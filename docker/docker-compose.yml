@@ -1,0 +1,80 @@
+version: '3.7'
+
+volumes:
+  #common_file: {}
+  cargo-cache:
+
+services:
+  ckb:
+    build: 
+      context: layer1
+    ports: 
+      - 8114:8114
+    volumes:
+      - ../ckb-data/:/code
+    # logging:
+    #   driver: "none"
+    # environment:
+    #   - SE_OPTS="log ckb-log.txt"
+    
+#  compile-lock: 
+#    build: 
+#      context: compile-lock
+#    volumes: 
+#      - common_file:/code
+
+
+
+#  lumos-config:
+#    build: 
+#      context: lumos-config
+#    networks: 
+#      - layer1
+#      - layer2
+#    volumes: 
+#      - common_file:/code/lumos-config-generator
+#    depends_on: 
+#      - chain
+ 
+  postgres:
+    image: postgres
+    ports: 
+      - 5432:5432
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_DB: lumos
+      POSTGRES_PASSWORD: password
+
+  lumos:
+    image: retricsu/gowoken-build_dev
+    volumes:
+      - ../:/code
+    command: bash /code/lumos_entrypoint.sh
+    depends_on: 
+      - postgres
+
+  godwoken:
+    image: retricsu/gowoken-build_dev
+    volumes:
+      - ../:/code
+      - cargo-cache:/usr/local/cargo
+    command: bash /code/godwoken_entrypoint.sh
+    ports: 
+      - 8119:8119
+    depends_on: 
+      - ckb
+      - lumos
+      - postgres
+
+  polyjuice:
+    image: retricsu/gowoken-build_dev
+    volumes:
+      - ../:/code
+    command: bash /code/polyjuice_entrypoint.sh
+    ports:
+      - 6101:6101
+      - 6100:6100
+    depends_on:
+      - ckb
+      - lumos
+      - postgres
