@@ -37,12 +37,14 @@ show-indexer:
 
 clean:
 	rm -rf ckb-data/data
+	rm -rf indexer-data/ckb-indexer-data && rm indexer-data/indexer-log 
 	cd godwoken-examples/packages/runner && rm -rf db && rm -rf temp-db
 
 re-init:
 	make down
 	rm -rf ckb-data
 	rm -rf godwoken
+	rm -rf godwoken-polyjuice
 	rm -rf godwoken-examples
 	rm -rf lumos
 	make init

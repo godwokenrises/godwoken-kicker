@@ -2,6 +2,7 @@ version: '3.7'
 
 volumes:
   cargo-cache:
+  ckb-cli:
 
 services:
   ckb:
@@ -67,6 +68,7 @@ services:
     volumes:
       - ../:/code
       - cargo-cache:/usr/local/cargo
+      - ckb-cli:/root/.ckb-cli
     command: bash /code/godwoken_entrypoint.sh
     ports: 
       - 8116:8116

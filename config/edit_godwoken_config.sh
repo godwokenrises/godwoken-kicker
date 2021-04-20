@@ -18,6 +18,7 @@ set_key_value() {
 
 
 set_key_value "privkey_path" "deploy/private_key"
+set_key_value "listen" "0.0.0.0:8119"
 
 # delete the default lock
 sed -i '/\[block_producer.wallet_config.lock\]/{n;d}' $CONF 

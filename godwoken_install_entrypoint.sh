@@ -9,9 +9,13 @@ cd ${PROJECT_DIR}/godwoken
 # build godwoken
 RUST_BACKTRACE=full cargo build
 
-# create scripts files
+
+# prepare to some config files for godwoken chain
+cp -r ${PROJECT_DIR}/config/scripts /scripts
 mkdir -p deploy && cd deploy
-cp -r ${PROJECT_DIR}/config/scripts scripts
+cp ${PROJECT_DIR}/config/private_key /private_key
+
+# create scripts files
 cat << EOF > scripts-deploy.json
 {
   "programs": {
