@@ -7,7 +7,6 @@ PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 # setup database
 cd ${PROJECT_DIR}/lumos
 git checkout v0.14.2-rc6
-yarn
 cd packages/sql-indexer
 cat << EOF > knexfile.js
 module.exports = {

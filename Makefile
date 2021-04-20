@@ -6,7 +6,8 @@ install:
 
 init:
 	make install
-#	cd godwoken-polyjuice && make all-via-docker
+	cd godwoken/godwoken-scripts/c && make all-via-docker
+	cd godwoken-polyjuice && make all-via-docker
 	cd docker/init && docker-compose up
 	
 start:

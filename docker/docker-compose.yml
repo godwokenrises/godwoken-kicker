@@ -1,7 +1,6 @@
 version: '3.7'
 
 volumes:
-  #common_file: {}
   cargo-cache:
 
 services:
@@ -35,8 +34,6 @@ services:
 #    volumes: 
 #      - common_file:/code
 
-
-
 #  lumos-config:
 #    build: 
 #      context: lumos-config
@@ -58,7 +55,7 @@ services:
       POSTGRES_PASSWORD: password
 
   lumos:
-    image: retricsu/gowoken-build_dev
+    image: retricsu/gowoken-build_dev:ubuntu20
     volumes:
       - ../:/code
     command: bash /code/lumos_entrypoint.sh
@@ -81,7 +78,7 @@ services:
       - postgres
 
   polyjuice:
-    image: retricsu/gowoken-build_dev
+    image: retricsu/gowoken-build_dev:ubuntu20
     volumes:
       - ../:/code
     command: bash /code/polyjuice_entrypoint.sh

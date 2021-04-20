@@ -13,7 +13,7 @@ services:
     command: bash /code/godwoken_install_entrypoint.sh
 
   polyjuice:
-    image: retricsu/gowoken-build_dev:rust
+    image: retricsu/gowoken-build_dev:ubuntu20
     volumes:
       - ../../:/code
     command: bash /code/polyjuice_install_entrypoint.sh
