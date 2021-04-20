@@ -6,14 +6,14 @@ volumes:
 services:
     
   godwoken:
-    image: retricsu/gowoken-build_dev
+    image: retricsu/gowoken-build_dev:ubuntu20
     volumes:
       - ../../:/code
       - cargo-cache:/usr/local/cargo
     command: bash /code/godwoken_install_entrypoint.sh
 
   polyjuice:
-    image: retricsu/gowoken-build_dev
+    image: retricsu/gowoken-build_dev:rust
     volumes:
       - ../../:/code
     command: bash /code/polyjuice_install_entrypoint.sh

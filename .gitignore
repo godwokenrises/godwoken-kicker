@@ -5,4 +5,6 @@ node_modules/
 yarn-error.log
 polyjuice/node_modules
 polyjuice/*.log
-ckb-data
+ckb-data/data
+indexer-data/ckb-indexer-data
+indexer-data/indexer-log

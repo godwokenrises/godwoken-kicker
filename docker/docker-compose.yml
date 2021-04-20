@@ -17,6 +17,18 @@ services:
     # environment:
     #   - SE_OPTS="log ckb-log.txt"
     
+  # ckb-indexer:
+  #   build: 
+  #     context: ckb-indexer
+  #   ports:
+  #     - 8116:8116
+  #   network_mode: 'bridge'
+  #   volumes:
+  #     - ../indexer-data/:/code
+  #   depends_on:
+  #     - ckb
+    
+
 #  compile-lock: 
 #    build: 
 #      context: compile-lock
@@ -54,16 +66,18 @@ services:
       - postgres
 
   godwoken:
-    image: retricsu/gowoken-build_dev
+    image: retricsu/gowoken-build_dev:ubuntu20
     volumes:
       - ../:/code
       - cargo-cache:/usr/local/cargo
     command: bash /code/godwoken_entrypoint.sh
     ports: 
+      - 8116:8116
       - 8119:8119
     depends_on: 
       - ckb
       - lumos
+    #  - ckb-indexer
       - postgres
 
   polyjuice:
