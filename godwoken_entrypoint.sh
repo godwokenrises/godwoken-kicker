@@ -45,7 +45,8 @@ cd ${PROJECT_DIR}/godwoken
 # copy polyjuice build file
 # todo: We should use real validator in the later version
 cp ${PROJECT_DIR}/godwoken-polyjuice/build/generator ${PROJECT_DIR}/godwoken/deploy/polyjuice-generator
-cp scripts/release/always-success deploy/polyjuice-validator
+cp scripts/release/always-success ${PROJECT_DIR}/godwoken/deploy/polyjuice-validator
+#cp ${PROJECT_DIR}/godwoken-polyjuice/build/validator ${PROJECT_DIR}/godwoken/deploy/polyjuice-validator
 
 # generate config file
 ./target/debug/gw-tools generate-config -r ${ckb_rpc} -g deploy/genesis-deploy-result.json -s deploy/scripts-deploy-result.json -p deploy -o config.toml
@@ -56,12 +57,13 @@ cp ${PROJECT_DIR}/config/edit_godwoken_config.sh edit_godwoken_config.sh
 rm edit_godwoken_config.sh 
 
 # prepare runner config file for polyjuice
-# cp $TOP/runner_config.json $PolyjuiceDir/packages/runner/configs/
-# todo
+cp deploy/scripts_deploy_result.json ${PROJECT_DIR}/godwoken-examples/packages/runner/configs/scripts_deploy_result.json
+cp config.toml ${PROJECT_DIR}/godwoken-examples/packages/runner/configs/godwoken-config.toml
 
 # start ckb-indexer
 # todo: should remove to another service. but the port mapping some how not working.
 ${PROJECT_DIR}/indexer-data/ckb-indexer -s ${PROJECT_DIR}/indexer-data/ckb-indexer-data -c ${ckb_rpc} > ${PROJECT_DIR}/indexer-data/indexer-log & 
 
 # start godwoken
-RUST_LOG=debug ./target/debug/godwoken
+#RUST_LOG=debug ./target/debug/godwoken
+cargo run --bin godwoken

@@ -8,3 +8,4 @@ polyjuice/*.log
 ckb-data/data
 indexer-data/ckb-indexer-data
 indexer-data/indexer-log
+ckb-cli-data/
