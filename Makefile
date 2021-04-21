@@ -69,3 +69,12 @@ enter-g:
 test:
 	docker run -t -d --name testimage retricsu/gowoken-build_dev:ubuntu20 
 	docker exec -it testimage bash 
+
+test-rpc:
+	./scripts/test_rpc.sh
+
+gen-schema:
+	cd docker && docker-compose up gen-godwoken-schema
+
+clean-schema:
+	cd docker/gen-godwoken-schema && rm -rf schemas/*
