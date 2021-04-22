@@ -74,7 +74,11 @@ test-rpc:
 	./scripts/test_rpc.sh
 
 gen-schema:
+	make clean-schema
 	cd docker && docker-compose up gen-godwoken-schema
 
 clean-schema:
 	cd docker/gen-godwoken-schema && rm -rf schemas/*
+
+status:
+	cd docker && docker-compose ps

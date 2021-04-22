@@ -38,9 +38,11 @@ done
 # deploy scripts
 cd ${PROJECT_DIR}/godwoken
 ./target/debug/gw-tools deploy-scripts -r ${ckb_rpc} -i deploy/scripts-deploy.json -o deploy/scripts-deploy-result.json -k ${PRIVKEY}
+#cargo run --bin gw-tools deploy-scripts -r ${ckb_rpc} -i deploy/scripts-deploy.json -o deploy/scripts-deploy-result.json -k ${PRIVKEY}
 
 # depoly genesis block
 ./target/debug/gw-tools deploy-genesis -r ${ckb_rpc} -d deploy/scripts-deploy-result.json -p deploy/poa-config.json -u deploy/rollup-config.json -o deploy/genesis-deploy-result.json -k ${PRIVKEY}
+#cargo run --bin gw-tools deploy-genesis -r ${ckb_rpc} -d deploy/scripts-deploy-result.json -p deploy/poa-config.json -u deploy/rollup-config.json -o deploy/genesis-deploy-result.json -k ${PRIVKEY}
 
 # copy polyjuice build file
 # todo: We should use real validator in the later version
@@ -50,6 +52,7 @@ cp scripts/release/always-success ${PROJECT_DIR}/godwoken/deploy/polyjuice-valid
 
 # generate config file
 ./target/debug/gw-tools generate-config -r ${ckb_rpc} -g deploy/genesis-deploy-result.json -s deploy/scripts-deploy-result.json -p deploy -o config.toml
+#cargo run --bin gw-tools generate-config -r ${ckb_rpc} -g deploy/genesis-deploy-result.json -s deploy/scripts-deploy-result.json -p deploy -o config.toml
 
 # Update block_producer.wallet_config section to your own lock.
 cp ${PROJECT_DIR}/config/edit_godwoken_config.sh edit_godwoken_config.sh
@@ -65,5 +68,5 @@ cp ${PROJECT_DIR}/godwoken/config.toml ${PROJECT_DIR}/godwoken-examples/packages
 ${PROJECT_DIR}/indexer-data/ckb-indexer -s ${PROJECT_DIR}/indexer-data/ckb-indexer-data -c ${ckb_rpc} > ${PROJECT_DIR}/indexer-data/indexer-log & 
 
 # start godwoken
-RUST_LOG=debug ./target/debug/godwoken
-#cargo run --bin godwoken
+#RUST_LOG=debug ./target/debug/godwoken
+cargo run --bin godwoken
