@@ -43,9 +43,21 @@ sp:
 sg:
 	cd docker && docker-compose logs -f godwoken
 
+stop-godwoken:
+	cd docker && docker-compose stop godwoken
+
 # show ckb-indexer
 si:
 	cd docker && docker-compose logs -f ckb-indexer
+
+show-web3:
+	cd docker && docker-compose logs -f web3
+
+stop-web3:
+	cd docker && docker-compose stop web3
+
+start-web3:
+	cd docker && docker-compose start web3
 
 clean:
 	rm -rf ckb-data/data
@@ -72,6 +84,9 @@ test:
 
 test-rpc:
 	./scripts/test_rpc.sh
+
+test-web3-rpc:
+	./scripts/test_web3_rpc.sh
 
 gen-schema:
 	make clean-schema
