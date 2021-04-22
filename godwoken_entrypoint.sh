@@ -61,7 +61,7 @@ rm edit_godwoken_config.sh
 
 # prepare runner config file for polyjuice
 cp ${PROJECT_DIR}/godwoken/deploy/scripts-deploy-result.json ${PROJECT_DIR}/godwoken-examples/packages/runner/configs/scripts-deploy-result.json
-cp ${PROJECT_DIR}/godwoken/config.toml ${PROJECT_DIR}/godwoken-examples/packages/runner/configs/godwoken_config.toml
+cp ${PROJECT_DIR}/godwoken/config.toml ${PROJECT_DIR}/godwoken-examples/packages/runner/configs/config.toml
 
 # start ckb-indexer
 # todo: should remove to another service. but the port mapping some how not working.
