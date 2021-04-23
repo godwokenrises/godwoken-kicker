@@ -14,14 +14,14 @@ echo '{
 | curl -H 'content-type: application/json' -d @- \
 http://localhost:8119
 
-echo -e "get_script_hash, id: 1 \n"
+echo -e "get_script_hash, id: 2 \n"
 
 echo '{
     "id": 2,
     "jsonrpc": "2.0",
     "method": "get_script_hash",
     "params":
-        ["0x1"]
+        ["0x2"]
 
 }' \
 | tr -d '\n' \

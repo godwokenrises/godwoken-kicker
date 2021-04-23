@@ -15,6 +15,12 @@ cp -r ${PROJECT_DIR}/config/scripts /scripts
 mkdir -p deploy && cd deploy
 cp ${PROJECT_DIR}/config/private_key /private_key
 
+# cp godwoken/c/ scripts to avoid build
+cp  ${PROJECT_DIR}/meta_contract_validator  ${PROJECT_DIR}/godwoken/godwoken-script/c/build/
+cp  ${PROJECT_DIR}/meta_contract_generator  ${PROJECT_DIR}/godwoken/godwoken-script/c/build/
+cp  ${PROJECT_DIR}/sudt_validator  ${PROJECT_DIR}/godwoken/godwoken-script/c/build/
+cp  ${PROJECT_DIR}/sudt_generator  ${PROJECT_DIR}/godwoken/godwoken-script/c/build/
+
 # create scripts files
 cat << EOF > scripts-deploy.json
 {
