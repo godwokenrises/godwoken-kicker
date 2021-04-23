@@ -53,6 +53,10 @@ services:
       POSTGRES_USER: user
       POSTGRES_DB: lumos
       POSTGRES_PASSWORD: password
+    volumes:
+      - ../postgres-data:/var/lib/postgresql/data
+      # copy the sql script to create tables
+      - ../web3-sql/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
 
   lumos:
     image: retricsu/gowoken-build_dev:ubuntu20

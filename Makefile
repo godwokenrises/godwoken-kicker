@@ -13,6 +13,9 @@ init:
 start:
 	cd docker && docker-compose up -d
 
+re-start:
+	cd docker && docker-compose restart
+
 stop:
 	cd docker && docker-compose stop
 
