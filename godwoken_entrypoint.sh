@@ -71,5 +71,5 @@ cd ${PROJECT_DIR}/godwoken-examples && yarn gen-config && cd ${PROJECT_DIR}/godw
 ${PROJECT_DIR}/indexer-data/ckb-indexer -s ${PROJECT_DIR}/indexer-data/ckb-indexer-data -c ${ckb_rpc} > ${PROJECT_DIR}/indexer-data/indexer-log & 
 
 # start godwoken
-RUST_LOG=debug ./target/debug/godwoken
-#cargo run --bin godwoken
+# RUST_LOG=debug ./target/debug/godwoken
+cargo run --bin godwoken

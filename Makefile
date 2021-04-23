@@ -49,6 +49,12 @@ sg:
 stop-godwoken:
 	cd docker && docker-compose stop godwoken
 
+stop-polyjuice:
+	cd docker && docker-compose stop polyjuice
+
+start-polyjuice:
+	cd docker && docker-compose start polyjuice
+
 # show ckb-indexer
 si:
 	cd docker && docker-compose logs -f ckb-indexer
