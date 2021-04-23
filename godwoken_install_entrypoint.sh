@@ -11,9 +11,9 @@ RUST_BACKTRACE=full cargo build
 
 
 # prepare to some config files for godwoken chain
-cp -r ${PROJECT_DIR}/config/scripts /scripts
+cp -r ${PROJECT_DIR}/config/scripts ${PROJECT_DIR}/godwoken/
 mkdir -p deploy && cd deploy
-cp ${PROJECT_DIR}/config/private_key /private_key
+cp ${PROJECT_DIR}/config/private_key private_key
 
 # cp godwoken/c/ scripts to avoid build
 cp  ${PROJECT_DIR}/meta_contract_validator  ${PROJECT_DIR}/godwoken/godwoken-script/c/build/
