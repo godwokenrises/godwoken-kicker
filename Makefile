@@ -5,9 +5,9 @@ install:
 	git submodule update --init --recursive
 
 init:
-	make install
+#	make install
 #	cd godwoken/godwoken-scripts/c && make all-via-docker
-	cd godwoken-polyjuice && make all-via-docker
+#	cd godwoken-polyjuice && make all-via-docker
 	cd docker/init && docker-compose up
 	
 start:
@@ -74,8 +74,9 @@ clean:
 	[ -e "indexer-data/ckb-indexer-data" ] && rm -rf indexer-data/ckb-indexer-data || echo 'file not exits.'
 	[ -e "indexer-data/indexer-log" ] && rm indexer-data/indexer-log || echo 'file not exits.'
 	cd godwoken-examples/packages/runner && rm -rf db && rm -rf temp-db
+	rm -rf postgres-data/*
 
-re-init:
+re-init:1
 	make down
 	rm -rf ckb-data
 	rm -rf godwoken
@@ -86,6 +87,9 @@ re-init:
 
 enter-g:
 	cd docker && docker-compose exec godwoken bash
+
+enter-p:
+	cd docker && docker-compose exec polyjuice bash	
 
 test:
 	docker run -t -d --name testimage retricsu/gowoken-build_dev:ubuntu20 
@@ -106,3 +110,15 @@ clean-schema:
 
 status:
 	cd docker && docker-compose ps
+
+
+clean-polyjuice:
+	cd godwoken-examples && yarn clean
+
+reset-polyjuice:
+	make stop-polyjuice
+	make clean-polyjuice	
+	make start-polyjuice
+
+start-godwoken:
+	cd docker && docker-compose start godwoken
