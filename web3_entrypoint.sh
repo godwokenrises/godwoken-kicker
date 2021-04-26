@@ -12,5 +12,5 @@ GODWOKEN_JSON_RPC=http://godwoken:8119
 EOF
 
 yarn workspace @godwoken-web3/godwoken tsc
-yarn workspace @godwoken-web3/api-server reset_database
+#yarn workspace @godwoken-web3/api-server reset_database
 yarn workspace @godwoken-web3/api-server start

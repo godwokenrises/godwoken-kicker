@@ -76,6 +76,13 @@ clean:
 	cd godwoken-examples/packages/runner && rm -rf db && rm -rf temp-db
 	rm -rf postgres-data/*
 
+smart-clean:
+	rm -rf ckb-cli-data/*
+	[ -e "indexer-data/ckb-indexer-data" ] && rm -rf indexer-data/ckb-indexer-data || echo 'file not exits.'
+	[ -e "indexer-data/indexer-log" ] && rm indexer-data/indexer-log || echo 'file not exits.'
+	cd godwoken-examples/packages/runner && rm -rf db && rm -rf temp-db
+	rm -rf postgres-data/*	
+
 re-init:1
 	make down
 	rm -rf ckb-data

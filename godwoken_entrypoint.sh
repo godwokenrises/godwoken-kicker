@@ -11,7 +11,7 @@ export LUMOS_CONFIG_FILE=${PROJECT_DIR}/config/lumos-config.json
 export PRIVKEY=deploy/private_key
 export ckb_rpc=http://ckb:8114
 export RUST_BACKTRACE=1
-export START_MODE="slim_start" # slim start, just start godwoken, no re-depoly scripts
+export START_MODE="fat_start" # slim start, just start godwoken, no re-depoly scripts
 
 if [ $START_MODE = "slim_start" ]; then
   cd ${PROJECT_DIR}/godwoken
