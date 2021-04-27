@@ -2,7 +2,7 @@
 
 the quickest way to get familar with and testing out this process is to use the [simple-storage-contract](https://github.com/RetricSu/godwoken-examples/tree/bbb824f8945ac55e48a6482b419ab41a8333e62e/packages/runner/src/sample-contracts) alongside with our PolyjuiceHttpPorviders [example](https://github.com/RetricSu/polyjuice-providers-http/tree/master/example/web).
 
-if you want to testing with your own dapp, [jump to line 67](#L123).
+if you want to testing with your own dapp, just jump to second parts.
 
 ## Test simple-storage-contract dapp
 
@@ -64,7 +64,7 @@ const SimpleContract = {
 yarn example
 ```
 
-## Test with your own 
+## Test with your own dapp
 
 so we assume you already ran a godwoken-polyjuice chain by starting [godwoken-kicker](https://github.com/retricsu/godwoken-kicker) and deployed a smart-contract on it.
 
