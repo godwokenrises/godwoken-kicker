@@ -6,12 +6,28 @@ PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 export TOP=${PROJECT_DIR}/config
 export PolyjuiceDir=${PROJECT_DIR}/godwoken-examples
-
 export LUMOS_CONFIG_FILE=${PROJECT_DIR}/config/lumos-config.json
 export PRIVKEY=deploy/private_key
 export ckb_rpc=http://ckb:8114
 export RUST_BACKTRACE=1
-export START_MODE="fat_start" # slim start, just start godwoken, no re-depoly scripts
+
+# detect which mode to start godwoken
+GODWOKEN_CONFIG_FILE=${PROJECT_DIR}/godwoken/config.toml
+
+if test -f "$GODWOKEN_CONFIG_FILE"; then
+  if [ "$FORCH_GODWOKEN_REDEPLOY" = true ]; then
+    echo "godwoken config.toml exists, but force_godwoken_redeploy is enabled, so use fat mode."
+    # fat start, re-deploy godwoken chain 
+    export START_MODE="fat_start" 
+  else
+    echo "godwoken config.toml exists. use slim mode."
+    # slim start, just start godwoken, no re-depoly scripts
+    export START_MODE="slim_start" 
+  fi
+else 
+  export START_MODE="fat_start"
+fi
+
 
 if [ $START_MODE = "slim_start" ]; then
   cd ${PROJECT_DIR}/godwoken

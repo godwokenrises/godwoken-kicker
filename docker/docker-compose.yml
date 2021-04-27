@@ -72,6 +72,8 @@ services:
       - ../:/code
       - cargo-cache:/usr/local/cargo
       - ../ckb-cli-data:/root/.ckb-cli
+    environment: 
+      FORCH_GODWOKEN_REDEPLOY: ${FORCH_GODWOKEN_REDEPLOY}
     command: bash /code/godwoken_entrypoint.sh
     ports: 
       - 8116:8116

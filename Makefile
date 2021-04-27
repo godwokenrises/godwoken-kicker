@@ -5,13 +5,16 @@ install:
 	git submodule update --init --recursive
 
 init:
-#	make install
+	make install
 #	cd godwoken/godwoken-scripts/c && make all-via-docker
-#	cd godwoken-polyjuice && make all-via-docker
+	cd godwoken-polyjuice && make all-via-docker
 	cd docker/init && docker-compose up
 	
 start:
 	cd docker && docker-compose up -d
+
+start-f:
+	cd docker && docker-compose --env-file .force.new.chain.env  up -d	
 
 re-start:
 	cd docker && docker-compose restart
@@ -131,4 +134,4 @@ start-godwoken:
 	cd docker && docker-compose start godwoken
 
 test-con:
-	./parseConfig.sh
+	./testParseConfig.sh
