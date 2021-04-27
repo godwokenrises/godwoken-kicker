@@ -11,14 +11,15 @@ export LUMOS_CONFIG_FILE=${PROJECT_DIR}/config/lumos-config.json
 export PRIVKEY=deploy/private_key
 export ckb_rpc=http://ckb:8114
 export RUST_BACKTRACE=1
-export START_MODE="slim_start" # slim start, just start godwoken, no re-depoly scripts
+export START_MODE="fat_start" # slim start, just start godwoken, no re-depoly scripts
 
 if [ $START_MODE = "slim_start" ]; then
   cd ${PROJECT_DIR}/godwoken
   # start ckb-indexer
   # todo: should remove to another service. but the port mapping some how not working.
   ${PROJECT_DIR}/indexer-data/ckb-indexer -s ${PROJECT_DIR}/indexer-data/ckb-indexer-data -c ${ckb_rpc} > ${PROJECT_DIR}/indexer-data/indexer-log & 
-  cargo run --bin godwoken
+  #cargo run --bin godwoken
+  RUST_LOG=debug ./target/debug/godwoken
 else
   echo 'run depoly mode'
 fi
@@ -83,5 +84,5 @@ cd ${PROJECT_DIR}/godwoken-examples && yarn gen-config && cd ${PROJECT_DIR}/godw
 ${PROJECT_DIR}/indexer-data/ckb-indexer -s ${PROJECT_DIR}/indexer-data/ckb-indexer-data -c ${ckb_rpc} > ${PROJECT_DIR}/indexer-data/indexer-log & 
 
 # start godwoken
-#RUST_LOG=debug ./target/debug/godwoken
-cargo run --bin godwoken
+RUST_LOG=debug ./target/debug/godwoken
+#cargo run --bin godwoken

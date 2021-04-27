@@ -129,3 +129,6 @@ reset-polyjuice:
 
 start-godwoken:
 	cd docker && docker-compose start godwoken
+
+test-con:
+	./parseConfig.sh
