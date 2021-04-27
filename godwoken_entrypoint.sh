@@ -50,7 +50,7 @@ yarn workspace @godwoken-examples/runner clean:temp
 yarn prepare-money
 cd ../../
 
-# wait for suffice fund to deploy godwoken scriptsx
+# wait for suffice fund to deploy godwoken scripts
 while true; do
     sleep 3;
     MINER_BALANCE=$(ckb-cli --url ${ckb_rpc} wallet get-capacity --wait-for-sync --address ckt1qyqy84gfm9ljvqr69p0njfqullx5zy2hr9kq0pd3n5)
@@ -63,6 +63,8 @@ while true; do
       echo 'fund unsuffice ${TOTAL}, keep waitting.'
     fi
 done
+
+echo 'this may takes a little bit of time, please wait...'
 
 # deploy scripts
 cd ${PROJECT_DIR}/godwoken
