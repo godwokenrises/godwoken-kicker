@@ -12,6 +12,3 @@ yarn install
 cd ${PROJECT_DIR}/godwoken-web3
 yarn install 
 
-cd ${PROJECT_DIR}/lumos
-#git checkout v0.14.2-rc6
-yarn install
