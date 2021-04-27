@@ -58,13 +58,13 @@ services:
       # copy the sql script to create tables
       - ../web3-sql/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
 
-  lumos:
-    image: retricsu/gowoken-build_dev:ubuntu20
-    volumes:
-      - ../:/code
-    command: bash /code/lumos_entrypoint.sh
-    depends_on: 
-      - postgres
+#   lumos:
+#     image: retricsu/gowoken-build_dev:ubuntu20
+#     volumes:
+#       - ../:/code
+#     command: bash /code/lumos_entrypoint.sh
+#     depends_on: 
+#       - postgres
 
   godwoken:
     image: retricsu/gowoken-build_dev:ubuntu20
@@ -80,7 +80,7 @@ services:
       - 8119:8119
     depends_on: 
       - ckb
-      - lumos
+    #  - lumos
     #  - ckb-indexer
       - postgres
 
@@ -94,7 +94,7 @@ services:
       - 6100:6100
     depends_on:
       - ckb
-      - lumos
+    #  - lumos
       - postgres
     
   web3:
