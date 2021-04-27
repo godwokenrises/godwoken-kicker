@@ -1,7 +1,7 @@
 [submodule "godwoken"]
 	path = godwoken
 	url = https://github.com/nervosnetwork/godwoken.git
-	branch = v0.1.x
+	branch = master 
 [submodule "lumos"]
 	path = lumos
 	url = https://github.com/nervosnetwork/lumos.git
