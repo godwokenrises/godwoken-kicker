@@ -2,13 +2,10 @@
 	path = godwoken
 	url = https://github.com/nervosnetwork/godwoken.git
 	branch = master 
-[submodule "lumos"]
-	path = lumos
-	url = https://github.com/nervosnetwork/lumos.git
 [submodule "godwoken-examples"]
 	path = godwoken-examples
 	url = https://github.com/RetricSu/godwoken-examples.git
-	branch = polyman
+	branch = polyman-master
 [submodule "godwoken-polyjuice"]
 	path = godwoken-polyjuice
 	url = https://github.com/nervosnetwork/godwoken-polyjuice.git
