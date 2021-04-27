@@ -7,8 +7,10 @@ install:
 init:
 	make install
 #	cd godwoken/godwoken-scripts/c && make all-via-docker
-	cd godwoken-polyjuice && make all-via-docker
-	cd docker/init && docker-compose up
+# 	todo: should build this file instead of copying later.
+#	cd godwoken-polyjuice && make all-via-docker
+	mkdir -p godwoken-polyjuice/build && cp config/polyjuice-generator godwoken-polyjuice/build/generator 
+	cd docker/init && docker-compose up 
 	
 start:
 	cd docker && docker-compose up -d
