@@ -59,7 +59,7 @@ start-polyjuice:
 si:
 	cd docker && docker-compose logs -f ckb-indexer
 
-show-web3:
+web3:
 	cd docker && docker-compose logs -f web3
 
 stop-web3:
