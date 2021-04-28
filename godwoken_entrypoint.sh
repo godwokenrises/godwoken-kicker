@@ -11,6 +11,13 @@ export PRIVKEY=deploy/private_key
 export ckb_rpc=http://ckb:8114
 export RUST_BACKTRACE=1
 
+# import some helper function
+source ${PROJECT_DIR}/gw_util.sh
+
+# start ckb-indexer
+# todo: should remove to another service. but the port mapping some how not working.
+${PROJECT_DIR}/indexer-data/ckb-indexer -s ${PROJECT_DIR}/indexer-data/ckb-indexer-data -c ${ckb_rpc} > ${PROJECT_DIR}/indexer-data/indexer-log & 
+ 
 # detect which mode to start godwoken
 GODWOKEN_CONFIG_FILE=${PROJECT_DIR}/godwoken/config.toml
 
@@ -20,9 +27,15 @@ if test -f "$GODWOKEN_CONFIG_FILE"; then
     # fat start, re-deploy godwoken chain 
     export START_MODE="fat_start" 
   else
-    echo "godwoken config.toml exists. use slim mode."
-    # slim start, just start godwoken, no re-depoly scripts
-    export START_MODE="slim_start" 
+    echo "godwoken config.toml exists. try search rollup cell.."
+    if isRollupCellExits "${GODWOKEN_CONFIG_FILE}";
+    then
+      # slim start, just start godwoken, no re-depoly scripts
+       export START_MODE="slim_start" 
+    else
+      # fat start, re-deploy godwoken chain 
+      export START_MODE="fat_start"
+    fi
   fi
 else 
   export START_MODE="fat_start"
@@ -31,9 +44,6 @@ fi
 
 if [ $START_MODE = "slim_start" ]; then
   cd ${PROJECT_DIR}/godwoken
-  # start ckb-indexer
-  # todo: should remove to another service. but the port mapping some how not working.
-  ${PROJECT_DIR}/indexer-data/ckb-indexer -s ${PROJECT_DIR}/indexer-data/ckb-indexer-data -c ${ckb_rpc} > ${PROJECT_DIR}/indexer-data/indexer-log & 
   #cargo run --bin godwoken
   RUST_LOG=debug ./target/debug/godwoken
 else
@@ -95,11 +105,6 @@ cp ${PROJECT_DIR}/godwoken/deploy/scripts-deploy-result.json ${PROJECT_DIR}/godw
 cp ${PROJECT_DIR}/godwoken/config.toml ${PROJECT_DIR}/godwoken-examples/packages/runner/configs/config.toml
 # generate godwoken config file for polyjuice
 cd ${PROJECT_DIR}/godwoken-examples && yarn gen-config && cd ${PROJECT_DIR}/godwoken 
-
-
-# start ckb-indexer
-# todo: should remove to another service. but the port mapping some how not working.
-${PROJECT_DIR}/indexer-data/ckb-indexer -s ${PROJECT_DIR}/indexer-data/ckb-indexer-data -c ${ckb_rpc} > ${PROJECT_DIR}/indexer-data/indexer-log & 
 
 # start godwoken
 RUST_LOG=debug ./target/debug/godwoken
