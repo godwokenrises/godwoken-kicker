@@ -1,13 +1,13 @@
 #!/bin/bash
 
-echo -e "get_script_hash, id: 3 \n"
+echo -e "get_script_hash, id: 6 \n"
 
 echo '{
     "id": 2,
     "jsonrpc": "2.0",
     "method": "get_script_hash",
     "params":
-        ["0x2"]
+        ["0x6"]
 
 }' \
 | tr -d '\n' \
@@ -49,7 +49,7 @@ echo '{
     "jsonrpc": "2.0",
     "method": "get_account_id_by_script_hash",
     "params":
-        ["0x572ea72cc258439d6e5d1691d92fd4cffe3ece856b85f72f6ae5dc8498d7814f"]
+        ["0x9e39821b6774239ebc4578af7a0b299145236878c99c9433663e17d6c94d3ed3"]
 
 }' \
 | tr -d '\n' \

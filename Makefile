@@ -45,11 +45,11 @@ down:
 
 # show polyjuice
 sp:
-	cd docker && docker-compose logs -f polyjuice
+	cd docker && docker-compose logs -f --tail 200 polyjuice
 
 # show godwoken
 sg:
-	cd docker && docker-compose logs -f godwoken
+	cd docker && docker-compose logs -f --tail 200 godwoken
 
 stop-godwoken:
 	cd docker && docker-compose stop godwoken
@@ -137,3 +137,6 @@ start-godwoken:
 
 test-con:
 	./testParseConfig.sh
+
+prepare-money:
+	cd godwoken-examples && yarn clean &&  yarn prepare-money:normal

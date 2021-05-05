@@ -9,7 +9,7 @@ export PolyjuiceDir=${PROJECT_DIR}/godwoken-examples
 export LUMOS_CONFIG_FILE=${PROJECT_DIR}/config/lumos-config.json
 export PRIVKEY=deploy/private_key
 export ckb_rpc=http://ckb:8114
-export RUST_BACKTRACE=1
+#export RUST_BACKTRACE=1
 
 # import some helper function
 source ${PROJECT_DIR}/gw_util.sh
@@ -44,8 +44,8 @@ fi
 
 if [ $START_MODE = "slim_start" ]; then
   cd ${PROJECT_DIR}/godwoken
-  #cargo run --bin godwoken
-  RUST_LOG=debug ./target/debug/godwoken
+  cargo run --bin godwoken
+  #RUST_LOG=debug ./target/debug/godwoken
 else
   echo 'run depoly mode'
 fi
@@ -107,5 +107,5 @@ cp ${PROJECT_DIR}/godwoken/config.toml ${PROJECT_DIR}/godwoken-examples/packages
 cd ${PROJECT_DIR}/godwoken-examples && yarn gen-config && cd ${PROJECT_DIR}/godwoken 
 
 # start godwoken
-RUST_LOG=debug ./target/debug/godwoken
-#cargo run --bin godwoken
+#./target/debug/godwoken
+cargo run --bin godwoken
