@@ -10,13 +10,14 @@ export LUMOS_CONFIG_FILE=${PROJECT_DIR}/config/lumos-config.json
 export PRIVKEY=deploy/private_key
 export ckb_rpc=http://ckb:8114
 #export RUST_BACKTRACE=1
+export RUST_LOG=polyjuice-generator
 
 # import some helper function
 source ${PROJECT_DIR}/gw_util.sh
 
 # start ckb-indexer
 # todo: should remove to another service. but the port mapping some how not working.
-${PROJECT_DIR}/indexer-data/ckb-indexer -s ${PROJECT_DIR}/indexer-data/ckb-indexer-data -c ${ckb_rpc} > ${PROJECT_DIR}/indexer-data/indexer-log & 
+RUST_LOG=ckb-indexer=error ${PROJECT_DIR}/indexer-data/ckb-indexer -s ${PROJECT_DIR}/indexer-data/ckb-indexer-data -c ${ckb_rpc} > ${PROJECT_DIR}/indexer-data/indexer-log & 
  
 # detect which mode to start godwoken
 GODWOKEN_CONFIG_FILE=${PROJECT_DIR}/godwoken/config.toml
@@ -30,7 +31,7 @@ if test -f "$GODWOKEN_CONFIG_FILE"; then
     echo "godwoken config.toml exists. try search rollup cell.."
     if isRollupCellExits "${GODWOKEN_CONFIG_FILE}";
     then
-      # slim start, just start godwoken, no re-depoly scripts
+      # slim start, just start godwoken, no re-deploy scripts
        export START_MODE="slim_start" 
     else
       # fat start, re-deploy godwoken chain 
@@ -44,10 +45,10 @@ fi
 
 if [ $START_MODE = "slim_start" ]; then
   cd ${PROJECT_DIR}/godwoken
-  cargo run --bin godwoken
-  #RUST_LOG=debug ./target/debug/godwoken
+  #cargo run --bin godwoken
+  RUST_LOG=gw_block_producer=info ./target/debug/godwoken
 else
-  echo 'run depoly mode'
+  echo 'run deploy mode'
 fi
 
 
@@ -82,7 +83,7 @@ cd ${PROJECT_DIR}/godwoken
 ./target/debug/gw-tools deploy-scripts -r ${ckb_rpc} -i deploy/scripts-deploy.json -o deploy/scripts-deploy-result.json -k ${PRIVKEY}
 #cargo run --bin gw-tools deploy-scripts -r ${ckb_rpc} -i deploy/scripts-deploy.json -o deploy/scripts-deploy-result.json -k ${PRIVKEY}
 
-# depoly genesis block
+# deploy genesis block
 ./target/debug/gw-tools deploy-genesis -r ${ckb_rpc} -d deploy/scripts-deploy-result.json -p deploy/poa-config.json -u deploy/rollup-config.json -o deploy/genesis-deploy-result.json -k ${PRIVKEY}
 #cargo run --bin gw-tools deploy-genesis -r ${ckb_rpc} -d deploy/scripts-deploy-result.json -p deploy/poa-config.json -u deploy/rollup-config.json -o deploy/genesis-deploy-result.json -k ${PRIVKEY}
 
@@ -108,5 +109,5 @@ cp ${PROJECT_DIR}/godwoken/config.toml ${PROJECT_DIR}/godwoken-examples/packages
 cd ${PROJECT_DIR}/godwoken-examples && yarn gen-config && cd ${PROJECT_DIR}/godwoken 
 
 # start godwoken
-#./target/debug/godwoken
-cargo run --bin godwoken
+RUST_LOG=godwoken=info ./target/debug/godwoken
+#cargo run --bin godwoken
