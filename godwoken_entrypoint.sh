@@ -64,8 +64,9 @@ cd ../../
 while true; do
     sleep 3;
     MINER_BALANCE=$(ckb-cli --url ${ckb_rpc} wallet get-capacity --wait-for-sync --address ckt1qyqy84gfm9ljvqr69p0njfqullx5zy2hr9kq0pd3n5)
-    MYTOTAL="${MINER_BALANCE##immature*:}"
-    TOTAL=" ${MYTOTAL%%.*} "
+    TOTAL="${MINER_BALANCE##immature*:}"
+    TOTAL="${TOTAL##total: }"
+    TOTAL=" ${TOTAL%%.*} "
     if [[ "$TOTAL" -gt 1000 ]]; then
       echo 'fund suffice, ready to deploy godwoken script.'
       break

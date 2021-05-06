@@ -49,12 +49,12 @@ EOF
 cat << EOF > poa-config.json
 {
   "poa_setup": {
-    "identity_size": 4,
+    "identity_size": 1,
     "round_interval_uses_seconds": false,
     "identities": [
-      "0x3bab60cef4af81a87b0386f29bbf1dd0f6fe71c9fe1d84ca37096a6284d3bdaf", // lock hash of miner
+      "0x3bab60cef4af81a87b0386f29bbf1dd0f6fe71c9fe1d84ca37096a6284d3bdaf"
     ],
-    "aggregator_change_threshold": 4,
+    "aggregator_change_threshold": 1,
     "round_intervals": 3,
     "subblocks_per_round": 1
   }
