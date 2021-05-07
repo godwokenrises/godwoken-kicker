@@ -4,6 +4,10 @@ set -o errexit
 set -o xtrace
 PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
+# prepare lumos config file for polyjuice
+cp ${PROJECT_DIR}/config/lumos-config.json ${PROJECT_DIR}/godwoken-examples/packages/runner/configs/
+
+
 cd ${PROJECT_DIR}/godwoken
 
 # build godwoken

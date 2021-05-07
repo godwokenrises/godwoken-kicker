@@ -52,9 +52,6 @@ else
 fi
 
 
-# prepare lumos config file for polyjuice
-cp $TOP/lumos-config.json $PolyjuiceDir/packages/runner/configs/
-
 # wait for polyjuice complete preparing money before godwoken deployment, avoiding cell comsuming conflict.
 cd $PolyjuiceDir
 yarn workspace @godwoken-examples/runner clean:temp
