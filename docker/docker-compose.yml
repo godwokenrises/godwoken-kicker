@@ -47,7 +47,7 @@ services:
     - ../ckb-cli-data:/root/.ckb-cli  # TODO: check if it's necessary
     environment:
       FORCH_GODWOKEN_REDEPLOY: ${FORCH_GODWOKEN_REDEPLOY}
-    command: bash /code/polyjuice_entrypoint.sh
+    command: bash /code/godwoken_entrypoint.sh
     ports:
       - 8116:8116
       - 8119:8119

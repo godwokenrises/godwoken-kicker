@@ -13,14 +13,15 @@ init:
 	mkdir -p ./godwoken/deploy
 	cp ./config/private_key ./godwoken/deploy/private_key
 	sh ./docker/layer2/init_config_json.sh
-# cp godwoken/c/ scripts
-# TODO: use /scripts in nervos/godwoken-prebuilds image
+# prepare lumos config file for polyjuice
+	cp ./config/lumos-config.json ./godwoken-examples/packages/runner/configs/ 
+# cp godwoken/c/ scripts => TODO: use /scripts in nervos/godwoken-prebuilds image
 	cp -r ./config/scripts ./godwoken/
 	cp ./config/meta-contract-validator ./godwoken/godwoken-scripts/c/build/meta-contract-validator
 	cp ./config/meta-contract-generator ./godwoken/godwoken-scripts/c/build/meta-contract-generator 
 	cp ./config/sudt-validator ./godwoken/godwoken-scripts/c/build/sudt-validator 
 	cp ./config/sudt-generator ./godwoken/godwoken-scripts/c/build/sudt-generator
-	cp ./config/polyjuice-generator godwoken-polyjuice/build/generator 
+	cp ./config/polyjuice-generator godwoken-polyjuice/build/generator
 # TODO: remove this step
 	cd docker/init && docker-compose up 
 	
