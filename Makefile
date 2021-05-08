@@ -141,8 +141,12 @@ test-con:
 prepare-money:
 	cd godwoken-examples && yarn clean &&  yarn prepare-money:normal
 
+rebuild-scripts:
+	make prepare-prebuild-scripts
+	make paste-prebuild-scripts 
+
 prepare-prebuild-scripts:
-	make install
+#	make install
 	cd godwoken/godwoken-scripts && cd c && make && cd - && capsule build --release --debug-output
 	cd godwoken-polyjuice && make all-via-docker
 
