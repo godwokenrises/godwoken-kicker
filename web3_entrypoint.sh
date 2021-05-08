@@ -25,8 +25,8 @@ EthAccountLockCodeHash=$(jq -r '.eth_account_lock.script_type_hash' $LOCKSCRIPTS
 CONFIGTOML=${PROJECT_DIR}/godwoken/config.toml
 RollupTypeHash=$(awk -F'[ ="]+' '$1 == "rollup_type_hash" { print $2 }' $CONFIGTOML | sed 's/\x27//g')
 
-
 cd ${PROJECT_DIR}/godwoken-web3
+yarn install
 
 cat > ./packages/api-server/.env <<EOF
 DATABASE_URL=postgres://user:password@postgres:5432/lumos

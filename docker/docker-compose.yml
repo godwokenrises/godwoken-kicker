@@ -72,12 +72,12 @@ services:
       - postgres
 
   web3:
-    image: node:14
+    image: nervos/godwoken-prebuilds:v0.2.0-rc2
     volumes: 
       - ../:/code
     command: bash /code/web3_entrypoint.sh
     environment: 
-       PORT: 8024
+      PORT: 8024
     ports:
       - 8024:8024
     depends_on: 

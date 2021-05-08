@@ -22,8 +22,6 @@ init:
 	cp ./config/sudt-validator ./godwoken/godwoken-scripts/c/build/sudt-validator 
 	cp ./config/sudt-generator ./godwoken/godwoken-scripts/c/build/sudt-generator
 	cp ./config/polyjuice-generator godwoken-polyjuice/build/generator
-# TODO: remove this step
-	cd docker/init && docker-compose up 
 	
 start:
 	cd docker && docker-compose up -d

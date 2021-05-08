@@ -11,8 +11,10 @@ services:
   #     - cargo-cache:/usr/local/cargo
   #   command: bash /code/godwoken_install_entrypoint.sh
 
-  polyjuice:
-    image: retricsu/gowoken-build_dev:ubuntu20
-    volumes:
-      - ../../:/code
-    command: bash /code/polyjuice_install_entrypoint.sh
+  # polyjuice:
+  #   image: retricsu/gowoken-build_dev:ubuntu20
+  #   volumes:
+  #     - ../../:/code
+  #   command: bash /code/polyjuice_install_entrypoint.sh
+
+# TODO: delete this file
