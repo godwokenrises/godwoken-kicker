@@ -23,6 +23,7 @@ RUST_LOG=error ${PROJECT_DIR}/indexer-data/ckb-indexer -s ${PROJECT_DIR}/indexer
 GODWOKEN_CONFIG_FILE=${PROJECT_DIR}/godwoken/config.toml
 
 if test -f "$GODWOKEN_CONFIG_FILE"; then
+  # TODO: FORCH -> FORCE ?
   if [ "$FORCH_GODWOKEN_REDEPLOY" = true ]; then
     echo "godwoken config.toml exists, but force_godwoken_redeploy is enabled, so use fat mode."
     # fat start, re-deploy godwoken chain 
@@ -46,7 +47,7 @@ fi
 if [ $START_MODE = "slim_start" ]; then
   cd ${PROJECT_DIR}/godwoken
   #cargo run --bin godwoken
-  RUST_LOG=gw_block_producer=info,gw_generator=debug ./target/debug/godwoken
+  RUST_LOG=gw_block_producer=info,gw_generator=debug godwoken
 else
   echo 'run deploy mode'
 fi
@@ -54,6 +55,7 @@ fi
 
 # wait for polyjuice complete preparing money before godwoken deployment, avoiding cell comsuming conflict.
 cd $PolyjuiceDir
+yarn install
 yarn workspace @godwoken-examples/runner clean:temp
 yarn prepare-money
 cd ../../
@@ -77,21 +79,21 @@ echo 'this may takes a little bit of time, please wait...'
 
 # deploy scripts
 cd ${PROJECT_DIR}/godwoken
-./target/debug/gw-tools deploy-scripts -r ${ckb_rpc} -i deploy/scripts-deploy.json -o deploy/scripts-deploy-result.json -k ${PRIVKEY}
+gw-tools deploy-scripts -r ${ckb_rpc} -i deploy/scripts-deploy.json -o deploy/scripts-deploy-result.json -k ${PRIVKEY}
 #cargo run --bin gw-tools deploy-scripts -r ${ckb_rpc} -i deploy/scripts-deploy.json -o deploy/scripts-deploy-result.json -k ${PRIVKEY}
 
 # deploy genesis block
-./target/debug/gw-tools deploy-genesis -r ${ckb_rpc} -d deploy/scripts-deploy-result.json -p deploy/poa-config.json -u deploy/rollup-config.json -o deploy/genesis-deploy-result.json -k ${PRIVKEY}
+gw-tools deploy-genesis -r ${ckb_rpc} -d deploy/scripts-deploy-result.json -p deploy/poa-config.json -u deploy/rollup-config.json -o deploy/genesis-deploy-result.json -k ${PRIVKEY}
 #cargo run --bin gw-tools deploy-genesis -r ${ckb_rpc} -d deploy/scripts-deploy-result.json -p deploy/poa-config.json -u deploy/rollup-config.json -o deploy/genesis-deploy-result.json -k ${PRIVKEY}
 
 # copy polyjuice build file
 # todo: We should use real validator in the later version
-cp ${PROJECT_DIR}/godwoken-polyjuice/build/generator ${PROJECT_DIR}/godwoken/deploy/polyjuice-generator
+cp /scripts/godwoken-polyjuice/generator ${PROJECT_DIR}/godwoken/deploy/polyjuice-generator
 cp scripts/release/always-success ${PROJECT_DIR}/godwoken/deploy/polyjuice-validator
 #cp ${PROJECT_DIR}/godwoken-polyjuice/build/validator ${PROJECT_DIR}/godwoken/deploy/polyjuice-validator
 
 # generate config file
-./target/debug/gw-tools generate-config -d ${DATABASE_URL} -r ${ckb_rpc} -g deploy/genesis-deploy-result.json -s deploy/scripts-deploy-result.json -p deploy -o config.toml
+gw-tools generate-config -d ${DATABASE_URL} -r ${ckb_rpc} -g deploy/genesis-deploy-result.json -s deploy/scripts-deploy-result.json -p deploy -o config.toml
 #cargo run --bin gw-tools generate-config -r ${ckb_rpc} -g deploy/genesis-deploy-result.json -s deploy/scripts-deploy-result.json -p deploy -o config.toml
 
 # Update block_producer.wallet_config section to your own lock.
@@ -106,5 +108,5 @@ cp ${PROJECT_DIR}/godwoken/config.toml ${PROJECT_DIR}/godwoken-examples/packages
 cd ${PROJECT_DIR}/godwoken-examples && yarn gen-config && cd ${PROJECT_DIR}/godwoken 
 
 # start godwoken
-RUST_LOG=gw_block_producer=info,gw_generator=debug ./target/debug/godwoken
+RUST_LOG=gw_block_producer=info,gw_generator=debug godwoken
 #cargo run --bin godwoken

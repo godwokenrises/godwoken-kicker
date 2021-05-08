@@ -1,15 +1,27 @@
+# TODO: remove
 build-docker:
 	cd docker && docker build -t retricsu/gowoken-build_dev:ubuntu20 .
 
 install:
 	git submodule update --init --recursive
+# TODO: remove ?
+	cp config/polyjuice-generator godwoken-polyjuice/build/generator 
 
 init:
 	make install
-#	cd godwoken/godwoken-scripts/c && make all-via-docker
-# 	todo: should build this file instead of copying later.
-#	cd godwoken-polyjuice && make all-via-docker
-	mkdir -p godwoken-polyjuice/build && cp config/polyjuice-generator godwoken-polyjuice/build/generator 
+	mkdir -p godwoken-polyjuice/build
+	mkdir -p ./godwoken/deploy
+	cp ./config/private_key ./godwoken/deploy/private_key
+	sh ./docker/layer2/init_config_json.sh
+# cp godwoken/c/ scripts
+# TODO: use /scripts in nervos/godwoken-prebuilds image
+	cp -r ./config/scripts ./godwoken/
+	cp ./config/meta-contract-validator ./godwoken/godwoken-scripts/c/build/meta-contract-validator
+	cp ./config/meta-contract-generator ./godwoken/godwoken-scripts/c/build/meta-contract-generator 
+	cp ./config/sudt-validator ./godwoken/godwoken-scripts/c/build/sudt-validator 
+	cp ./config/sudt-generator ./godwoken/godwoken-scripts/c/build/sudt-generator
+	cp ./config/polyjuice-generator godwoken-polyjuice/build/generator 
+# TODO: remove this step
 	cd docker/init && docker-compose up 
 	
 start:
