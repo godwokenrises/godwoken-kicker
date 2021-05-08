@@ -38,8 +38,6 @@ services:
     command: ["sh", "/entrypoint/ckb.sh"]
 
   godwoken:
-    # build:
-    #   context: layer2
     image: nervos/godwoken-prebuilds:v0.2.0-rc2
     volumes:
     - ../:/code
@@ -54,24 +52,25 @@ services:
     depends_on:
       - ckb
       - postgres
-
-
-
-
-
+      
   polyjuice:
-    image: retricsu/gowoken-build_dev:ubuntu20
+    image: nervos/godwoken-prebuilds:v0.2.0-rc2
     volumes:
-      - ../:/code
-    command: bash /code/polyjuice_entrypoint.sh
+    - ../godwoken-examples:/godwoken-examples
+    # - ../:/code
+    working_dir: /godwoken-examples
+    # commands copied from polyjuice_entrypoint.sh
+    command: sh -c "
+      yarn install &&
+      yarn workspace @godwoken-examples/runner clean &&
+      yarn workspace @godwoken-examples/runner start"
     ports:
       - 6101:6101
       - 6100:6100
     depends_on:
       - ckb
-    # - lumos
       - postgres
-    
+
   web3:
     image: node:14
     volumes: 
