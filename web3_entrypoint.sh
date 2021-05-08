@@ -9,6 +9,16 @@ apt update && apt install jq -y
 
 # read eth_lock_hash from json config file
 LOCKSCRIPTS=${PROJECT_DIR}/godwoken/deploy/scripts-deploy-result.json
+# wait for godwoken finished its deployment
+while true; do
+    sleep 3;
+    if [[ -f "$LOCKSCRIPTS" ]]; then
+      echo 'scripts-deploy-result.json file exits. continue.'
+      break
+    else
+      echo 'scripts-deploy-result.json file not exits, keep waitting for godwoken deployment.'
+    fi
+done
 EthAccountLockCodeHash=$(jq -r '.eth_account_lock.script_type_hash' $LOCKSCRIPTS)
 
 # read rollup type hash from config.toml file
