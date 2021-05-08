@@ -38,6 +38,7 @@ cat << EOF > scripts-deploy.json
     "l2_sudt_validator": "scripts/release/always-success",
     "meta_contract_validator": "scripts/release/always-success",
     "eth_account_lock": "scripts/release/always-success",
+    "tron_account_lock": "scripts/release/always-success",
     "polyjuice_validator": "scripts/release/always-success",
     "state_validator_lock": "scripts/release/poa",
     "poa_state": "scripts/release/state"
