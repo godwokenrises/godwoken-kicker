@@ -9,6 +9,7 @@ export PolyjuiceDir=${PROJECT_DIR}/godwoken-examples
 export LUMOS_CONFIG_FILE=${PROJECT_DIR}/config/lumos-config.json
 export PRIVKEY=deploy/private_key
 export ckb_rpc=http://ckb:8114
+export DATABASE_URL=postgres://user:password@postgres:5432/lumos
 #export RUST_BACKTRACE=1
 
 # import some helper function
@@ -90,7 +91,7 @@ cp scripts/release/always-success ${PROJECT_DIR}/godwoken/deploy/polyjuice-valid
 #cp ${PROJECT_DIR}/godwoken-polyjuice/build/validator ${PROJECT_DIR}/godwoken/deploy/polyjuice-validator
 
 # generate config file
-./target/debug/gw-tools generate-config -r ${ckb_rpc} -g deploy/genesis-deploy-result.json -s deploy/scripts-deploy-result.json -p deploy -o config.toml
+./target/debug/gw-tools generate-config -d ${DATABASE_URL} -r ${ckb_rpc} -g deploy/genesis-deploy-result.json -s deploy/scripts-deploy-result.json -p deploy -o config.toml
 #cargo run --bin gw-tools generate-config -r ${ckb_rpc} -g deploy/genesis-deploy-result.json -s deploy/scripts-deploy-result.json -p deploy -o config.toml
 
 # Update block_producer.wallet_config section to your own lock.
