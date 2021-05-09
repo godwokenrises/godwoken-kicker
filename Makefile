@@ -4,8 +4,6 @@ build-docker:
 
 install:
 	git submodule update --init --recursive
-# TODO: remove ?
-	cp config/polyjuice-generator godwoken-polyjuice/build/generator 
 
 init:
 	make install
