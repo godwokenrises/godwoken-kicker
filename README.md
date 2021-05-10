@@ -16,6 +16,8 @@ and you are already good to go!
 
 ![panel](docs/provider.png)
 
+***Notice: You should change your metamask networks too if you want to deploy contract using kicker!***
+
 ## How to run
 
 make sure you have `docker` and `docker-compose` install on your machine.
@@ -57,6 +59,7 @@ after everything started, check `http://localhost:6100/` to deploy contract.
 
 ## How to deploy contract
 
+0. ***CHANGE YOUR METAMASK NETWORK to GODWOKEN!***
 1. open `http://localhost:6100/`, connect with your metamask address
 2. click `Deposit` button to fund some devnet ckb on your metamask address.
 3. after deposit finished, 
