@@ -2,7 +2,17 @@
 
 one line command to start a quick devnet godwoken-polyjuice chain for contract depolyment.
 
-with web3 custom provider like [polyjuice-providers-http](https://github.com/RetricSu/polyjuice-providers-http), you can do simple debugging and testing for your dapp as well.
+start from v0.2.0-rc2, you don't need custom provider like [polyjuice-http-providers](https://github.com/RetricSu/polyjuice-providers-http) to run your eth dapp any more! 
+
+instead, just change your Metamask network setting like following:
+
+```sh
+    Network Name: Godwoken
+    New RPC URL: http://localhost:8024
+    Chain ID: 0x3
+```
+
+and you are already good to go!
 
 ## How to run
 
@@ -56,11 +66,9 @@ then the deployment will auto start.
 
 after deployment successfully get done, you will find the contract address listing below.
 
-with deployed contract address and the above web3.js-init-code sample, you are good to go.
-
 ## How to test dapp
 
-read [doc here](docs/test-simple-dapp.md).
+~~read [doc here](docs/test-simple-dapp.md).~~ needs update.
 
 ## Some useful command
 
