@@ -84,3 +84,35 @@ isRollupCellExits(){
     fi
 }
 
+# set key value in toml config file
+# how to use: set_key_value_in_toml key value your_toml_config_file
+set_key_value_in_toml() {
+    local key=${1}
+    local value=${2}
+    if [ -n $value ]; then
+        #echo $value
+        local current=$(sed -n -e "s/^\($key = '\)\([^ ']*\)\(.*\)$/\2/p" $3}) # value带单引号
+        if [ -n $current ];then
+            echo "setting $3 : $key = $value"
+            value="$(echo "${value}" | sed 's|[&]|\\&|g')"
+            sed -i "s|^[#]*[ ]*${key}\([ ]*\)=.*|${key} = '${value}'|" ${3}
+        fi
+    fi
+}
+
+get_sudt_code_hash_from_lumos_file() {
+    if [[ -n $1 ]]; 
+    then
+        local lumosconfigfile="$1"
+    else
+        local lumosconfigfile="/code/godwoken-examples/packages/runner/configs/lumos-config.json"
+    fi
+
+    echo "$(cat $lumosconfigfile)" | grep -Pzo 'SUDT[\s\S]*CODE_HASH": "\K[^"]*'
+}
+
+# check if sudt script cell exits in ckb from lumos file
+#isSudtCellExits() {
+#
+#}
+
