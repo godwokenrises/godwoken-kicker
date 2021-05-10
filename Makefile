@@ -49,7 +49,7 @@ unpause:
 	cd docker && docker-compose unpause
 
 down:
-	cd docker/init && docker-compose down
+# cd docker/init && docker-compose down
 	cd docker && docker-compose down
 
 # show polyjuice
@@ -83,6 +83,7 @@ start-web3:
 	cd docker && docker-compose start web3
 
 clean:
+# FIXME: clean needs sudo privilage
 	rm -rf ckb-data/data
 	rm -rf ckb-cli-data/*
 	[ -e "indexer-data/ckb-indexer-data" ] && rm -rf indexer-data/ckb-indexer-data || echo 'file not exits.'

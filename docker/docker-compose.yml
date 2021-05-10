@@ -72,10 +72,17 @@ services:
       - postgres
 
   web3:
-    image: nervos/godwoken-prebuilds:v0.2.0-rc2
+    build: # base on image: nervos/godwoken-prebuilds:v0.2.0-rc2
+      context: layer2
+      dockerfile: Dockerfile.web3
     volumes: 
-      - ../:/code
-    command: bash /code/web3_entrypoint.sh
+    # - ../:/code => only mount /godwoken-web3
+    - ../godwoken-web3:/godwoken-we3
+    # TODO: check these config files
+    - ../godwoken/deploy/scripts-deploy-result.json:/godwoken-web3/config/godwoken-deploy-result.json
+    - ../godwoken/config.toml:/godwoken-web3/config/godwoken_config.toml
+    - ../web3_entrypoint.sh:/web3_entrypoint.sh
+    command: bash /web3_entrypoint.sh
     environment: 
       PORT: 8024
     ports:

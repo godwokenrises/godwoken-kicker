@@ -1,0 +1,14 @@
+FROM nervos/godwoken-prebuilds:v0.2.0-rc2
+
+WORKDIR "/godwoken-we3"
+
+RUN apt-get update \
+ && apt-get dist-upgrade -y \
+ && apt-get install jq -y \
+ && apt-get clean \
+ && echo "Finished installing dependencies"
+
+EXPOSE 8024
+
+USER node
+CMD ["node", "version"]
