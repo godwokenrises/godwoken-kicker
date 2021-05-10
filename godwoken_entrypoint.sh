@@ -10,12 +10,30 @@ export LUMOS_CONFIG_FILE=${PROJECT_DIR}/config/lumos-config.json
 export PRIVKEY=deploy/private_key
 export ckb_rpc=http://ckb:8114
 export DATABASE_URL=postgres://user:password@postgres:5432/lumos
-#export RUST_BACKTRACE=1
 
 # import some helper function
 source ${PROJECT_DIR}/gw_util.sh
 
-# start ckb-indexer
+
+# wait for polyjuice complete preparing money before godwoken deployment, avoiding cell comsuming conflict.
+cd $PolyjuiceDir
+yarn workspace @godwoken-examples/runner clean:temp
+yarn prepare-money
+cd ../../
+
+# wait for godwoken-examples deploy layer1 sudt script before starting godwoken
+cd $PolyjuiceDir
+yarn workspace @godwoken-examples/runner clean
+yarn prepare-sudt
+cd ../../
+
+# update l1_sudt_script_hash in config.toml file(if it exits) with lumos script.sudt.code_hash
+codeHash=$(get_sudt_code_hash_from_lumos_file "${PROJECT_DIR}/godwoken-examples/packages/runner/configs/lumos-config.json")
+set_key_value_in_toml "l1_sudt_script_type_hash" $codeHash "${PROJECT_DIR}/godwoken/config.toml"
+
+# ready to start godwoken
+
+# first, start ckb-indexer
 # todo: should remove to another service. but the port mapping some how not working.
 RUST_LOG=error ${PROJECT_DIR}/indexer-data/ckb-indexer -s ${PROJECT_DIR}/indexer-data/ckb-indexer-data -c ${ckb_rpc} > ${PROJECT_DIR}/indexer-data/indexer-log & 
  
@@ -52,13 +70,6 @@ else
   echo 'run deploy mode'
 fi
 
-
-# wait for polyjuice complete preparing money before godwoken deployment, avoiding cell comsuming conflict.
-cd $PolyjuiceDir
-yarn install
-yarn workspace @godwoken-examples/runner clean:temp
-yarn prepare-money
-cd ../../
 
 # wait for suffice fund to deploy godwoken scripts
 while true; do
@@ -100,6 +111,10 @@ gw-tools generate-config -d ${DATABASE_URL} -r ${ckb_rpc} -g deploy/genesis-depl
 cp ${PROJECT_DIR}/config/edit_godwoken_config.sh edit_godwoken_config.sh
 ./edit_godwoken_config.sh
 rm edit_godwoken_config.sh 
+
+# update l1_sudt_script_hash in config.toml file(if it exits) with lumos script.sudt.code_hash
+codeHash=$(get_sudt_code_hash_from_lumos_file "${PROJECT_DIR}/godwoken-examples/packages/runner/configs/lumos-config.json")
+set_key_value_in_toml "l1_sudt_script_type_hash" $codeHash "${PROJECT_DIR}/godwoken/config.toml"
 
 # prepare runner config file for polyjuice
 cp ${PROJECT_DIR}/godwoken/deploy/scripts-deploy-result.json ${PROJECT_DIR}/godwoken-examples/packages/runner/configs/scripts-deploy-result.json

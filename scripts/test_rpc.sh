@@ -1,13 +1,13 @@
 #!/bin/bash
 
-echo -e "get_script_hash, id: 6 \n"
+echo -e "get_balance, id: 4 \n"
 
 echo '{
     "id": 2,
     "jsonrpc": "2.0",
-    "method": "get_script_hash",
+    "method": "get_balance",
     "params":
-        ["0x6"]
+        ["0x4", "0x1"]
 
 }' \
 | tr -d '\n' \
