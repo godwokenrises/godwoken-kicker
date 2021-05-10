@@ -80,6 +80,8 @@ clean:
 	[ -e "indexer-data/indexer-log" ] && rm indexer-data/indexer-log || echo 'file not exits.'
 	cd godwoken-examples/packages/runner && rm -rf db && rm -rf temp-db
 	rm -rf postgres-data/*
+# prepare brand new lumos config file for polyjuice
+	cp config/lumos-config.json godwoken-examples/packages/runner/configs/
 
 smart-clean:
 	rm -rf ckb-cli-data/*
