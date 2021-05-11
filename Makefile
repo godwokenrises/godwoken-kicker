@@ -82,6 +82,9 @@ clean:
 	rm -rf postgres-data/*
 # prepare brand new lumos config file for polyjuice
 	cp config/lumos-config.json godwoken-examples/packages/runner/configs/
+# delete the godwoken outdated config file as well
+	rm -f godwoken/config.toml 
+	rm -f godwoken/deploy/*-result.json
 
 smart-clean:
 	rm -rf ckb-cli-data/*

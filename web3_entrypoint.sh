@@ -23,6 +23,16 @@ EthAccountLockCodeHash=$(jq -r '.eth_account_lock.script_type_hash' $LOCKSCRIPTS
 
 # read rollup type hash from config.toml file
 CONFIGTOML=${PROJECT_DIR}/godwoken/config.toml
+# wait for godwoken finished generating config.toml file
+while true; do
+    sleep 3;
+    if [[ -f "$CONFIGTOML" ]]; then
+      echo 'config.toml file exits. continue.'
+      break
+    else
+      echo 'config.toml file not exits, keep waitting for godwoken generating config.'
+    fi
+done
 RollupTypeHash=$(awk -F'[ ="]+' '$1 == "rollup_type_hash" { print $2 }' $CONFIGTOML | sed 's/\x27//g')
 
 
