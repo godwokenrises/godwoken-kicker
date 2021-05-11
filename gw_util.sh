@@ -52,6 +52,9 @@ isRollupCellExits(){
     rollup_hash_type=$( parse_toml_with_section "$tomlconfigfile" "chain.rollup_type_script" "hash_type" )
     rollup_args=$( parse_toml_with_section "$tomlconfigfile" "chain.rollup_type_script" "args" )
 
+    # curl retry on connrefused, considering ECONNREFUSED as a transient error(network issues)
+    # connections with ipv6 are not retried because it returns EADDRNOTAVAIL instead of ECONNREFUSED,
+    # hence we should use --ipv4
     result=$( echo '{
     "id": 2,
     "jsonrpc": "2.0",
@@ -70,8 +73,9 @@ isRollupCellExits(){
     ]
     }' \
     | tr -d '\n' \
-    | curl -H 'content-type: application/json' -d @- \
-    http://localhost:8116 )
+    | curl --ipv4 --retry 3 --retry-connrefused \
+    -H 'content-type: application/json' -d @- \
+    http://localhost:8116)
 
     if [[ $result =~ "block_number" ]]; then
         echo "Rollup cell exits!"
