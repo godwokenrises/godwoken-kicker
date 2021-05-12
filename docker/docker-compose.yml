@@ -21,7 +21,8 @@ services:
   ckb:
     image: nervos/godwoken-prebuilds:v0.2.0-rc2
     ports: 
-    - 8114:8114 # to EXPOSE 8115 ?
+    - 8114:8114
+    - 8115:8115 # 8115 is not using for now, but we may need it when extend kicker in the future
     volumes:
     - ./layer1/entrypoint.sh:/entrypoint/ckb.sh
     - ../ckb-data/:/ckb-data
@@ -41,8 +42,8 @@ services:
     image: nervos/godwoken-prebuilds:v0.2.0-rc2
     volumes:
     - ../:/code
-    - cargo-cache:/usr/local/cargo    # TODO: check if it's necessary
-    - ../ckb-cli-data:/root/.ckb-cli  # TODO: check if it's necessary
+    - cargo-cache:/usr/local/cargo
+    - ../ckb-cli-data:/root/.ckb-cli
     environment:
       FORCH_GODWOKEN_REDEPLOY: ${FORCH_GODWOKEN_REDEPLOY}
     command: bash /code/godwoken_entrypoint.sh
@@ -98,7 +99,8 @@ services:
       - ../:/code
     command: bash /code/docker/gen-godwoken-schema/entrypoint.sh
     
-   
+######## TODO: clean these? #########################################
+
   # ckb-indexer:
   #   build: 
   #     context: ckb-indexer
