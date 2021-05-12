@@ -3,14 +3,15 @@ build-docker:
 	cd docker && docker build -t retricsu/gowoken-build_dev:ubuntu20 .
 
 build-image:
-	docker build godwoken-examples -t gw-example:latest
+# docker build godwoken-examples -t gw-example:latest
+# docker build godwoken-web3 -t gw-web3:latest
+	cd docker && docker-compose build --no-rm
 
 install:
 	git submodule update --init --recursive
 
 init:
 	make install
-	make build-image
 	mkdir -p godwoken-polyjuice/build
 	mkdir -p ./godwoken/deploy
 	cp ./config/private_key ./godwoken/deploy/private_key
@@ -24,9 +25,11 @@ init:
 	cp ./config/sudt-validator ./godwoken/godwoken-scripts/c/build/sudt-validator 
 	cp ./config/sudt-generator ./godwoken/godwoken-scripts/c/build/sudt-generator
 	cp ./config/polyjuice-generator godwoken-polyjuice/build/generator
+
+	make build-image
 	
 start:
-	cd docker && docker-compose up -d
+	cd docker && docker-compose up -d --build
 
 start-f:
 	cd docker && docker-compose --env-file .force.new.chain.env  up -d	

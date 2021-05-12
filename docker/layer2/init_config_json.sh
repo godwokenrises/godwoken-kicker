@@ -57,3 +57,13 @@ cat << EOF > rollup-config.json
   ]
 }
 EOF
+
+cd ../../godwoken-web3/api-server
+cat > .env <<EOF
+DATABASE_URL=postgres://user:password@postgres:5432/lumos
+GODWOKEN_JSON_RPC=http://godwoken:8119
+ETH_ACCOUNT_LOCK_HASH=$EthAccountLockCodeHash
+ROLLUP_TYPE_HASH=$RollupTypeHash
+PORT=8024
+CREATOR_ACCOUNT_ID=3
+EOF

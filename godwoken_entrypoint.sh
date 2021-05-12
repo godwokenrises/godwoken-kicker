@@ -5,7 +5,7 @@ set -o xtrace
 PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 export TOP=${PROJECT_DIR}/config
-export PolyjuiceDir=${PROJECT_DIR}/godwoken-examples
+export PolyjuiceDir=/godwoken-examples
 export LUMOS_CONFIG_FILE=${PROJECT_DIR}/config/lumos-config.json
 export PRIVKEY=deploy/private_key
 export ckb_rpc=http://ckb:8114
@@ -14,19 +14,17 @@ export DATABASE_URL=postgres://user:password@postgres:5432/lumos
 # import some helper function
 source ${PROJECT_DIR}/gw_util.sh
 
-
 # wait for polyjuice complete preparing money before godwoken deployment, avoiding cell comsuming conflict.
 cd $PolyjuiceDir
 yarn workspace @godwoken-examples/runner clean:temp
 yarn prepare-money
-cd ../../
 
 # wait for godwoken-examples deploy layer1 sudt script before starting godwoken
 cd $PolyjuiceDir
 yarn workspace @godwoken-examples/runner clean
 yarn prepare-sudt
-cd ../../
 
+cd /code
 # update l1_sudt_script_hash in config.toml file(if it exits) with lumos script.sudt.code_hash
 codeHash=$(get_sudt_code_hash_from_lumos_file "${PROJECT_DIR}/godwoken-examples/packages/runner/configs/lumos-config.json")
 set_key_value_in_toml "l1_sudt_script_type_hash" $codeHash "${PROJECT_DIR}/godwoken/config.toml"

@@ -39,7 +39,8 @@ services:
     command: ["sh", "/entrypoint/ckb.sh"]
 
   godwoken:
-    image: nervos/godwoken-prebuilds:v0.2.0-rc2
+    build:
+      context: ../godwoken-examples
     volumes:
     - ../:/code
     - cargo-cache:/usr/local/cargo
@@ -77,11 +78,12 @@ services:
 
   web3:
     build: # base on image: nervos/godwoken-prebuilds:v0.2.0-rc2
-      context: layer2
-      dockerfile: Dockerfile.web3
+      context: ../godwoken-web3
     volumes: 
     # - ../:/code => only mount /godwoken-web3
-    - ../godwoken-web3:/godwoken-web3-latest
+    # Dockerfile has copied the /godwoken-web3 into image
+    # - ../godwoken-web3:/godwoken-web3
+    
     # TODO: check these config files
     - ../godwoken/deploy/scripts-deploy-result.json:/godwoken-web3/config/godwoken-deploy-result.json
     - ../godwoken/config.toml:/godwoken-web3/config/godwoken_config.toml
