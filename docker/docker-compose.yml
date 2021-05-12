@@ -55,14 +55,17 @@ services:
       - postgres
       
   polyjuice:
-    image: nervos/godwoken-prebuilds:v0.2.0-rc2
-    volumes:
-    - ../godwoken-examples:/godwoken-examples
+    # image: nervos/godwoken-prebuilds:v0.2.0-rc2
+    build:
+      context: ../godwoken-examples
+    # Dockerfile has copied the files into image
+    # volumes:
+    # - ../godwoken-examples:/godwoken-examples
     # - ../:/code
+    # TODO: delete volumes
     working_dir: /godwoken-examples
     # commands copied from polyjuice_entrypoint.sh
     command: sh -c "
-      yarn install &&
       yarn workspace @godwoken-examples/runner clean &&
       yarn workspace @godwoken-examples/runner start"
     ports:
@@ -78,7 +81,7 @@ services:
       dockerfile: Dockerfile.web3
     volumes: 
     # - ../:/code => only mount /godwoken-web3
-    - ../godwoken-web3:/godwoken-we3
+    - ../godwoken-web3:/godwoken-web3-latest
     # TODO: check these config files
     - ../godwoken/deploy/scripts-deploy-result.json:/godwoken-web3/config/godwoken-deploy-result.json
     - ../godwoken/config.toml:/godwoken-web3/config/godwoken_config.toml

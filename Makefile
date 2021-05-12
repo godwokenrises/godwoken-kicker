@@ -2,11 +2,15 @@
 build-docker:
 	cd docker && docker build -t retricsu/gowoken-build_dev:ubuntu20 .
 
+build-image:
+	docker build godwoken-examples -t gw-example:latest
+
 install:
 	git submodule update --init --recursive
 
 init:
 	make install
+	make build-image
 	mkdir -p godwoken-polyjuice/build
 	mkdir -p ./godwoken/deploy
 	cp ./config/private_key ./godwoken/deploy/private_key

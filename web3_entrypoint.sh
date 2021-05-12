@@ -46,6 +46,7 @@ CREATOR_ACCOUNT_ID=3
 EOF
 
 # pwd => /web3
+# TODO: install in `make init` stage
 yarn install
 yarn workspace @godwoken-web3/godwoken tsc
 yarn workspace @godwoken-web3/api-server start
