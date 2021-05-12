@@ -26,7 +26,7 @@ yarn prepare-sudt
 
 cd /code
 # update l1_sudt_script_hash in config.toml file(if it exits) with lumos script.sudt.code_hash
-codeHash=$(get_sudt_code_hash_from_lumos_file "${PROJECT_DIR}/godwoken-examples/packages/runner/configs/lumos-config.json")
+codeHash=$(get_sudt_code_hash_from_lumos_file "${PolyjuiceDir}/packages/runner/configs/lumos-config.json")
 set_key_value_in_toml "l1_sudt_script_type_hash" $codeHash "${PROJECT_DIR}/godwoken/config.toml"
 
 # ready to start godwoken
@@ -111,14 +111,14 @@ cp ${PROJECT_DIR}/config/edit_godwoken_config.sh edit_godwoken_config.sh
 rm edit_godwoken_config.sh 
 
 # update l1_sudt_script_hash in config.toml file(if it exits) with lumos script.sudt.code_hash
-codeHash=$(get_sudt_code_hash_from_lumos_file "${PROJECT_DIR}/godwoken-examples/packages/runner/configs/lumos-config.json")
+codeHash=$(get_sudt_code_hash_from_lumos_file "${PolyjuiceDir}/packages/runner/configs/lumos-config.json")
 set_key_value_in_toml "l1_sudt_script_type_hash" $codeHash "${PROJECT_DIR}/godwoken/config.toml"
 
 # prepare runner config file for polyjuice
-cp ${PROJECT_DIR}/godwoken/deploy/scripts-deploy-result.json ${PROJECT_DIR}/godwoken-examples/packages/runner/configs/scripts-deploy-result.json
-cp ${PROJECT_DIR}/godwoken/config.toml ${PROJECT_DIR}/godwoken-examples/packages/runner/configs/config.toml
+cp ${PROJECT_DIR}/godwoken/deploy/scripts-deploy-result.json ${PolyjuiceDir}/packages/runner/configs/scripts-deploy-result.json
+cp ${PROJECT_DIR}/godwoken/config.toml ${PolyjuiceDir}/packages/runner/configs/config.toml
 # generate godwoken config file for polyjuice
-cd ${PROJECT_DIR}/godwoken-examples && yarn gen-config && cd ${PROJECT_DIR}/godwoken 
+cd ${PolyjuiceDir} && yarn gen-config && cd ${PROJECT_DIR}/godwoken 
 
 # start godwoken
 RUST_LOG=gw_block_producer=info,gw_generator=debug godwoken
