@@ -39,8 +39,7 @@ services:
     command: ["sh", "/entrypoint/ckb.sh"]
 
   godwoken:
-    build:
-      context: ../godwoken-examples
+    image: nervos/godwoken-prebuilds:v0.2.0-rc2
     volumes:
     - ../:/code
     - cargo-cache:/usr/local/cargo
@@ -56,16 +55,10 @@ services:
       - postgres
       
   polyjuice:
-    # image: nervos/godwoken-prebuilds:v0.2.0-rc2
-    build:
-      context: ../godwoken-examples
-    # Dockerfile has copied the files into image
-    # volumes:
-    # - ../godwoken-examples:/godwoken-examples
-    # - ../:/code
-    # TODO: delete volumes
+    image: nervos/godwoken-prebuilds:v0.2.0-rc2
+    volumes:
+    - ../godwoken-examples:/godwoken-examples
     working_dir: /godwoken-examples
-    # commands copied from polyjuice_entrypoint.sh
     command: sh -c "
       yarn workspace @godwoken-examples/runner clean &&
       yarn workspace @godwoken-examples/runner start"
@@ -77,7 +70,7 @@ services:
       - postgres
 
   web3:
-    build: # base on image: nervos/godwoken-prebuilds:v0.2.0-rc2
+    build: # base image: nervos/godwoken-prebuilds:v0.2.0-rc2
       context: ../godwoken-web3
     volumes: 
     # - ../:/code => only mount /godwoken-web3

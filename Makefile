@@ -9,6 +9,7 @@ build-image:
 
 install:
 	git submodule update --init --recursive
+	docker run --rm -v `PWD`/godwoken-examples:/app -w=/app nervos/godwoken-prebuilds:v0.2.0-rc2 yarn
 
 init:
 	make install
@@ -25,7 +26,7 @@ init:
 	cp ./config/sudt-validator ./godwoken/godwoken-scripts/c/build/sudt-validator 
 	cp ./config/sudt-generator ./godwoken/godwoken-scripts/c/build/sudt-generator
 	cp ./config/polyjuice-generator godwoken-polyjuice/build/generator
-
+# build image for docker-compose build cache
 	make build-image
 	
 start:

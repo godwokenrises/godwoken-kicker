@@ -5,7 +5,7 @@ set -o xtrace
 PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 export TOP=${PROJECT_DIR}/config
-export PolyjuiceDir=/godwoken-examples
+export PolyjuiceDir=${PROJECT_DIR}/godwoken-examples
 export LUMOS_CONFIG_FILE=${PROJECT_DIR}/config/lumos-config.json
 export PRIVKEY=deploy/private_key
 export ckb_rpc=http://ckb:8114
@@ -24,7 +24,7 @@ cd $PolyjuiceDir
 yarn workspace @godwoken-examples/runner clean
 yarn prepare-sudt
 
-cd /code
+cd ${PROJECT_DIR}
 # update l1_sudt_script_hash in config.toml file(if it exits) with lumos script.sudt.code_hash
 codeHash=$(get_sudt_code_hash_from_lumos_file "${PolyjuiceDir}/packages/runner/configs/lumos-config.json")
 set_key_value_in_toml "l1_sudt_script_type_hash" $codeHash "${PROJECT_DIR}/godwoken/config.toml"
