@@ -1,5 +1,5 @@
 #!/bin/sh
-
+cd /ckb-data
 if ! [ -f ckb.toml ]; then
   /bin/ckb init --chain "$CKB_CHAIN" --ba-arg "$BA_ARG" --ba-code-hash "$BA_CODE_HASH" --ba-hash-type "$BA_HASH_TYPE" --ba-message "$BA_MESSAGE"
 fi

@@ -2,7 +2,7 @@
 
 one line command to start a quick devnet godwoken-polyjuice chain for contract depolyment.
 
-startting from v0.2.0-rc2, you don't need custom provider like [polyjuice-http-providers](https://github.com/RetricSu/polyjuice-providers-http) to run your eth dapp any more! 
+starting from v0.2.0-rc2, you don't need custom provider like [polyjuice-http-providers](https://github.com/RetricSu/polyjuice-providers-http) to run your eth dapp any more! 
 
 instead, just change your Metamask network setting like following:
 

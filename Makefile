@@ -1,19 +1,36 @@
+# TODO: remove
 build-docker:
 	cd docker && docker build -t retricsu/gowoken-build_dev:ubuntu20 .
 
+build-image:
+# docker build godwoken-examples -t gw-example:latest
+# docker build godwoken-web3 -t gw-web3:latest
+	cd docker && docker-compose build --no-rm
+
 install:
 	git submodule update --init --recursive
+	docker run --rm -v `PWD`/godwoken-examples:/app -w=/app nervos/godwoken-prebuilds:v0.2.0-rc2 yarn
 
 init:
 	make install
-#	cd godwoken/godwoken-scripts/c && make all-via-docker
-# 	todo: should build this file instead of copying later.
-#	cd godwoken-polyjuice && make all-via-docker
-	mkdir -p godwoken-polyjuice/build && cp config/polyjuice-generator godwoken-polyjuice/build/generator 
-	cd docker/init && docker-compose up 
+	mkdir -p godwoken-polyjuice/build
+	mkdir -p ./godwoken/deploy
+	cp ./config/private_key ./godwoken/deploy/private_key
+	sh ./docker/layer2/init_config_json.sh
+# prepare lumos config file for polyjuice
+	cp ./config/lumos-config.json ./godwoken-examples/packages/runner/configs/ 
+# cp godwoken/c/ scripts => TODO: use /scripts in nervos/godwoken-prebuilds image
+	cp -r ./config/scripts ./godwoken/
+	cp ./config/meta-contract-validator ./godwoken/godwoken-scripts/c/build/meta-contract-validator
+	cp ./config/meta-contract-generator ./godwoken/godwoken-scripts/c/build/meta-contract-generator 
+	cp ./config/sudt-validator ./godwoken/godwoken-scripts/c/build/sudt-validator 
+	cp ./config/sudt-generator ./godwoken/godwoken-scripts/c/build/sudt-generator
+	cp ./config/polyjuice-generator godwoken-polyjuice/build/generator
+# build image for docker-compose build cache
+	make build-image
 	
 start:
-	cd docker && docker-compose up -d
+	cd docker && docker-compose up -d --build && docker-compose logs -f --tail 100
 
 start-f:
 	cd docker && docker-compose --env-file .force.new.chain.env  up -d	
@@ -40,7 +57,7 @@ unpause:
 	cd docker && docker-compose unpause
 
 down:
-	cd docker/init && docker-compose down
+# cd docker/init && docker-compose down
 	cd docker && docker-compose down
 
 # show polyjuice
@@ -74,6 +91,7 @@ start-web3:
 	cd docker && docker-compose start web3
 
 clean:
+# FIXME: clean needs sudo privilage
 	rm -rf ckb-data/data
 	rm -rf ckb-cli-data/*
 	[ -e "indexer-data/ckb-indexer-data" ] && rm -rf indexer-data/ckb-indexer-data || echo 'file not exits.'

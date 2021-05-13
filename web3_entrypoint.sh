@@ -5,10 +5,12 @@ set -o xtrace
 PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 # todo: move to init process, maybe the main docker image
-apt update && apt install jq -y
+# apt update && apt install jq -y
+# moved to docker/layer2/Dockerfile
 
 # read eth_lock_hash from json config file
 LOCKSCRIPTS=${PROJECT_DIR}/godwoken/deploy/scripts-deploy-result.json
+
 # wait for godwoken finished its deployment
 while true; do
     sleep 3;
@@ -35,9 +37,6 @@ while true; do
 done
 RollupTypeHash=$(awk -F'[ ="]+' '$1 == "rollup_type_hash" { print $2 }' $CONFIGTOML | sed 's/\x27//g')
 
-
-cd ${PROJECT_DIR}/godwoken-web3
-
 cat > ./packages/api-server/.env <<EOF
 DATABASE_URL=postgres://user:password@postgres:5432/lumos
 GODWOKEN_JSON_RPC=http://godwoken:8119
@@ -47,5 +46,6 @@ PORT=8024
 CREATOR_ACCOUNT_ID=3
 EOF
 
+cd /godwoken-web3
 yarn workspace @godwoken-web3/godwoken tsc
 yarn workspace @godwoken-web3/api-server start

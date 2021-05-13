@@ -1,31 +1,6 @@
-#!/bin/bash
+# please invoke this script in the project root dir
+cd godwoken/deploy
 
-set -o errexit
-set -o xtrace
-PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-
-# prepare lumos config file for polyjuice
-cp ${PROJECT_DIR}/config/lumos-config.json ${PROJECT_DIR}/godwoken-examples/packages/runner/configs/
-
-
-cd ${PROJECT_DIR}/godwoken
-
-# build godwoken
-RUST_BACKTRACE=full cargo build
-
-
-# prepare some config files for godwoken chain
-cp -r ${PROJECT_DIR}/config/scripts ${PROJECT_DIR}/godwoken/
-mkdir -p deploy && cd deploy
-cp ${PROJECT_DIR}/config/private_key private_key
-
-# cp godwoken/c/ scripts to avoid build
-cp  ${PROJECT_DIR}/config/meta-contract-validator  ${PROJECT_DIR}/godwoken/godwoken-scripts/c/build/meta-contract-validator
-cp  ${PROJECT_DIR}/config/meta-contract-generator  ${PROJECT_DIR}/godwoken/godwoken-scripts/c/build/meta-contract-generator 
-cp  ${PROJECT_DIR}/config/sudt-validator  ${PROJECT_DIR}/godwoken/godwoken-scripts/c/build/sudt-validator 
-cp  ${PROJECT_DIR}/config/sudt-generator  ${PROJECT_DIR}/godwoken/godwoken-scripts/c/build/sudt-generator 
-
-# create scripts files
 cat << EOF > scripts-deploy.json
 {
   "programs": {
