@@ -36,15 +36,14 @@ while true; do
 done
 RollupTypeHash=$(awk -F'[ ="]+' '$1 == "rollup_type_hash" { print $2 }' $CONFIGTOML | sed 's/\x27//g')
 
-# moved to `make init` stage => docker/layer2/init_config_json.sh
-# cat > ./packages/api-server/.env <<EOF
-# DATABASE_URL=postgres://user:password@postgres:5432/lumos
-# GODWOKEN_JSON_RPC=http://godwoken:8119
-# ETH_ACCOUNT_LOCK_HASH=$EthAccountLockCodeHash
-# ROLLUP_TYPE_HASH=$RollupTypeHash
-# PORT=8024
-# CREATOR_ACCOUNT_ID=3
-# EOF
+cat > ./packages/api-server/.env <<EOF
+DATABASE_URL=postgres://user:password@postgres:5432/lumos
+GODWOKEN_JSON_RPC=http://godwoken:8119
+ETH_ACCOUNT_LOCK_HASH=$EthAccountLockCodeHash
+ROLLUP_TYPE_HASH=$RollupTypeHash
+PORT=8024
+CREATOR_ACCOUNT_ID=3
+EOF
 
 cd /godwoken-web3
 yarn workspace @godwoken-web3/godwoken tsc
