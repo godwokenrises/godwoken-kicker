@@ -1,4 +1,4 @@
-FROM nervos/ckb
+FROM nervos/godwoken-prebuilds:v0.2.0-rc2
 
 USER root
 

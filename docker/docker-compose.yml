@@ -19,12 +19,13 @@ services:
       - ../web3-sql/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
 
   ckb:
-    image: nervos/godwoken-prebuilds:v0.2.0-rc2
+    # image: nervos/godwoken-prebuilds:v0.2.0-rc2
+    build:
+      context: layer1
     ports: 
     - 8114:8114
     - 8115:8115 # 8115 is not using for now, but we may need it when extend kicker in the future
     volumes:
-    - ./layer1/entrypoint.sh:/entrypoint/ckb.sh
     - ../ckb-data/:/ckb-data
     environment:
       # env of layer 1:
@@ -36,7 +37,6 @@ services:
       # - SE_OPTS="log ckb-log.txt"
     # logging:
       # driver: "none"
-    command: ["sh", "/entrypoint/ckb.sh"]
 
   godwoken:
     image: nervos/godwoken-prebuilds:v0.2.0-rc2
