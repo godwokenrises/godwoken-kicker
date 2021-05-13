@@ -9,7 +9,8 @@ PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 # moved to docker/layer2/Dockerfile
 
 # read eth_lock_hash from json config file
-LOCKSCRIPTS=${PROJECT_DIR}/godwoken-web3/config/godwoken-deploy-result.json
+LOCKSCRIPTS=${PROJECT_DIR}/godwoken/deploy/scripts-deploy-result.json
+
 # wait for godwoken finished its deployment
 while true; do
     sleep 3;
@@ -23,7 +24,7 @@ done
 EthAccountLockCodeHash=$(jq -r '.eth_account_lock.script_type_hash' $LOCKSCRIPTS)
 
 # read rollup type hash from config.toml file
-CONFIGTOML=${PROJECT_DIR}/godwoken-web3/config/godwoken_config.toml
+CONFIGTOML=${PROJECT_DIR}/godwoken/config.toml
 # wait for godwoken finished generating config.toml file
 while true; do
     sleep 3;

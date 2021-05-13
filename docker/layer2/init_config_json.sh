@@ -1,8 +1,5 @@
 # please invoke this script in the project root dir
-cd godwoken
-touch config.toml
-cd deploy
-touch scripts-deploy-result.json
+cd godwoken/deploy
 
 cat << EOF > scripts-deploy.json
 {

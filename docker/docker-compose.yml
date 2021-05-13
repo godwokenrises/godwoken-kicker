@@ -73,13 +73,7 @@ services:
     build: # base image: nervos/godwoken-prebuilds:v0.2.0-rc2
       context: ../godwoken-web3
     volumes: 
-    # - ../:/code => only mount /godwoken-web3
-    # Dockerfile has copied the /godwoken-web3 into image
-    # - ../godwoken-web3:/godwoken-web3
-    
-    # TODO: check these config files
-    - ../godwoken/deploy/scripts-deploy-result.json:/godwoken-web3/config/godwoken-deploy-result.json
-    - ../godwoken/config.toml:/godwoken-web3/config/godwoken_config.toml
+    - ../godwoken/:/godwoken
     - ../web3_entrypoint.sh:/web3_entrypoint.sh
     command: bash /web3_entrypoint.sh
     environment: 
