@@ -4,10 +4,6 @@ set -o errexit
 set -o xtrace
 PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-# todo: move to init process, maybe the main docker image
-# apt update && apt install jq -y
-# moved to docker/layer2/Dockerfile
-
 # read eth_lock_hash from json config file
 LOCKSCRIPTS=${PROJECT_DIR}/godwoken/deploy/scripts-deploy-result.json
 
@@ -46,6 +42,5 @@ PORT=8024
 CREATOR_ACCOUNT_ID=3
 EOF
 
-cd /godwoken-web3
-yarn workspace @godwoken-web3/godwoken tsc
+# start web3 server
 yarn workspace @godwoken-web3/api-server start

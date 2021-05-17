@@ -19,7 +19,7 @@ services:
       - ../web3-sql/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
 
   ckb:
-    # image: nervos/godwoken-prebuilds:v0.2.0-rc2
+    # based-image: nervos/godwoken-prebuilds:v0.2.0-rc2
     build:
       context: layer1
     ports: 
@@ -34,9 +34,6 @@ services:
       BA_CODE_HASH: 0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8
       BA_HASH_TYPE: type
       BA_MESSAGE: 0x1234
-      # - SE_OPTS="log ckb-log.txt"
-    # logging:
-      # driver: "none"
 
   godwoken:
     image: nervos/godwoken-prebuilds:v0.2.0-rc2
@@ -70,9 +67,10 @@ services:
       - postgres
 
   web3:
-    build: # base image: nervos/godwoken-prebuilds:v0.2.0-rc2
-      context: ../godwoken-web3
+    build: # based-image: nervos/godwoken-prebuilds:v0.2.0-rc2
+      context: web3
     volumes: 
+    - ../godwoken-web3/:/code/godwoken-web3 # the manual-build resource all stays in /code dir
     - ../godwoken/:/godwoken
     - ../web3_entrypoint.sh:/web3_entrypoint.sh
     command: bash /web3_entrypoint.sh
@@ -91,40 +89,3 @@ services:
       - ../:/code
     command: bash /code/docker/gen-godwoken-schema/entrypoint.sh
     
-######## TODO: clean these? #########################################
-
-  # ckb-indexer:
-  #   build: 
-  #     context: ckb-indexer
-  #   ports:
-  #     - 8116:8116
-  #   network_mode: 'bridge'
-  #   volumes:
-  #     - ../indexer-data/:/code
-  #   depends_on:
-  #     - ckb
-
-#  compile-lock: 
-#    build: 
-#      context: compile-lock
-#    volumes: 
-#      - common_file:/code
-
-#  lumos-config:
-#    build: 
-#      context: lumos-config
-#    networks: 
-#      - layer1
-#      - layer2
-#    volumes: 
-#      - common_file:/code/lumos-config-generator
-#    depends_on: 
-#      - chain
-
-#   lumos:
-#     image: retricsu/gowoken-build_dev:ubuntu20
-#     volumes:
-#       - ../:/code
-#     command: bash /code/lumos_entrypoint.sh
-#     depends_on: 
-#       - postgres

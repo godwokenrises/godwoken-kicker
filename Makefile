@@ -1,15 +1,10 @@
-# TODO: remove
-build-docker:
-	cd docker && docker build -t retricsu/gowoken-build_dev:ubuntu20 .
-
 build-image:
-# docker build godwoken-examples -t gw-example:latest
-# docker build godwoken-web3 -t gw-web3:latest
 	cd docker && docker-compose build --no-rm
 
 install:
 	git submodule update --init --recursive
-	docker run --rm -v `PWD`/godwoken-examples:/app -w=/app nervos/godwoken-prebuilds:v0.2.0-rc2 yarn
+	docker run --rm -v `pwd`/godwoken-examples:/app -w=/app nervos/godwoken-prebuilds:v0.2.0-rc2 yarn
+	docker run --rm -v `pwd`/godwoken-web3:/app -w=/app nervos/godwoken-prebuilds:v0.2.0-rc2 sh -c "yarn; yarn workspace @godwoken-web3/godwoken tsc"
 
 init:
 	make install
@@ -26,16 +21,17 @@ init:
 	cp ./config/sudt-validator ./godwoken/godwoken-scripts/c/build/sudt-validator 
 	cp ./config/sudt-generator ./godwoken/godwoken-scripts/c/build/sudt-generator
 	cp ./config/polyjuice-generator godwoken-polyjuice/build/generator
+	cp ./config/polyjuice-validator godwoken-polyjuice/build/validator
 # build image for docker-compose build cache
 	make build-image
 	
 start:
-	cd docker && docker-compose up -d --build && docker-compose logs -f --tail 100
+	cd docker && docker-compose up -d --build
 
 start-f:
 	cd docker && docker-compose --env-file .force.new.chain.env  up -d	
 
-re-start:
+restart:
 	cd docker && docker-compose restart
 
 stop:
@@ -44,11 +40,6 @@ stop:
 # stop godwoken
 exit-g:
 	cd docker && docker-compose stop godwoken
-
-# run godwoken only start or exit ./godwoken
-# run-g:
-#	cd docker && docker-compose 
-
 
 pause:
 	cd docker && docker-compose pause
@@ -90,6 +81,9 @@ stop-web3:
 start-web3:
 	cd docker && docker-compose start web3
 
+enter-web3:
+	cd docker && docker-compose logs -f web3
+
 clean:
 # FIXME: clean needs sudo privilage
 	rm -rf ckb-data/data
@@ -111,14 +105,13 @@ smart-clean:
 	cd godwoken-examples/packages/runner && rm -rf db && rm -rf temp-db
 	rm -rf postgres-data/*	
 
-re-init:
+un-init:
 	make down
 	make clean
 	rm -rf godwoken
 	rm -rf godwoken-polyjuice
 	rm -rf godwoken-examples
 	rm -rf godwoken-web3
-	make init
 
 enter-g:
 	cd docker && docker-compose exec godwoken bash
@@ -158,9 +151,6 @@ reset-polyjuice:
 start-godwoken:
 	cd docker && docker-compose start godwoken
 
-test-con:
-	./testParseConfig.sh
-
 prepare-money:
 	cd godwoken-examples && yarn clean &&  yarn prepare-money:normal
 
@@ -181,5 +171,3 @@ paste-prebuild-scripts:
 	cp godwoken/godwoken-scripts/build/release/* config/scripts/release/
 	cp godwoken-polyjuice/build/generator_log config/polyjuice-generator
 	cp godwoken-polyjuice/build/validator_log config/polyjuice-validator
-
-
