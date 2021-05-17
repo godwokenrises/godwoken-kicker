@@ -10,7 +10,7 @@ ENV BA_MESSAGE=0x1234
 
 EXPOSE 8114 8115
 WORKDIR /code
-COPY --chown=ckb ./entrypoint.sh /bin/
+COPY ./entrypoint.sh /bin/
 
 RUN chmod +x /bin/entrypoint.sh
 

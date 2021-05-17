@@ -111,13 +111,13 @@ smart-clean:
 	cd godwoken-examples/packages/runner && rm -rf db && rm -rf temp-db
 	rm -rf postgres-data/*	
 
-re-init:1
+re-init:
 	make down
-	rm -rf ckb-data
+	make clean
 	rm -rf godwoken
 	rm -rf godwoken-polyjuice
 	rm -rf godwoken-examples
-	rm -rf lumos
+	rm -rf godwoken-web3
 	make init
 
 enter-g:
@@ -181,4 +181,5 @@ paste-prebuild-scripts:
 	cp godwoken/godwoken-scripts/build/release/* config/scripts/release/
 	cp godwoken-polyjuice/build/generator_log config/polyjuice-generator
 	cp godwoken-polyjuice/build/validator_log config/polyjuice-validator
+
 
