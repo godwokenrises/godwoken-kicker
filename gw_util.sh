@@ -123,8 +123,68 @@ get_sudt_code_hash_from_lumos_file() {
     echo "$(cat $lumosconfigfile)" | grep -Pzo 'SUDT[\s\S]*CODE_HASH": "\K[^"]*'
 }
 
-# check if sudt script cell exits in ckb from lumos file
-#isSudtCellExits() {
-#
-#}
+# 
+generateSubmodulesEnvFile(){
+    File="docker/.manual.build.list.env"
+    rm $File 
+    echo "####[mode]" >> $File
+    echo MANUAL_BUILD_GODWOKEN=false >> $File
+    echo MANUAL_BUILD_WEB3=false >> $File
+    echo '' >> $File
 
+    local -a arr=("godwoken" "godwoken-web3" "godwoken-polyjuice" "godwoken-examples")
+    for i in "${arr[@]}"
+    do
+       # get origin url
+       url=$(git config --file .gitmodules --get-regexp "submodule.${i}.path" | 
+        awk '{print $2}' | xargs -i git -C {} remote get-url origin)
+       # get branch
+       branchs=$(git config --file .gitmodules --get-regexp "submodule.${i}.path" | 
+        awk '{print $2}' |  xargs -i git -C {} branch -q)
+       # get last commit
+       commit=$(git config --file .gitmodules --get-regexp "submodule.${i}.path" | 
+        awk '{print $2}' | xargs -i git -C {} log --pretty=format:'%h' -n 1 )
+    
+       # renameing godwoken-examples => godwoken_examples, 
+       # cater for env variable naming rule.
+       url_name=$(echo "${i^^}_URL" | tr - _ )
+       branch_name=$(echo "${i^^}_BRANCH" | tr - _)
+       commit_name=$(echo "${i^^}_COMMIT" | tr - _ )
+
+       echo "####["$i"]" >> $File
+       echo "$url_name=$url" >> $File
+       echo "$branchs" >> $File
+       echo "$commit_name=$commit" >> $File
+       echo '' >> $File
+
+       sed -i /HEAD/d $File 
+       sed -i "s/[ ]./$branch_name=/" $File
+    done
+}
+
+update_submodules(){
+   # load env from submodule info file
+   # use these env varibles to update the desired submodules
+   source docker/.manual.build.list.env
+
+   local -a arr=("godwoken" "godwoken-web3" "godwoken-polyjuice" "godwoken-examples")
+   for i in "${arr[@]}"
+   do
+      # set url for submodule
+      remote_url_key=$(echo "${i^^}_URL" | tr - _ )
+      remote_url_value=$(printf '%s\n' "${!remote_url_key}")
+      git submodule set-url -- $i $remote_url_value 
+
+      # set branch for submodule
+      branch_key=$(echo "${i^^}_BRANCH" | tr - _ )
+      branch_value=$(printf '%s\n' "${!branch_key}")
+      git submodule set-branch --branch $branch_value -- $i 
+      git submodule update --init --recursive -- $i 
+
+      # checkout commit for submodule
+      file_path=$(printf '%s\n' "${i}")
+      commit_key=$(echo "${i^^}_COMMIT" | tr - _ )
+      commit_value=$(printf '%s\n' "${!commit_key}")
+      cd `pwd`/$file_path && git checkout $commit_value && cd ..
+   done
+}

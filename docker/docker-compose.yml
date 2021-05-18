@@ -41,8 +41,11 @@ services:
     - ../:/code
     - cargo-cache:/usr/local/cargo
     - ../ckb-cli-data:/root/.ckb-cli
+    env_file:
+      - .manual.build.list.env
     environment:
-      FORCH_GODWOKEN_REDEPLOY: ${FORCH_GODWOKEN_REDEPLOY}
+      FORCE_GODWOKEN_REDEPLOY: ${FORCE_GODWOKEN_REDEPLOY}
+      MANUAL_BUILD_GODWOKEN: ${MANUAL_BUILD_GODWOKEN}
     command: bash /code/godwoken_entrypoint.sh
     ports:
       - 8116:8116
@@ -74,7 +77,10 @@ services:
     - ../godwoken/:/godwoken
     - ../web3_entrypoint.sh:/web3_entrypoint.sh
     command: bash /web3_entrypoint.sh
+    env_file:
+      - .manual.build.list.env
     environment: 
+      MANUAL_BUILD_WEB3: ${MANUAL_BUILD_WEB3}
       PORT: 8024
     ports:
       - 8024:8024

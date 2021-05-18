@@ -1,10 +1,35 @@
+# if env file exits, include it.
+MANUAL_ENV_FILE=./docker/.manual.build.list.env
+ifneq ($(wildcard $(MANUAL_ENV_FILE)),)
+    include $(MANUAL_ENV_FILE)
+	export $(shell sed 's/=.*//' $(MANUAL_ENV_FILE))
+endif
+
+
+###### command list ########
+
 build-image:
 	cd docker && docker-compose build --no-rm
 
-install:
+gen-submodule-env: SHELL:=/bin/bash
+gen-submodule-env:
+	source gw_util.sh && generateSubmodulesEnvFile
+
+update-submodule: SHELL:=/bin/bash
+update-submodule:
+	source ./gw_util.sh && update_submodules	
+
+install: gen-submodule-env
 	git submodule update --init --recursive
 	docker run --rm -v `pwd`/godwoken-examples:/app -w=/app nervos/godwoken-prebuilds:v0.2.0-rc2 yarn
-	docker run --rm -v `pwd`/godwoken-web3:/app -w=/app nervos/godwoken-prebuilds:v0.2.0-rc2 sh -c "yarn; yarn workspace @godwoken-web3/godwoken tsc"
+# if manual build web3
+	if [ "$(MANUAL_BUILD_WEB3)" = true ] ; then \
+		docker run --rm -v `pwd`/godwoken-web3:/app -w=/app nervos/godwoken-prebuilds:v0.2.0-rc2 sh -c "yarn; yarn workspace @godwoken-web3/godwoken tsc" ; \
+	fi
+# if manual build godwoken (only support building in your local env, not in docker for now)
+	if [ "$(MANUAL_BUILD_GODWOKEN)" = true ] ; then \
+		cd godwoken && cargo build; \
+	fi	
 
 init:
 	make install
@@ -37,10 +62,6 @@ restart:
 stop:
 	cd docker && docker-compose stop
 
-# stop godwoken
-exit-g:
-	cd docker && docker-compose stop godwoken
-
 pause:
 	cd docker && docker-compose pause
 
@@ -48,7 +69,6 @@ unpause:
 	cd docker && docker-compose unpause
 
 down:
-# cd docker/init && docker-compose down
 	cd docker && docker-compose down
 
 # show polyjuice

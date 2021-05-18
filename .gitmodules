@@ -11,4 +11,4 @@
 	url = https://github.com/nervosnetwork/godwoken-polyjuice.git
 [submodule "godwoken-web3"]
 	path = godwoken-web3
-	url = https://github.com/nervosnetwork/godwoken-web3.git
+	url = https://github.com/bitrocks/godwoken-web3.git
