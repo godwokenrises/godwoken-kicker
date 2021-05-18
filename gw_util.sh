@@ -185,6 +185,7 @@ update_submodules(){
       file_path=$(printf '%s\n' "${i}")
       commit_key=$(echo "${i^^}_COMMIT" | tr - _ )
       commit_value=$(printf '%s\n' "${!commit_key}")
-      cd `pwd`/$file_path && git checkout $commit_value && cd ..
+      # todo: how to resolve conflicts? make the submodule return to un-init status first?
+      cd `pwd`/$file_path && git pull $remote_url_value $branch_value && git checkout $commit_value && cd ..
    done
 }

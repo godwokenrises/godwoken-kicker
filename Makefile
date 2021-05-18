@@ -110,10 +110,10 @@ clean:
 	rm -rf ckb-cli-data/*
 	[ -e "indexer-data/ckb-indexer-data" ] && rm -rf indexer-data/ckb-indexer-data || echo 'file not exits.'
 	[ -e "indexer-data/indexer-log" ] && rm indexer-data/indexer-log || echo 'file not exits.'
-	cd godwoken-examples/packages/runner && rm -rf db && rm -rf temp-db
+	[ -e "godwoken-examples/packages/runner" ] && cd godwoken-examples/packages/runner && rm -rf db && rm -rf temp-db  || echo 'file not exits.'
 	rm -rf postgres-data/*
 # prepare brand new lumos config file for polyjuice
-	cp config/lumos-config.json godwoken-examples/packages/runner/configs/
+	[ -e "godwoken-examples/packages/runner" ] && cp config/lumos-config.json godwoken-examples/packages/runner/configs/
 # delete the godwoken outdated config file as well
 	rm -f godwoken/config.toml 
 	rm -f godwoken/deploy/*-result.json
@@ -122,10 +122,10 @@ smart-clean:
 	rm -rf ckb-cli-data/*
 	[ -e "indexer-data/ckb-indexer-data" ] && rm -rf indexer-data/ckb-indexer-data || echo 'file not exits.'
 	[ -e "indexer-data/indexer-log" ] && rm indexer-data/indexer-log || echo 'file not exits.'
-	cd godwoken-examples/packages/runner && rm -rf db && rm -rf temp-db
+	[ -e "godwoken-examples/packages/runner" ] && cd godwoken-examples/packages/runner && rm -rf db && rm -rf temp-db  || echo 'file not exits.'
 	rm -rf postgres-data/*	
 
-un-init:
+uninit:
 	make down
 	make clean
 	rm -rf godwoken
