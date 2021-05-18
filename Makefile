@@ -19,7 +19,7 @@ update-submodule: SHELL:=/bin/bash
 update-submodule:
 	source ./gw_util.sh && update_submodules	
 
-install: gen-submodule-env
+install: 
 	git submodule update --init --recursive
 	docker run --rm -v `pwd`/godwoken-examples:/app -w=/app nervos/godwoken-prebuilds:v0.2.0-rc2 yarn
 # if manual build web3
