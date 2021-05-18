@@ -8,7 +8,16 @@ endif
 
 ###### command list ########
 
+# manual-builded-godwoken binary need this based-image to run
+build-manual:
+	cd build-manual && docker build -t retricsu/godwoken-manual-build .
+
+build-image: SHELL:=/bin/bash
 build-image:
+	cp docker/layer2/Dockerfile.example docker/layer2/Dockerfile
+	if [ "$(MANUAL_BUILD_GODWOKEN)" = true ] ; then \
+		source ./gw_util.sh && update_godwoken_dockerfile_to_manual_mode ; \
+	fi
 	cd docker && docker-compose build --no-rm
 
 gen-submodule-env: SHELL:=/bin/bash
@@ -19,17 +28,13 @@ update-submodule: SHELL:=/bin/bash
 update-submodule:
 	source ./gw_util.sh && update_submodules	
 
-install: 
+install:
 	git submodule update --init --recursive
 	docker run --rm -v `pwd`/godwoken-examples:/app -w=/app nervos/godwoken-prebuilds:v0.2.0-rc2 yarn
-# if manual build web3
-	if [ "$(MANUAL_BUILD_WEB3)" = true ] ; then \
-		docker run --rm -v `pwd`/godwoken-web3:/app -w=/app nervos/godwoken-prebuilds:v0.2.0-rc2 sh -c "yarn; yarn workspace @godwoken-web3/godwoken tsc" ; \
-	fi
 # if manual build godwoken (only support building in your local env, not in docker for now)
 	if [ "$(MANUAL_BUILD_GODWOKEN)" = true ] ; then \
 		cd godwoken && cargo build; \
-	fi	
+	fi
 
 init:
 	make install
@@ -37,8 +42,8 @@ init:
 	mkdir -p ./godwoken/deploy
 	cp ./config/private_key ./godwoken/deploy/private_key
 	sh ./docker/layer2/init_config_json.sh
-# prepare lumos config file for polyjuice
-	cp ./config/lumos-config.json ./godwoken-examples/packages/runner/configs/ 
+# prepare lumos config file (if not exists) for polyjuice
+	[ -e "godwoken-examples/packages/runner/configs/lumos-config.json" ] && echo 'lumos-config file exits' || cp ./config/lumos-config.json ./godwoken-examples/packages/runner/configs/
 # cp godwoken/c/ scripts => TODO: use /scripts in nervos/godwoken-prebuilds image
 	cp -r ./config/scripts ./godwoken/
 	cp ./config/meta-contract-validator ./godwoken/godwoken-scripts/c/build/meta-contract-validator

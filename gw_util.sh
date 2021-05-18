@@ -197,3 +197,8 @@ update_submodules(){
       cd `pwd`/$file_path && git pull $remote_url_value $branch_value && git checkout $commit_value && cd ..
    done
 }
+
+update_godwoken_dockerfile_to_manual_mode(){
+    File="docker/layer2/Dockerfile"
+    sed -i 's/FROM .*/FROM retricsu\/godwoken-manual-build:latest/' $File
+}

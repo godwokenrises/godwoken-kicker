@@ -36,7 +36,8 @@ services:
       BA_MESSAGE: 0x1234
 
   godwoken:
-    image: nervos/godwoken-prebuilds:v0.2.0-rc2
+    build: 
+      context: layer2
     volumes:
     - ../:/code
     - cargo-cache:/usr/local/cargo
@@ -76,12 +77,12 @@ services:
     - ../godwoken-web3/:/code/godwoken-web3 # the manual-build resource all stays in /code dir
     - ../godwoken/:/godwoken
     - ../web3_entrypoint.sh:/web3_entrypoint.sh
-    command: bash /web3_entrypoint.sh
     env_file:
       - .manual.build.list.env
     environment: 
       MANUAL_BUILD_WEB3: ${MANUAL_BUILD_WEB3}
       PORT: 8024
+    command: bash /web3_entrypoint.sh
     ports:
       - 8024:8024
     depends_on: 

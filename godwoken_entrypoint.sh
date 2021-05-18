@@ -11,6 +11,7 @@ export PRIVKEY=deploy/private_key
 export ckb_rpc=http://ckb:8114
 export DATABASE_URL=postgres://user:password@postgres:5432/lumos
 
+# detect which godwoken to start (prebuild version or local manual-build version)
 if [ "$MANUAL_BUILD_GODWOKEN" = true ] ; then
   export GODWOKEN_BIN=${PROJECT_DIR}/godwoken/target/debug/godwoken
   export GW_TOOLS_BIN=${PROJECT_DIR}/godwoken/target/debug/gw-tools
@@ -38,6 +39,7 @@ codeHash=$(get_sudt_code_hash_from_lumos_file "${PolyjuiceDir}/packages/runner/c
 set_key_value_in_toml "l1_sudt_script_type_hash" $codeHash "${PROJECT_DIR}/godwoken/config.toml"
 
 # ready to start godwoken
+cd ${PROJECT_DIR}/godwoken
 
 # first, start ckb-indexer from nervos/godwoken-prebuilds
 # todo: should remove to another service. but the port mapping some how not working.
@@ -92,7 +94,6 @@ done
 echo 'this may takes a little bit of time, please wait...'
 
 # deploy scripts
-cd ${PROJECT_DIR}/godwoken
 $GW_TOOLS_BIN deploy-scripts -r ${ckb_rpc} -i deploy/scripts-deploy.json -o deploy/scripts-deploy-result.json -k ${PRIVKEY}
 
 # deploy genesis block
@@ -100,7 +101,7 @@ $GW_TOOLS_BIN deploy-genesis -r ${ckb_rpc} -d deploy/scripts-deploy-result.json 
 
 # copy polyjuice build file
 # todo: We should use real validator in the later version
-cp /scripts/godwoken-polyjuice/generator ${PROJECT_DIR}/godwoken/deploy/polyjuice-generator
+cp ${PROJECT_DIR}/godwoken-polyjuice/build/generator ${PROJECT_DIR}/godwoken/deploy/polyjuice-generator
 cp scripts/release/always-success ${PROJECT_DIR}/godwoken/deploy/polyjuice-validator
 #cp ${PROJECT_DIR}/godwoken-polyjuice/build/validator ${PROJECT_DIR}/godwoken/deploy/polyjuice-validator
 

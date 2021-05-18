@@ -4,6 +4,14 @@ set -o errexit
 set -o xtrace
 PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
+if [ "$MANUAL_BUILD_WEB3" = true ] ; then 
+  echo "manual mode.."
+  cd /code/godwoken-web3
+else
+  echo "prebuild mode.."
+  cd /godwoken-web3
+fi
+
 # read eth_lock_hash from json config file
 LOCKSCRIPTS=${PROJECT_DIR}/godwoken/deploy/scripts-deploy-result.json
 
