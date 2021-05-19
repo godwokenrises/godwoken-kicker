@@ -184,7 +184,7 @@ rebuild-scripts:
 	make paste-prebuild-scripts 
 
 prepare-prebuild-scripts:
-	make install
+	git submodule update --init --recursive
 	cd godwoken-scripts && cd c && make && cd - && capsule build --release --debug-output
 	cd godwoken-polyjuice && make all-via-docker
 
