@@ -129,7 +129,7 @@ GODWOKEN_SCRIPTS_BRANCH=master
 GODWOKEN_SCRIPTS_COMMIT=ec77128
 ```
 
-change `MANUAL_BUILD_GODWOKEN` under `[mode]` section to `true` if you want to build godwoken binary (through submodule) on manual. 
+change `MANUAL_BUILD_GODWOKEN` under `[mode]` section to `true` if you want to build godwoken binary (through submodule) on manual. you must be able to `cargo build` godwoken on your local envirement.
 
 same as `MANUAL_BUILD_WEB3`. the other two currently not supported yet.
 
