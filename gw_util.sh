@@ -132,8 +132,8 @@ generateSubmodulesEnvFile(){
     echo "####[mode]" >> $File
     echo MANUAL_BUILD_GODWOKEN=false >> $File
     echo MANUAL_BUILD_WEB3=false >> $File
-    echo MANUAL_BUILD_SCRIPTS=false >> $File
-    echo MANUAL_BUILD_POLYJUICE=false >> $File 
+    #echo MANUAL_BUILD_SCRIPTS=false >> $File
+    #echo MANUAL_BUILD_POLYJUICE=false >> $File 
     echo '' >> $File
 
     # if submodule folder is not initialized and updated

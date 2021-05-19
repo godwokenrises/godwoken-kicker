@@ -18,7 +18,11 @@ build-image:
 	if [ "$(MANUAL_BUILD_GODWOKEN)" = true ] ; then \
 		source ./gw_util.sh && update_godwoken_dockerfile_to_manual_mode ; \
 	fi
-	cd docker && docker-compose build --no-rm
+# pass the env file if exisit	
+	if [ -f ".manual.build.list.env" ] ; then \
+		cd docker && docker-compose build --no-rm --env-file .manual.build.list.env ;\
+	else cd docker && docker-compose build --no-rm ;\
+	fi 
 
 gen-submodule-env: SHELL:=/bin/bash
 gen-submodule-env:
@@ -28,12 +32,13 @@ update-submodule: SHELL:=/bin/bash
 update-submodule:
 	source ./gw_util.sh && update_submodules	
 
+install: SHELL:=/bin/bash
 install:
 	git submodule update --init --recursive
 	docker run --rm -v `pwd`/godwoken-examples:/app -w=/app nervos/godwoken-prebuilds:v0.2.0-rc2 yarn
-# if manual build godwoken (only support building in your local env, not in docker for now)
+# if manual build godwoken
 	if [ "$(MANUAL_BUILD_GODWOKEN)" = true ] ; then \
-		cd godwoken && cargo build; \
+		docker run --rm -v `pwd`/godwoken:/app -w=/app retricsu/godwoken-manual-build cargo build ; \
 	fi
 
 init:
@@ -54,12 +59,22 @@ init:
 	cp ./config/polyjuice-validator godwoken-polyjuice/build/validator
 # build image for docker-compose build cache
 	make build-image
-	
-start:
-	cd docker && docker-compose up -d --build
 
+start: SHELL:=/bin/bash	
+start: 
+# pass the env file if exisit	
+	if [ -f ".manual.build.list.env" ] ; then \
+		cd docker && docker-compose up -d --build --env-file .manual.build.list.env ;\
+	else cd docker && docker-compose up -d --build ;\
+	fi 
+
+start-f: SHELL:=/bin/bash
 start-f:
-	cd docker && docker-compose --env-file .force.new.chain.env  up -d	
+# pass the env file if exisit	
+	if [ -f ".manual.build.list.env" ] ; then \
+		cd docker && docker-compose --env-file .force.new.chain.env --env-file .manual.build.list.env up -d --build ;\
+	else cd docker && docker-compose --env-file .force.new.chain.env up -d --build ;\
+	fi
 
 restart:
 	cd docker && docker-compose restart
@@ -107,7 +122,19 @@ start-web3:
 	cd docker && docker-compose start web3
 
 enter-web3:
-	cd docker && docker-compose logs -f web3
+	cd docker && docker-compose exec web3 bash
+
+ckb:
+	cd docker && docker-compose logs -f --tail 200 ckb
+
+stop-ckb:
+	cd docker && docker-compose stop ckb
+
+start-ckb:
+	cd docker && docker-compose start ckb
+
+enter-ckb:
+	cd docker && docker-compose exec ckb bash
 
 clean:
 # FIXME: clean needs sudo privilage
