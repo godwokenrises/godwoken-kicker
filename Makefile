@@ -41,10 +41,8 @@ install:
 		docker run --rm -v `pwd`/godwoken-web3:/app -w=/app nervos/godwoken-prebuilds:v0.2.0-rc2 /bin/bash -c "yarn; yarn workspace @godwoken-web3/godwoken tsc" ; \
 	fi
 # if manual build godwoken
-# todo: add cache improving repeat build speed
 	if [ "$(MANUAL_BUILD_GODWOKEN)" = true ] ; then \
-		docker run --rm -v `pwd`/godwoken:/app \
-		 -w=/app retricsu/godwoken-manual-build cargo build ; \
+		docker run --rm -it -v `pwd`/godwoken:/app -v `pwd`/cargo-cache-data:/root/.cargo/registry -w=/app retricsu/godwoken-manual-build cargo build ; \
 	fi
 
 init:
@@ -208,6 +206,12 @@ reset-polyjuice:
 
 start-godwoken:
 	cd docker && docker-compose start godwoken
+
+build-godwoken:
+	docker run --rm -it -v `pwd`/godwoken:/app -v `pwd`/cargo-cache-data:/root/.cargo/registry -w=/app retricsu/godwoken-manual-build cargo build
+
+clean-cargo-cache:
+	rm -rf cargo-cache-data
 
 prepare-money:
 	cd godwoken-examples && yarn clean &&  yarn prepare-money:normal

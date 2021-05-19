@@ -13,3 +13,4 @@ postgres-data/
 docker/gen-godwoken-schema/schemas/*
 docker/.manual.build.list.env
 docker/layer2/Dockerfile
+cargo-cache-data/
