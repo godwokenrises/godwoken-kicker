@@ -14,3 +14,7 @@
 	path = godwoken-web3
 	url = https://github.com/nervosnetwork/godwoken-web3.git
 	branch = main
+[submodule "godwoken-scripts"]
+	path = godwoken-scripts
+	url = https://github.com/nervosnetwork/godwoken-scripts.git
+	branch = master
