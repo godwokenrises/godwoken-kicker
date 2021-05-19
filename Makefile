@@ -184,15 +184,15 @@ rebuild-scripts:
 	make paste-prebuild-scripts 
 
 prepare-prebuild-scripts:
-#	make install
-	cd godwoken/godwoken-scripts && cd c && make && cd - && capsule build --release --debug-output
+	git submodule update --init --recursive
+	cd godwoken-scripts && cd c && make && cd - && capsule build --release --debug-output
 	cd godwoken-polyjuice && make all-via-docker
 
 paste-prebuild-scripts:
-	cp godwoken/godwoken-scripts/c/build/meta-contract-generator config/meta-contract-generator
-	cp godwoken/godwoken-scripts/c/build/meta-contract-validator config/meta-contract-validator	
-	cp godwoken/godwoken-scripts/c/build/sudt-generator config/sudt-generator	
-	cp godwoken/godwoken-scripts/c/build/sudt-validator config/sudt-validator
-	cp godwoken/godwoken-scripts/build/release/* config/scripts/release/
+	cp godwoken-scripts/c/build/meta-contract-generator config/meta-contract-generator
+	cp godwoken-scripts/c/build/meta-contract-validator config/meta-contract-validator	
+	cp godwoken-scripts/c/build/sudt-generator config/sudt-generator	
+	cp godwoken-scripts/c/build/sudt-validator config/sudt-validator
+	cp godwoken-scripts/build/release/* config/scripts/release/
 	cp godwoken-polyjuice/build/generator_log config/polyjuice-generator
 	cp godwoken-polyjuice/build/validator_log config/polyjuice-validator

@@ -132,15 +132,17 @@ generateSubmodulesEnvFile(){
     echo "####[mode]" >> $File
     echo MANUAL_BUILD_GODWOKEN=false >> $File
     echo MANUAL_BUILD_WEB3=false >> $File
+    echo MANUAL_BUILD_SCRIPTS=false >> $File
+    echo MANUAL_BUILD_POLYJUICE=false >> $File 
     echo '' >> $File
 
     # if submodule folder is not initialized and updated
-    if [[ -z "$(ls -A godwoken)" || -z "$(ls -A godwoken-examples)" || -z "$(ls -A godwoken-polyjuice)" || -z "$(ls -A godwoken-web3)" ]]; then
+    if [[ -z "$(ls -A godwoken)" || -z "$(ls -A godwoken-examples)" || -z "$(ls -A godwoken-polyjuice)" || -z "$(ls -A godwoken-web3)" || -z "$(ls -A godwoken-scripts)" ]]; then
        echo "one or more of submodule folders is Empty, do init and update first."
        git submodule update --init --recursive
     fi
 
-    local -a arr=("godwoken" "godwoken-web3" "godwoken-polyjuice" "godwoken-examples")
+    local -a arr=("godwoken" "godwoken-web3" "godwoken-polyjuice" "godwoken-examples" "godwoken-scripts")
     for i in "${arr[@]}"
     do
        # get origin url
@@ -152,6 +154,13 @@ generateSubmodulesEnvFile(){
        # get last commit
        commit=$(git config --file .gitmodules --get-regexp "submodule.${i}.path" | 
         awk '{print $2}' | xargs -i git -C {} log --pretty=format:'%h' -n 1 )
+       # get describe of commit
+       describe=$(git config --file .gitmodules --get-regexp "submodule.${i}.path" | 
+        awk '{print $2}' | xargs -i git -C {} describe --all --long )
+       # get describe of commit
+       comment=$(git config --file .gitmodules --get-regexp "submodule.${i}.path" | 
+        awk '{print $2}' | xargs -i git -C {} log --oneline -1)
+    
 
        # renameing godwoken-examples => godwoken_examples, 
        # cater for env variable naming rule.
@@ -160,13 +169,18 @@ generateSubmodulesEnvFile(){
        commit_name=$(echo "${i^^}_COMMIT" | tr - _ )
 
        echo "####["$i"]" >> $File
+       echo "#info: $describe, $comment" >> $File
        echo "$url_name=$url" >> $File
        echo "$branchs" >> $File
        echo "$commit_name=$commit" >> $File
        echo '' >> $File
-
+    
+       # todo: broken if checkout mutiple branchs
+       # delete such line `* (HEAD detached at 96cb75d)`
        sed -i /HEAD/d $File 
-       sed -i "s/[ ]./$branch_name=/" $File
+       # delete the space before branch name
+       sed -i "s/^  */$branch_name=/" $File
+       sed -i "s/^\* */$branch_name=/" $File
     done
 }
 
@@ -175,7 +189,7 @@ update_submodules(){
    # use these env varibles to update the desired submodules
    source docker/.manual.build.list.env
 
-   local -a arr=("godwoken" "godwoken-web3" "godwoken-polyjuice" "godwoken-examples")
+   local -a arr=("godwoken" "godwoken-web3" "godwoken-polyjuice" "godwoken-examples" "godwoken-scripts")
    for i in "${arr[@]}"
    do
       # set url for submodule
