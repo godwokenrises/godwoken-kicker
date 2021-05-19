@@ -123,8 +123,96 @@ get_sudt_code_hash_from_lumos_file() {
     echo "$(cat $lumosconfigfile)" | grep -Pzo 'SUDT[\s\S]*CODE_HASH": "\K[^"]*'
 }
 
-# check if sudt script cell exits in ckb from lumos file
-#isSudtCellExits() {
-#
-#}
+ 
+generateSubmodulesEnvFile(){
+    File="docker/.manual.build.list.env"
+    if [[ -f $File ]]; then
+        rm $File 
+    fi
+    echo "####[mode]" >> $File
+    echo MANUAL_BUILD_GODWOKEN=false >> $File
+    echo MANUAL_BUILD_WEB3=false >> $File
+    #echo MANUAL_BUILD_SCRIPTS=false >> $File
+    #echo MANUAL_BUILD_POLYJUICE=false >> $File 
+    echo '' >> $File
 
+    # if submodule folder is not initialized and updated
+    if [[ -z "$(ls -A godwoken)" || -z "$(ls -A godwoken-examples)" || -z "$(ls -A godwoken-polyjuice)" || -z "$(ls -A godwoken-web3)" || -z "$(ls -A godwoken-scripts)" ]]; then
+       echo "one or more of submodule folders is Empty, do init and update first."
+       git submodule update --init --recursive
+    fi
+
+    local -a arr=("godwoken" "godwoken-web3" "godwoken-polyjuice" "godwoken-examples" "godwoken-scripts")
+    for i in "${arr[@]}"
+    do
+       # get origin url
+       url=$(git config --file .gitmodules --get-regexp "submodule.${i}.path" | 
+        awk '{print $2}' | xargs -i git -C {} remote get-url origin)
+       # get branch
+       branchs=$(git config --file .gitmodules --get-regexp "submodule.${i}.path" | 
+        awk '{print $2}' |  xargs -i git -C {} branch -q)
+       # get last commit
+       commit=$(git config --file .gitmodules --get-regexp "submodule.${i}.path" | 
+        awk '{print $2}' | xargs -i git -C {} log --pretty=format:'%h' -n 1 )
+       # get describe of commit
+       describe=$(git config --file .gitmodules --get-regexp "submodule.${i}.path" | 
+        awk '{print $2}' | xargs -i git -C {} describe --all --long )
+       # get describe of commit
+       comment=$(git config --file .gitmodules --get-regexp "submodule.${i}.path" | 
+        awk '{print $2}' | xargs -i git -C {} log --oneline -1)
+    
+
+       # renameing godwoken-examples => godwoken_examples, 
+       # cater for env variable naming rule.
+       url_name=$(echo "${i^^}_URL" | tr - _ )
+       branch_name=$(echo "${i^^}_BRANCH" | tr - _)
+       commit_name=$(echo "${i^^}_COMMIT" | tr - _ )
+
+       echo "####["$i"]" >> $File
+       echo "#info: $describe, $comment" >> $File
+       echo "$url_name=$url" >> $File
+       echo "$branchs" >> $File
+       echo "$commit_name=$commit" >> $File
+       echo '' >> $File
+    
+       # todo: broken if checkout mutiple branchs
+       # delete such line `* (HEAD detached at 96cb75d)`
+       sed -i /HEAD/d $File 
+       # delete the space before branch name
+       sed -i "s/^  */$branch_name=/" $File
+       sed -i "s/^\* */$branch_name=/" $File
+    done
+}
+
+update_submodules(){
+   # load env from submodule info file
+   # use these env varibles to update the desired submodules
+   source docker/.manual.build.list.env
+
+   local -a arr=("godwoken" "godwoken-web3" "godwoken-polyjuice" "godwoken-examples" "godwoken-scripts")
+   for i in "${arr[@]}"
+   do
+      # set url for submodule
+      remote_url_key=$(echo "${i^^}_URL" | tr - _ )
+      remote_url_value=$(printf '%s\n' "${!remote_url_key}")
+      git submodule set-url -- $i $remote_url_value 
+
+      # set branch for submodule
+      branch_key=$(echo "${i^^}_BRANCH" | tr - _ )
+      branch_value=$(printf '%s\n' "${!branch_key}")
+      git submodule set-branch --branch $branch_value -- $i 
+      git submodule update --init --recursive -- $i 
+
+      # checkout commit for submodule
+      file_path=$(printf '%s\n' "${i}")
+      commit_key=$(echo "${i^^}_COMMIT" | tr - _ )
+      commit_value=$(printf '%s\n' "${!commit_key}")
+      # todo: how to resolve conflicts? make the submodule return to un-init status first?
+      cd `pwd`/$file_path && git pull $remote_url_value $branch_value && git checkout $commit_value && cd ..
+   done
+}
+
+update_godwoken_dockerfile_to_manual_mode(){
+    File="docker/layer2/Dockerfile"
+    sed -i 's/FROM .*/FROM retricsu\/godwoken-manual-build:latest/' $File
+}

@@ -1,7 +1,7 @@
 [submodule "godwoken"]
 	path = godwoken
 	url = https://github.com/nervosnetwork/godwoken.git
-	branch = master 
+	branch = master
 [submodule "godwoken-examples"]
 	path = godwoken-examples
 	url = https://github.com/RetricSu/godwoken-examples.git
@@ -9,6 +9,12 @@
 [submodule "godwoken-polyjuice"]
 	path = godwoken-polyjuice
 	url = https://github.com/nervosnetwork/godwoken-polyjuice.git
+	branch = main
 [submodule "godwoken-web3"]
 	path = godwoken-web3
 	url = https://github.com/nervosnetwork/godwoken-web3.git
+	branch = main
+[submodule "godwoken-scripts"]
+	path = godwoken-scripts
+	url = https://github.com/nervosnetwork/godwoken-scripts.git
+	branch = master

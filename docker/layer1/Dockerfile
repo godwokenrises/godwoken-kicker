@@ -1,4 +1,4 @@
-FROM nervos/ckb
+FROM nervos/godwoken-prebuilds:v0.2.0-rc2
 
 USER root
 
@@ -10,7 +10,7 @@ ENV BA_MESSAGE=0x1234
 
 EXPOSE 8114 8115
 WORKDIR /code
-COPY --chown=ckb ./entrypoint.sh /bin/
+COPY ./entrypoint.sh /bin/
 
 RUN chmod +x /bin/entrypoint.sh
 
