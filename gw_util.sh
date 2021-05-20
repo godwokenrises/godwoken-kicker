@@ -189,6 +189,9 @@ update_submodules(){
    # use these env varibles to update the desired submodules
    source docker/.manual.build.list.env
 
+   # first, let's clean the submodule avoiding merge conflicts
+   git submodule foreach --recursive git clean -xfd
+
    local -a arr=("godwoken" "godwoken-web3" "godwoken-polyjuice" "godwoken-examples" "godwoken-scripts")
    for i in "${arr[@]}"
    do
@@ -201,14 +204,18 @@ update_submodules(){
       branch_key=$(echo "${i^^}_BRANCH" | tr - _ )
       branch_value=$(printf '%s\n' "${!branch_key}")
       git submodule set-branch --branch $branch_value -- $i 
-      git submodule update --init --recursive -- $i 
 
-      # checkout commit for submodule
+      # mark the commit we want to checkout for submodule
       file_path=$(printf '%s\n' "${i}")
       commit_key=$(echo "${i^^}_COMMIT" | tr - _ )
       commit_value=$(printf '%s\n' "${!commit_key}")
-      # todo: how to resolve conflicts? make the submodule return to un-init status first?
-      cd `pwd`/$file_path && git pull $remote_url_value $branch_value && git checkout $commit_value && cd ..
+
+      git submodule update --init --recursive -- $i
+
+      # checkout the commit
+      cd `pwd`/$file_path
+      git checkout $commit_value
+      cd ..
    done
 }
 
