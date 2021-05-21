@@ -34,7 +34,7 @@ update-submodule:
 
 install: SHELL:=/bin/bash
 install:
-	git submodule update --init --recursive
+	source ./gw_util.sh && init_submodule_if_empty
 	docker run --rm -v `pwd`/godwoken-examples:/app -w=/app nervos/godwoken-prebuilds:v0.2.1 yarn
 # if manual build web3
 	if [ "$(MANUAL_BUILD_WEB3)" = true ] ; then \
