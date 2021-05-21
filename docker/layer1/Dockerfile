@@ -1,4 +1,4 @@
-FROM nervos/godwoken-prebuilds:v0.2.0-rc2
+FROM nervos/godwoken-prebuilds:v0.2.1
 
 USER root
 
