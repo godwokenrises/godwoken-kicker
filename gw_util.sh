@@ -223,3 +223,11 @@ update_godwoken_dockerfile_to_manual_mode(){
     File="docker/layer2/Dockerfile"
     sed -i 's/FROM .*/FROM retricsu\/godwoken-manual-build:latest/' $File
 }
+
+init_submodule_if_empty(){
+    # if submodule folder is empty and not initialized
+    if [[ -z "$(ls -A godwoken)" || -z "$(ls -A godwoken-examples)" || -z "$(ls -A godwoken-polyjuice)" || -z "$(ls -A godwoken-web3)" || -z "$(ls -A godwoken-scripts)" ]]; then
+       echo "one or more of submodule folders is Empty, do init and update first."
+       git submodule update --init --recursive
+    fi
+}
