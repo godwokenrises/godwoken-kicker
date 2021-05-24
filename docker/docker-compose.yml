@@ -19,7 +19,7 @@ services:
       - ../web3-sql/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
 
   ckb:
-    # based-image: nervos/godwoken-prebuilds:v0.2.1
+    # based-image: nervos/godwoken-prebuilds:v0.2.3
     build:
       context: layer1
     ports: 
@@ -54,7 +54,7 @@ services:
       - postgres
       
   polyjuice:
-    image: nervos/godwoken-prebuilds:v0.2.1
+    image: nervos/godwoken-prebuilds:v0.2.3
     volumes:
     - ../godwoken-examples:/godwoken-examples
     working_dir: /godwoken-examples
@@ -69,7 +69,7 @@ services:
       - postgres
 
   web3:
-    build: # based-image: nervos/godwoken-prebuilds:v0.2.1
+    build: # based-image: nervos/godwoken-prebuilds:v0.2.3
       context: web3
     volumes: 
     - ../godwoken-web3/:/code/godwoken-web3 # the manual-build resource all stays in /code dir
