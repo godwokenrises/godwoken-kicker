@@ -38,6 +38,16 @@ install:
 	if [ "$(MANUAL_BUILD_GODWOKEN)" = true ] ; then \
 		docker run --rm -it -v `pwd`/godwoken:/app -v `pwd`/cargo-cache-data:/root/.cargo/registry -w=/app retricsu/godwoken-manual-build cargo build ; \
 	fi
+# if manual build godwoken-polyjuice
+	if [ "$(MANUAL_BUILD_POLYJUICE)" = true ] ; then \
+		make rebuild-polyjuice-bin ; \
+	else make copy-polyjuice-bin-from-docker ; \
+	fi
+# if manual build godwoken-scripts
+	if [ "$(MANUAL_BUILD_SCRIPTS)" = true ] ; then \
+		make rebuild-gw-scripts-and-bin ; \
+	else make copy-gw-scripts-and-bin-from-docker ; \
+	fi
 
 init:
 	make install
@@ -200,6 +210,8 @@ clean-cargo-cache:
 prepare-money:
 	cd godwoken-examples && yarn clean &&  yarn prepare-money:normal
 
+########### manual-build-mode #############
+### gw and polyjuice all in one
 rebuild-scripts:
 	make prepare-prebuild-scripts
 	make paste-prebuild-scripts 
@@ -209,10 +221,59 @@ prepare-prebuild-scripts:
 	cd godwoken-polyjuice && make all-via-docker
 
 paste-prebuild-scripts:
+# godwoken-scripts
 	cp godwoken-scripts/c/build/meta-contract-generator config/meta-contract-generator
 	cp godwoken-scripts/c/build/meta-contract-validator config/meta-contract-validator	
 	cp godwoken-scripts/c/build/sudt-generator config/sudt-generator	
 	cp godwoken-scripts/c/build/sudt-validator config/sudt-validator
 	cp godwoken-scripts/build/release/* config/scripts/release/
+# godwoken-polyjuice
 	cp godwoken-polyjuice/build/generator_log config/polyjuice-generator
 	cp godwoken-polyjuice/build/validator_log config/polyjuice-validator
+
+#### gw and polyjucie standalone
+rebuild-polyjuice-bin:
+	cd godwoken-polyjuice && make all-via-docker
+	cp godwoken-polyjuice/build/generator_log config/polyjuice-generator
+	cp godwoken-polyjuice/build/validator_log config/polyjuice-validator	
+
+rebuild-gw-scripts-and-bin:
+	cd godwoken-scripts && cd c && make && cd - && capsule build --release --debug-output
+	cp godwoken-scripts/c/build/meta-contract-generator config/meta-contract-generator
+	cp godwoken-scripts/c/build/meta-contract-validator config/meta-contract-validator	
+	cp godwoken-scripts/c/build/sudt-generator config/sudt-generator	
+	cp godwoken-scripts/c/build/sudt-validator config/sudt-validator
+	cp godwoken-scripts/build/release/* config/scripts/release/	
+
+########## prebuild-quick-mode #############
+copy-polyjuice-bin-from-docker:	
+	mkdir -p `pwd`/quick-mode/polyjuice
+	docker run -it -d --name dummy nervos/godwoken-prebuilds:v0.2.4
+	docker cp dummy:/scripts/godwoken-polyjuice/. `pwd`/quick-mode/polyjuice
+	docker rm -f dummy
+# paste the prebuild bin to config dir for use
+	cp quick-mode/polyjuice/generator_log config/polyjuice-generator
+	cp quick-mode/polyjuice/validator_log config/polyjuice-validator	
+
+copy-gw-scripts-and-bin-from-docker:
+	mkdir -p `pwd`/quick-mode/godwoken
+	docker run -it -d --name dummy nervos/godwoken-prebuilds:v0.2.4
+	docker cp dummy:/scripts/godwoken-scripts/* `pwd`/quick-mode/godwoken
+	docker rm -f dummy
+# paste the prebuild bin to config dir for use	
+	cp /quick-mode/godwoken/meta-contract-generator config/meta-contract-generator
+	cp /quick-mode/godwoken/meta-contract-validator config/meta-contract-validator	
+	cp /quick-mode/godwoken/sudt-generator config/sudt-generator	
+	cp /quick-mode/godwoken/sudt-validator config/sudt-validator
+# paste the prebuild scripts to config dir for use
+	cp /quick-mode/godwoken/withdrawal-lock config/scripts/release/
+	cp /quick-mode/godwoken/eth-account-lock config/scripts/release/
+	cp /quick-mode/godwoken/stake-lock config/scripts/release/
+	cp /quick-mode/godwoken/challenge-lock config/scripts/release/
+	cp /quick-mode/godwoken/state-validator config/scripts/release/
+	cp /quick-mode/godwoken/custodian-lock config/scripts/release/
+	cp /quick-mode/godwoken/deposition-lock config/scripts/release/
+	cp /quick-mode/godwoken/always-success config/scripts/release/
+
+	
+
