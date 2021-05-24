@@ -122,19 +122,12 @@ get_sudt_code_hash_from_lumos_file() {
 
     echo "$(cat $lumosconfigfile)" | grep -Pzo 'SUDT[\s\S]*CODE_HASH": "\K[^"]*'
 }
-
  
 generateSubmodulesEnvFile(){
-    File="docker/.manual.build.list.env"
+    File="docker/.submodule.list.env"
     if [[ -f $File ]]; then
         rm $File 
     fi
-    echo "####[mode]" >> $File
-    echo MANUAL_BUILD_GODWOKEN=false >> $File
-    echo MANUAL_BUILD_WEB3=false >> $File
-    #echo MANUAL_BUILD_SCRIPTS=false >> $File
-    #echo MANUAL_BUILD_POLYJUICE=false >> $File 
-    echo '' >> $File
 
     # if submodule folder is not initialized and updated
     if [[ -z "$(ls -A godwoken)" || -z "$(ls -A godwoken-examples)" || -z "$(ls -A godwoken-polyjuice)" || -z "$(ls -A godwoken-web3)" || -z "$(ls -A godwoken-scripts)" ]]; then
@@ -187,7 +180,7 @@ generateSubmodulesEnvFile(){
 update_submodules(){
    # load env from submodule info file
    # use these env varibles to update the desired submodules
-   source docker/.manual.build.list.env
+   source docker/.submodule.list.env
 
    # first, let's clean the submodule avoiding merge conflicts
    git submodule foreach --recursive git clean -xfd
@@ -209,10 +202,11 @@ update_submodules(){
       file_path=$(printf '%s\n' "${i}")
       commit_key=$(echo "${i^^}_COMMIT" | tr - _ )
       commit_value=$(printf '%s\n' "${!commit_key}")
+      
+      # sync the new submodule
+      git submodule sync --recursive -- $i
 
-      git submodule update --init --recursive -- $i
-
-      # checkout the commit
+      # checkout the commit we mark
       cd `pwd`/$file_path
       git checkout $commit_value
       cd ..

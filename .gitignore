@@ -11,6 +11,6 @@ indexer-data/indexer-log
 ckb-cli-data/
 postgres-data/
 docker/gen-godwoken-schema/schemas/*
-docker/.manual.build.list.env
+docker/.submodule.list.env
 docker/layer2/Dockerfile
 cargo-cache-data/

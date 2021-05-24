@@ -1,9 +1,7 @@
-# if env file exits, include it.
-MANUAL_ENV_FILE=./docker/.manual.build.list.env
-ifneq ($(wildcard $(MANUAL_ENV_FILE)),)
-    include $(MANUAL_ENV_FILE)
-	export $(shell sed 's/=.*//' $(MANUAL_ENV_FILE))
-endif
+# include build mode env file
+BUILD_MODE_ENV_FILE=./docker/.build.mode.env
+include $(BUILD_MODE_ENV_FILE)
+export $(shell sed 's/=.*//' $(BUILD_MODE_ENV_FILE))
 
 
 ###### command list ########
@@ -18,11 +16,7 @@ build-image:
 	if [ "$(MANUAL_BUILD_GODWOKEN)" = true ] ; then \
 		source ./gw_util.sh && update_godwoken_dockerfile_to_manual_mode ; \
 	fi
-# pass the env file if exisit	
-	if [ -f ".manual.build.list.env" ] ; then \
-		cd docker && docker-compose build --no-rm --env-file .manual.build.list.env ;\
-	else cd docker && docker-compose build --no-rm ;\
-	fi 
+	cd docker && docker-compose build --no-rm --env-file .build.mode.env
 
 gen-submodule-env: SHELL:=/bin/bash
 gen-submodule-env:
@@ -64,21 +58,11 @@ init:
 # build image for docker-compose build cache
 	make build-image
 
-start: SHELL:=/bin/bash	
 start: 
-# pass the env file if exisit	
-	if [ -f ".manual.build.list.env" ] ; then \
-		cd docker && docker-compose up -d --build --env-file .manual.build.list.env ;\
-	else cd docker && docker-compose up -d --build ;\
-	fi 
+	cd docker && docker-compose up -d --build --env-file .build.mode.env
 
-start-f: SHELL:=/bin/bash
 start-f:
-# pass the env file if exisit	
-	if [ -f ".manual.build.list.env" ] ; then \
-		cd docker && docker-compose --env-file .force.new.chain.env --env-file .manual.build.list.env up -d --build ;\
-	else cd docker && docker-compose --env-file .force.new.chain.env up -d --build ;\
-	fi
+	cd docker && docker-compose --env-file .force.new.chain.env --env-file .build.mode.env up -d --build
 
 restart:
 	cd docker && docker-compose restart
