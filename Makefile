@@ -35,10 +35,10 @@ update-submodule:
 install: SHELL:=/bin/bash
 install:
 	source ./gw_util.sh && init_submodule_if_empty
-	docker run --rm -v `pwd`/godwoken-examples:/app -w=/app nervos/godwoken-prebuilds:v0.2.3 yarn
+	docker run --rm -v `pwd`/godwoken-examples:/app -w=/app nervos/godwoken-prebuilds:v0.2.4 yarn
 # if manual build web3
 	if [ "$(MANUAL_BUILD_WEB3)" = true ] ; then \
-		docker run --rm -v `pwd`/godwoken-web3:/app -w=/app nervos/godwoken-prebuilds:v0.2.3 /bin/bash -c "yarn; yarn workspace @godwoken-web3/godwoken tsc" ; \
+		docker run --rm -v `pwd`/godwoken-web3:/app -w=/app nervos/godwoken-prebuilds:v0.2.4 /bin/bash -c "yarn; yarn workspace @godwoken-web3/godwoken tsc" ; \
 	fi
 # if manual build godwoken
 	if [ "$(MANUAL_BUILD_GODWOKEN)" = true ] ; then \
