@@ -7,8 +7,8 @@ export $(shell sed 's/=.*//' $(BUILD_MODE_ENV_FILE))
 ###### command list ########
 
 # manual-builded-godwoken binary need this based-image to run
-build-manual:
-	cd build-manual && docker build -t retricsu/godwoken-manual-build .
+manual-image:
+	cd docker/manual-image && docker build -t ${DOCKER_MANUAL_BUILD_IMAGE_NAME} .
 
 build-image: SHELL:=/bin/bash
 build-image:
@@ -16,7 +16,8 @@ build-image:
 	if [ "$(MANUAL_BUILD_GODWOKEN)" = true ] ; then \
 		source ./gw_util.sh && update_godwoken_dockerfile_to_manual_mode ; \
 	fi
-	cd docker && docker-compose build --no-rm --env-file .build.mode.env
+# todo: remove env file when build image through cleanning web3 dockerfile 
+	cd docker && docker-compose build --no-rm 
 
 gen-submodule-env: SHELL:=/bin/bash
 gen-submodule-env:
@@ -29,10 +30,10 @@ update-submodule:
 install: SHELL:=/bin/bash
 install:
 	source ./gw_util.sh && init_submodule_if_empty
-	docker run --rm -v `pwd`/godwoken-examples:/app -w=/app nervos/godwoken-prebuilds:v0.2.4 yarn
+	docker run --rm -v `pwd`/godwoken-examples:/app -w=/app $$DOCKER_PREBUILD_IMAGE_NAME:$$DOCKER_PREBUILD_IMAGE_TAG yarn
 # if manual build web3
 	if [ "$(MANUAL_BUILD_WEB3)" = true ] ; then \
-		docker run --rm -v `pwd`/godwoken-web3:/app -w=/app nervos/godwoken-prebuilds:v0.2.4 /bin/bash -c "yarn; yarn workspace @godwoken-web3/godwoken tsc" ; \
+		docker run --rm -v `pwd`/godwoken-web3:/app -w=/app $$DOCKER_PREBUILD_IMAGE_NAME:$$DOCKER_PREBUILD_IMAGE_TAG /bin/bash -c "yarn; yarn workspace @godwoken-web3/godwoken tsc" ; \
 	fi
 # if manual build godwoken
 	if [ "$(MANUAL_BUILD_GODWOKEN)" = true ] ; then \
@@ -57,7 +58,7 @@ init:
 	sh ./docker/layer2/init_config_json.sh
 # prepare lumos config file (if not exists) for polyjuice
 	[ -e "godwoken-examples/packages/runner/configs/lumos-config.json" ] && echo 'lumos-config file exits' || cp ./config/lumos-config.json ./godwoken-examples/packages/runner/configs/
-# cp godwoken/c/ scripts => TODO: use /scripts in nervos/godwoken-prebuilds image
+# cp godwoken/c/ scripts => TODO: use /scripts in $$DOCKER_PREBUILD_IMAGE_NAME image
 	cp -r ./config/scripts ./godwoken/
 	cp ./config/meta-contract-validator ./godwoken/godwoken-scripts/c/build/meta-contract-validator
 	cp ./config/meta-contract-generator ./godwoken/godwoken-scripts/c/build/meta-contract-generator 
@@ -248,7 +249,7 @@ rebuild-gw-scripts-and-bin:
 ########## prebuild-quick-mode #############
 copy-polyjuice-bin-from-docker:	
 	mkdir -p `pwd`/quick-mode/polyjuice
-	docker run -it -d --name dummy nervos/godwoken-prebuilds:v0.2.4
+	docker run -it -d --name dummy $$DOCKER_PREBUILD_IMAGE_NAME:$$DOCKER_PREBUILD_IMAGE_TAG
 	docker cp dummy:/scripts/godwoken-polyjuice/. `pwd`/quick-mode/polyjuice
 	docker rm -f dummy
 # paste the prebuild bin to config dir for use
@@ -257,23 +258,23 @@ copy-polyjuice-bin-from-docker:
 
 copy-gw-scripts-and-bin-from-docker:
 	mkdir -p `pwd`/quick-mode/godwoken
-	docker run -it -d --name dummy nervos/godwoken-prebuilds:v0.2.4
-	docker cp dummy:/scripts/godwoken-scripts/* `pwd`/quick-mode/godwoken
+	docker run -it -d --name dummy $$DOCKER_PREBUILD_IMAGE_NAME:$$DOCKER_PREBUILD_IMAGE_TAG
+	docker cp dummy:/scripts/godwoken-scripts/. `pwd`/quick-mode/godwoken
 	docker rm -f dummy
 # paste the prebuild bin to config dir for use	
-	cp /quick-mode/godwoken/meta-contract-generator config/meta-contract-generator
-	cp /quick-mode/godwoken/meta-contract-validator config/meta-contract-validator	
-	cp /quick-mode/godwoken/sudt-generator config/sudt-generator	
-	cp /quick-mode/godwoken/sudt-validator config/sudt-validator
+	cp quick-mode/godwoken/meta-contract-generator config/meta-contract-generator
+	cp quick-mode/godwoken/meta-contract-validator config/meta-contract-validator	
+	cp quick-mode/godwoken/sudt-generator config/sudt-generator	
+	cp quick-mode/godwoken/sudt-validator config/sudt-validator
 # paste the prebuild scripts to config dir for use
-	cp /quick-mode/godwoken/withdrawal-lock config/scripts/release/
-	cp /quick-mode/godwoken/eth-account-lock config/scripts/release/
-	cp /quick-mode/godwoken/stake-lock config/scripts/release/
-	cp /quick-mode/godwoken/challenge-lock config/scripts/release/
-	cp /quick-mode/godwoken/state-validator config/scripts/release/
-	cp /quick-mode/godwoken/custodian-lock config/scripts/release/
-	cp /quick-mode/godwoken/deposition-lock config/scripts/release/
-	cp /quick-mode/godwoken/always-success config/scripts/release/
+	cp quick-mode/godwoken/withdrawal-lock config/scripts/release/
+	cp quick-mode/godwoken/eth-account-lock config/scripts/release/
+	cp quick-mode/godwoken/stake-lock config/scripts/release/
+	cp quick-mode/godwoken/challenge-lock config/scripts/release/
+	cp quick-mode/godwoken/state-validator config/scripts/release/
+	cp quick-mode/godwoken/custodian-lock config/scripts/release/
+	cp quick-mode/godwoken/deposition-lock config/scripts/release/
+	cp quick-mode/godwoken/always-success config/scripts/release/
 
 	
 

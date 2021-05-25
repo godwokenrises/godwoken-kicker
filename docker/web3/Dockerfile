@@ -1,4 +1,5 @@
-FROM nervos/godwoken-prebuilds:v0.2.4
+ARG DOCKER_PREBUILD_IMAGE 
+FROM ${DOCKER_PREBUILD_IMAGE} 
 USER root
 
 RUN apt-get update \

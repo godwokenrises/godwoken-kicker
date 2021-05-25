@@ -215,7 +215,7 @@ update_submodules(){
 
 update_godwoken_dockerfile_to_manual_mode(){
     File="docker/layer2/Dockerfile"
-    sed -i 's/FROM .*/FROM retricsu\/godwoken-manual-build:latest/' $File
+    sed -i 's/FROM .*/FROM ${DOCKER_MANUAL_BUILD_IMAGE}/' $File
 }
 
 init_submodule_if_empty(){

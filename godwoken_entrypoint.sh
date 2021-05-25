@@ -41,7 +41,7 @@ set_key_value_in_toml "l1_sudt_script_type_hash" $codeHash "${PROJECT_DIR}/godwo
 # ready to start godwoken
 cd ${PROJECT_DIR}/godwoken
 
-# first, start ckb-indexer from nervos/godwoken-prebuilds
+# first, start ckb-indexer 
 # todo: should remove to another service. but the port mapping some how not working.
 RUST_LOG=error ckb-indexer -s ${PROJECT_DIR}/indexer-data/ckb-indexer-data -c ${ckb_rpc} > ${PROJECT_DIR}/indexer-data/indexer-log & 
  
