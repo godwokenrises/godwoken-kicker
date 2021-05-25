@@ -122,19 +122,12 @@ get_sudt_code_hash_from_lumos_file() {
 
     echo "$(cat $lumosconfigfile)" | grep -Pzo 'SUDT[\s\S]*CODE_HASH": "\K[^"]*'
 }
-
  
 generateSubmodulesEnvFile(){
-    File="docker/.manual.build.list.env"
+    File="docker/.submodule.list.env"
     if [[ -f $File ]]; then
         rm $File 
     fi
-    echo "####[mode]" >> $File
-    echo MANUAL_BUILD_GODWOKEN=false >> $File
-    echo MANUAL_BUILD_WEB3=false >> $File
-    #echo MANUAL_BUILD_SCRIPTS=false >> $File
-    #echo MANUAL_BUILD_POLYJUICE=false >> $File 
-    echo '' >> $File
 
     # if submodule folder is not initialized and updated
     if [[ -z "$(ls -A godwoken)" || -z "$(ls -A godwoken-examples)" || -z "$(ls -A godwoken-polyjuice)" || -z "$(ls -A godwoken-web3)" || -z "$(ls -A godwoken-scripts)" ]]; then
@@ -156,7 +149,7 @@ generateSubmodulesEnvFile(){
         awk '{print $2}' | xargs -i git -C {} log --pretty=format:'%h' -n 1 )
        # get describe of commit
        describe=$(git config --file .gitmodules --get-regexp "submodule.${i}.path" | 
-        awk '{print $2}' | xargs -i git -C {} describe --all --long )
+        awk '{print $2}' | xargs -i git -C {} describe --all --always )
        # get describe of commit
        comment=$(git config --file .gitmodules --get-regexp "submodule.${i}.path" | 
         awk '{print $2}' | xargs -i git -C {} log --oneline -1)
@@ -187,10 +180,7 @@ generateSubmodulesEnvFile(){
 update_submodules(){
    # load env from submodule info file
    # use these env varibles to update the desired submodules
-   source docker/.manual.build.list.env
-
-   # first, let's clean the submodule avoiding merge conflicts
-   git submodule foreach --recursive git clean -xfd
+   source docker/.submodule.list.env
 
    local -a arr=("godwoken" "godwoken-web3" "godwoken-polyjuice" "godwoken-examples" "godwoken-scripts")
    for i in "${arr[@]}"
@@ -209,19 +199,26 @@ update_submodules(){
       file_path=$(printf '%s\n' "${i}")
       commit_key=$(echo "${i^^}_COMMIT" | tr - _ )
       commit_value=$(printf '%s\n' "${!commit_key}")
+      
+      # sync the new submodule
+      git submodule sync --recursive -- $i
 
-      git submodule update --init --recursive -- $i
-
-      # checkout the commit
+      # now get the new submodule
       cd `pwd`/$file_path
-      git checkout $commit_value
+      # first, let's clean the submodule avoiding merge conflicts
+      git rm .
+      # pull the new submodule
+      git pull $remote_url_value $branch_value
+      git checkout $branch_value
+      # checkout the commit we mark
+      git reset --hard $commit_value
       cd ..
    done
 }
 
 update_godwoken_dockerfile_to_manual_mode(){
     File="docker/layer2/Dockerfile"
-    sed -i 's/FROM .*/FROM retricsu\/godwoken-manual-build:latest/' $File
+    sed -i 's/FROM .*/FROM ${DOCKER_MANUAL_BUILD_IMAGE}/' $File
 }
 
 init_submodule_if_empty(){
@@ -229,5 +226,39 @@ init_submodule_if_empty(){
     if [[ -z "$(ls -A godwoken)" || -z "$(ls -A godwoken-examples)" || -z "$(ls -A godwoken-polyjuice)" || -z "$(ls -A godwoken-web3)" || -z "$(ls -A godwoken-scripts)" ]]; then
        echo "one or more of submodule folders is Empty, do init and update first."
        git submodule update --init --recursive
+    fi
+}
+
+isGodwokenRpcRunning(){
+    echo $1
+    if [[ -n $1 ]]; 
+    then
+        local rpc_url="$1"
+    else
+        local rpc_url="http://localhost:8119"
+    fi
+
+    # curl retry on connrefused, considering ECONNREFUSED as a transient error(network issues)
+    # connections with ipv6 are not retried because it returns EADDRNOTAVAIL instead of ECONNREFUSED,
+    # hence we should use --ipv4
+    result=$( echo '{
+    "id": 2,
+    "jsonrpc": "2.0",
+    "method": "ping",
+    "params": []
+    }' \
+    | tr -d '\n' \
+    | curl --ipv4 --retry 3 --retry-connrefused \
+    -H 'content-type: application/json' -d @- \
+    $rpc_url)
+
+    if [[ $result =~ "pong" ]]; then
+        echo "godwoken rpc server is up and running!"
+        # 0 equals true
+        return 0
+    else
+        echo "godwoken rpc server is down."
+        # 1 equals false
+        return 1
     fi
 }

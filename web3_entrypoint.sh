@@ -3,7 +3,12 @@
 set -o errexit
 set -o xtrace
 PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+GODWOKEN_RPC_URL="http://godwoken:8119"
 
+# import some helper function
+source ${PROJECT_DIR}/gw_util.sh
+
+# detect which mode to start godwoken_web3
 if [ "$MANUAL_BUILD_WEB3" = true ] ; then 
   echo "manual mode.."
   cd /code/godwoken-web3
@@ -50,5 +55,18 @@ PORT=8024
 CREATOR_ACCOUNT_ID=3
 EOF
 
+# wait for godwoken rpc server to start
+while true; do
+    sleep 5;
+    if isGodwokenRpcRunning "${GODWOKEN_RPC_URL}";
+    then
+      break;
+    else echo "keep waitting..."
+    fi
+done
+
 # start web3 server
-yarn workspace @godwoken-web3/api-server start
+#for debug, you can run: yarn workspace @godwoken-web3/api-server start
+cd packages/api-server 
+DEBUG=godwoken-web3-api:server node ./bin/www
+

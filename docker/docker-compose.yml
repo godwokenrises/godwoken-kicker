@@ -19,9 +19,10 @@ services:
       - ../web3-sql/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
 
   ckb:
-    # based-image: nervos/godwoken-prebuilds:v0.2.4
     build:
       context: layer1
+      args: 
+        DOCKER_PREBUILD_IMAGE: "${DOCKER_PREBUILD_IMAGE_NAME}:${DOCKER_PREBUILD_IMAGE_TAG}"
     ports: 
     - 8114:8114
     - 8115:8115 # 8115 is not using for now, but we may need it when extend kicker in the future
@@ -38,6 +39,9 @@ services:
   godwoken:
     build: 
       context: layer2
+      args: 
+        DOCKER_PREBUILD_IMAGE: "${DOCKER_PREBUILD_IMAGE_NAME}:${DOCKER_PREBUILD_IMAGE_TAG}"
+        DOCKER_MANUAL_BUILD_IMAGE: "${DOCKER_MANUAL_BUILD_IMAGE_NAME}:${DOCKER_MANUAL_BUILD_IMAGE_TAG}"
     volumes:
     - ../:/code
     - cargo-cache:/usr/local/cargo
@@ -54,7 +58,7 @@ services:
       - postgres
       
   polyjuice:
-    image: nervos/godwoken-prebuilds:v0.2.4
+    image: ${DOCKER_PREBUILD_IMAGE_NAME}:${DOCKER_PREBUILD_IMAGE_TAG}
     volumes:
     - ../godwoken-examples:/godwoken-examples
     working_dir: /godwoken-examples
@@ -69,16 +73,16 @@ services:
       - postgres
 
   web3:
-    build: # based-image: nervos/godwoken-prebuilds:v0.2.4
+    build:
       context: web3
+      args: 
+        DOCKER_PREBUILD_IMAGE: "${DOCKER_PREBUILD_IMAGE_NAME}:${DOCKER_PREBUILD_IMAGE_TAG}"
     volumes: 
-    - ../godwoken-web3/:/code/godwoken-web3 # the manual-build resource all stays in /code dir
-    - ../godwoken/:/godwoken
-    - ../web3_entrypoint.sh:/web3_entrypoint.sh
+    - ../:/code # the manual-build resource all stays in /code dir
     environment: 
       MANUAL_BUILD_WEB3: ${MANUAL_BUILD_WEB3}
       PORT: 8024
-    command: bash /web3_entrypoint.sh
+    command: bash /code/web3_entrypoint.sh
     ports:
       - 8024:8024
     depends_on: 
