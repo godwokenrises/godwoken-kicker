@@ -149,7 +149,7 @@ generateSubmodulesEnvFile(){
         awk '{print $2}' | xargs -i git -C {} log --pretty=format:'%h' -n 1 )
        # get describe of commit
        describe=$(git config --file .gitmodules --get-regexp "submodule.${i}.path" | 
-        awk '{print $2}' | xargs -i git -C {} describe --all --long )
+        awk '{print $2}' | xargs -i git -C {} describe --all --always )
        # get describe of commit
        comment=$(git config --file .gitmodules --get-regexp "submodule.${i}.path" | 
         awk '{print $2}' | xargs -i git -C {} log --oneline -1)
@@ -182,9 +182,6 @@ update_submodules(){
    # use these env varibles to update the desired submodules
    source docker/.submodule.list.env
 
-   # first, let's clean the submodule avoiding merge conflicts
-   git submodule foreach --recursive git clean -xfd
-
    local -a arr=("godwoken" "godwoken-web3" "godwoken-polyjuice" "godwoken-examples" "godwoken-scripts")
    for i in "${arr[@]}"
    do
@@ -206,9 +203,15 @@ update_submodules(){
       # sync the new submodule
       git submodule sync --recursive -- $i
 
-      # checkout the commit we mark
+      # now get the new submodule
       cd `pwd`/$file_path
-      git checkout $commit_value
+      # first, let's clean the submodule avoiding merge conflicts
+      git rm .
+      # pull the new submodule
+      git pull $remote_url_value $branch_value
+      git checkout $branch_value
+      # checkout the commit we mark
+      git reset --hard $commit_value
       cd ..
    done
 }
