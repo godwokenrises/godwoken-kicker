@@ -152,7 +152,7 @@ generateSubmodulesEnvFile(){
         awk '{print $2}' | xargs -i git -C {} describe --all --always )
        # get describe of commit
        comment=$(git config --file .gitmodules --get-regexp "submodule.${i}.path" | 
-        awk '{print $2}' | xargs -i git -C {} log --oneline -1)
+        awk '{print $2}' | xargs -i git -C {} log --date=relative --pretty=format:"[%ad] %s by %an" -1)
     
 
        # renameing godwoken-examples => godwoken_examples, 
