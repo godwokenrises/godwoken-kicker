@@ -69,10 +69,10 @@ init:
 	make build-image
 
 start: 
-	cd docker && docker-compose up -d --build --env-file .build.mode.env
+	cd docker && FORCE_GODWOKEN_REDEPLOY=false docker-compose --env-file .build.mode.env up -d --build
 
 start-f:
-	cd docker && docker-compose --env-file .force.new.chain.env --env-file .build.mode.env up -d --build
+	cd docker && FORCE_GODWOKEN_REDEPLOY=true docker-compose --env-file .build.mode.env up -d --build
 
 restart:
 	cd docker && docker-compose restart
