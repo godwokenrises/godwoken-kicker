@@ -137,6 +137,8 @@ then you can check submodule again to ensure it indeed updated as you want:
 make gen-submodule-env
 ```
 
+***NOTE: this will remove all local file in submodule. so all your local changed will gone.***
+
 ## How to deploy contract
 
 0. ***CHANGE YOUR METAMASK NETWORK to GODWOKEN!***
