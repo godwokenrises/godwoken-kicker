@@ -40,7 +40,7 @@ git clone https://github.com/RetricSu/godwoken-kicker.git
 cd godwoken-kicker 
 ```
 
-when you run first time, do:
+when you run first time, or everytime after you change mode, please do:
 
 ```sh
 make init

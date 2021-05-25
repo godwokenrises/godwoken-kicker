@@ -78,13 +78,11 @@ services:
       args: 
         DOCKER_PREBUILD_IMAGE: "${DOCKER_PREBUILD_IMAGE_NAME}:${DOCKER_PREBUILD_IMAGE_TAG}"
     volumes: 
-    - ../godwoken-web3/:/code/godwoken-web3 # the manual-build resource all stays in /code dir
-    - ../godwoken/:/godwoken
-    - ../web3_entrypoint.sh:/web3_entrypoint.sh
+    - ../:/code # the manual-build resource all stays in /code dir
     environment: 
       MANUAL_BUILD_WEB3: ${MANUAL_BUILD_WEB3}
       PORT: 8024
-    command: bash /web3_entrypoint.sh
+    command: bash /code/web3_entrypoint.sh
     ports:
       - 8024:8024
     depends_on: 

@@ -15,3 +15,11 @@ docker/.submodule.list.env
 docker/layer2/Dockerfile
 cargo-cache-data/
 quick-mode/
+
+# ---remove later---
+# config/scripts/release/*
+# !config/scripts/release/poa
+# !config/scripts/release/state
+# 
+# config/*generator
+# config/*validator

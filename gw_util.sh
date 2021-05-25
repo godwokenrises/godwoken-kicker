@@ -225,3 +225,37 @@ init_submodule_if_empty(){
        git submodule update --init --recursive
     fi
 }
+
+isGodwokenRpcRunning(){
+    echo $1
+    if [[ -n $1 ]]; 
+    then
+        local rpc_url="$1"
+    else
+        local rpc_url="http://localhost:8119"
+    fi
+
+    # curl retry on connrefused, considering ECONNREFUSED as a transient error(network issues)
+    # connections with ipv6 are not retried because it returns EADDRNOTAVAIL instead of ECONNREFUSED,
+    # hence we should use --ipv4
+    result=$( echo '{
+    "id": 2,
+    "jsonrpc": "2.0",
+    "method": "ping",
+    "params": []
+    }' \
+    | tr -d '\n' \
+    | curl --ipv4 --retry 3 --retry-connrefused \
+    -H 'content-type: application/json' -d @- \
+    $rpc_url)
+
+    if [[ $result =~ "pong" ]]; then
+        echo "godwoken rpc server is up and running!"
+        # 0 equals true
+        return 0
+    else
+        echo "godwoken rpc server is down."
+        # 1 equals false
+        return 1
+    fi
+}

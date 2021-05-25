@@ -33,7 +33,7 @@ install:
 	docker run --rm -v `pwd`/godwoken-examples:/app -w=/app $$DOCKER_PREBUILD_IMAGE_NAME:$$DOCKER_PREBUILD_IMAGE_TAG yarn
 # if manual build web3
 	if [ "$(MANUAL_BUILD_WEB3)" = true ] ; then \
-		docker run --rm -v `pwd`/godwoken-web3:/app -w=/app $$DOCKER_PREBUILD_IMAGE_NAME:$$DOCKER_PREBUILD_IMAGE_TAG /bin/bash -c "yarn; yarn workspace @godwoken-web3/godwoken tsc" ; \
+		docker run --rm -v `pwd`/godwoken-web3:/app -w=/app $$DOCKER_PREBUILD_IMAGE_NAME:$$DOCKER_PREBUILD_IMAGE_TAG /bin/bash -c "yarn; yarn workspace @godwoken-web3/godwoken tsc; yarn workspace @godwoken-web3/api-server tsc" ; \
 	fi
 # if manual build godwoken
 	if [ "$(MANUAL_BUILD_GODWOKEN)" = true ] ; then \
