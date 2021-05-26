@@ -273,7 +273,7 @@ copy-gw-scripts-and-bin-from-docker:
 	cp quick-mode/godwoken/challenge-lock config/scripts/release/
 	cp quick-mode/godwoken/state-validator config/scripts/release/
 	cp quick-mode/godwoken/custodian-lock config/scripts/release/
-	cp quick-mode/godwoken/deposition-lock config/scripts/release/
+	cp quick-mode/godwoken/deposit-lock config/scripts/release/
 	cp quick-mode/godwoken/always-success config/scripts/release/
 
 	

@@ -5,7 +5,7 @@ cat << EOF > scripts-deploy.json
 {
   "programs": {
     "custodian_lock": "scripts/release/always-success",
-    "deposition_lock": "scripts/release/always-success",
+    "deposit_lock": "scripts/release/always-success",
     "withdrawal_lock": "scripts/release/always-success",
     "challenge_lock": "scripts/release/always-success",
     "stake_lock": "scripts/release/always-success",
