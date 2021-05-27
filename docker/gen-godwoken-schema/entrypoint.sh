@@ -3,6 +3,8 @@ ENTRY_DIR=${PROJECT_DIR}/docker/gen-godwoken-schema
 
 moleculec -V
 
+mkdir -p ${ENTRY_DIR}/schemas
+
 moleculec --language - --schema-file ${PROJECT_DIR}/godwoken/crates/types/schemas/blockchain.mol --format json > ${ENTRY_DIR}/schemas/blockchain.json
 moleculec --language - --schema-file ${PROJECT_DIR}/godwoken/crates/types/schemas/godwoken.mol --format json > ${ENTRY_DIR}/schemas/godwoken.json
 moleculec --language - --schema-file ${PROJECT_DIR}/godwoken/crates/types/schemas/store.mol --format json > ${ENTRY_DIR}/schemas/store.json
