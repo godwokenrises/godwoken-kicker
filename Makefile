@@ -52,9 +52,8 @@ install:
 # if manual build clerkb for POA
 	if [ "$(MANUAL_BUILD_CLERKB)" = true ] ; then \
 		make rebuild-poa-scripts ; \
-	elif [ "$(DOCKER_PREBUILD_IMAGE_TAG)" > "v0.2.4" ]; then \
-		make copy-poa-scripts-from-docker ; \
-	else "prebuild image version is lower than v0.2.5, there is no poa scripts in docker. use poa scripts in config folder. do nothing." ; \
+	else \
+		source ./gw_util.sh && copy_poa_scripts_from_docker_or_abort ;\
 	fi
 
 init:

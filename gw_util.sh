@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# if docker-prebuild-image version is lower than this, then it is legacy
+# which doesnt have poa scripts built-in.
+LEGACY_PREBUILD_IMAGE_VERSION=0.2.4
 
 # how to use: 
 #    parese_toml_with_section file_path section_name key_name
@@ -261,4 +264,61 @@ isGodwokenRpcRunning(){
         # 1 equals false
         return 1
     fi
+}
+
+version_comp () {
+    if [[ $1 == $2 ]]
+    then
+        return 0
+    fi
+    local IFS=.
+    local i ver1=($1) ver2=($2)
+    # fill empty fields in ver1 with zeros
+    for ((i=${#ver1[@]}; i<${#ver2[@]}; i++))
+    do
+        ver1[i]=0
+    done
+    for ((i=0; i<${#ver1[@]}; i++))
+    do
+        if [[ -z ${ver2[i]} ]]
+        then
+            # fill empty fields in ver2 with zeros
+            ver2[i]=0
+        fi
+        if ((10#${ver1[i]} > 10#${ver2[i]}))
+        then
+            return 1
+        fi
+        if ((10#${ver1[i]} < 10#${ver2[i]}))
+        then
+            return 2
+        fi
+    done
+    return 0
+}
+
+test_version_comp () {
+    verion_comp $1 $2
+    case $? in
+        0) op='=';;
+        1) op='>';;
+        2) op='<';;
+    esac
+    if [[ $op != $3 ]]
+    then
+        echo "FAIL: Expected '$3', Actual '$op', Arg1 '$1', Arg2 '$2'"
+    else
+        echo "Pass: '$1 $op $2'"
+    fi
+}
+
+copy_poa_scripts_from_docker_or_abort(){
+    version_comp "${DOCKER_PREBUILD_IMAGE_TAG//v}" $LEGACY_PREBUILD_IMAGE_VERSION 
+    # if version large than legacy_version
+	if [ "$?" = 1 ]; then 
+        echo "copy poa scripts from docker image..."
+		make copy-poa-scripts-from-docker 
+	else 
+		echo "prebuild image version is lower than v0.2.5, there is no poa scripts in docker. instead, use poa scripts in config folder. do nothing."  
+	fi 
 }
