@@ -135,7 +135,7 @@ generateSubmodulesEnvFile(){
        git submodule update --init --recursive
     fi
 
-    local -a arr=("godwoken" "godwoken-web3" "godwoken-polyjuice" "godwoken-examples" "godwoken-scripts")
+    local -a arr=("godwoken" "godwoken-web3" "godwoken-polyjuice" "godwoken-examples" "godwoken-scripts" "clerkb")
     for i in "${arr[@]}"
     do
        # get origin url
@@ -182,7 +182,7 @@ update_submodules(){
    # use these env varibles to update the desired submodules
    source docker/.submodule.list.env
 
-   local -a arr=("godwoken" "godwoken-web3" "godwoken-polyjuice" "godwoken-examples" "godwoken-scripts")
+   local -a arr=("godwoken" "godwoken-web3" "godwoken-polyjuice" "godwoken-examples" "godwoken-scripts" "clerkb")
    for i in "${arr[@]}"
    do
       # set url for submodule

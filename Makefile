@@ -49,6 +49,13 @@ install:
 		make rebuild-gw-scripts-and-bin ; \
 	else make copy-gw-scripts-and-bin-from-docker ; \
 	fi
+# if manual build clerkb for POA
+	if [ "$(MANUAL_BUILD_CLERKB)" = true ] ; then \
+		make rebuild-poa-scripts ; \
+	elif [ "$(DOCKER_PREBUILD_IMAGE_TAG)" > "v0.2.4" ]; then \
+		make copy-poa-scripts-from-docker ; \
+	else "prebuild image version is lower than v0.2.5, there is no poa scripts in docker. use poa scripts in config folder. do nothing." ; \
+	fi
 
 init:
 	make install
@@ -212,27 +219,13 @@ prepare-money:
 	cd godwoken-examples && yarn clean &&  yarn prepare-money:normal
 
 ########### manual-build-mode #############
-### gw and polyjuice all in one
+### rebuild components's scripts and bin all in one
 rebuild-scripts:
-	make prepare-prebuild-scripts
-	make paste-prebuild-scripts 
+	make rebuild-polyjuice-bin
+	make rebuild-gw-scripts-and-bin 
+	make rebuild-poa-scripts
 
-prepare-prebuild-scripts:
-	cd godwoken-scripts && cd c && make && cd - && capsule build --release --debug-output
-	cd godwoken-polyjuice && make all-via-docker
-
-paste-prebuild-scripts:
-# godwoken-scripts
-	cp godwoken-scripts/c/build/meta-contract-generator config/meta-contract-generator
-	cp godwoken-scripts/c/build/meta-contract-validator config/meta-contract-validator	
-	cp godwoken-scripts/c/build/sudt-generator config/sudt-generator	
-	cp godwoken-scripts/c/build/sudt-validator config/sudt-validator
-	cp godwoken-scripts/build/release/* config/scripts/release/
-# godwoken-polyjuice
-	cp godwoken-polyjuice/build/generator_log config/polyjuice-generator
-	cp godwoken-polyjuice/build/validator_log config/polyjuice-validator
-
-#### gw and polyjucie standalone
+#### rebuild components's scripts and bin standalone
 rebuild-polyjuice-bin:
 	cd godwoken-polyjuice && make all-via-docker
 	cp godwoken-polyjuice/build/generator_log config/polyjuice-generator
@@ -245,6 +238,11 @@ rebuild-gw-scripts-and-bin:
 	cp godwoken-scripts/c/build/sudt-generator config/sudt-generator	
 	cp godwoken-scripts/c/build/sudt-validator config/sudt-validator
 	cp godwoken-scripts/build/release/* config/scripts/release/	
+
+rebuild-poa-scripts:
+	cd clerkb && yarn && make all-via-docker
+	cp clerkb/build/debug/poa config/scripts/release/
+	cp clerkb/build/debug/state config/scripts/release/
 
 ########## prebuild-quick-mode #############
 copy-polyjuice-bin-from-docker:	
@@ -276,5 +274,10 @@ copy-gw-scripts-and-bin-from-docker:
 	cp quick-mode/godwoken/deposition-lock config/scripts/release/
 	cp quick-mode/godwoken/always-success config/scripts/release/
 
-	
-
+copy-poa-scripts-from-docker:
+	mkdir -p `pwd`/quick-mode/clerkb
+	docker run -it -d --name dummy $$DOCKER_PREBUILD_IMAGE_NAME:$$DOCKER_PREBUILD_IMAGE_TAG
+	docker cp dummy:/scripts/clerkb/. `pwd`/quick-mode/clerkb
+	docker rm -f dummy
+# paste the prebuild scripts to config dir for use	
+	cp quick-mode/clerkb/* config/scripts/release/
