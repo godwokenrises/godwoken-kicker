@@ -18,3 +18,6 @@
 	path = godwoken-scripts
 	url = https://github.com/nervosnetwork/godwoken-scripts.git
 	branch = master
+[submodule "clerkb"]
+	path = clerkb
+	url = https://github.com/nervosnetwork/clerkb.git
