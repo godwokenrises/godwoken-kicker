@@ -68,10 +68,8 @@ you will need to change your Metamask network setting like following:
 ```sh
     Network Name: Godwoken
     New RPC URL: http://localhost:8024
-    Chain ID: 0x3
+    Chain ID: 0x100000003
 ```
-
-![panel](docs/provider.png)
 
 ### 2. custom mode
 

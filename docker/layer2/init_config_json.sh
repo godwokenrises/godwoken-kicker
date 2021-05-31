@@ -9,7 +9,7 @@ cat << EOF > scripts-deploy.json
     "withdrawal_lock": "scripts/release/always-success",
     "challenge_lock": "scripts/release/always-success",
     "stake_lock": "scripts/release/always-success",
-    "state_validator": "scripts/release/state-validator",
+    "state_validator": "scripts/release/always-success",
     "l2_sudt_validator": "scripts/release/always-success",
     "meta_contract_validator": "scripts/release/always-success",
     "eth_account_lock": "scripts/release/always-success",
@@ -51,6 +51,7 @@ cat << EOF > rollup-config.json
   "reward_burn_rate": 50,
   "allowed_eoa_type_hashes": [
     "0xf0e03a329803bd033eae42e80c8cd6c6dc81b48afe9f4a630f27e78be54db14c"
-  ]
+  ],
+  "compatible_chain_id": 1
 }
 EOF
