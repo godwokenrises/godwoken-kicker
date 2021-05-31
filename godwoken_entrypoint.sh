@@ -96,6 +96,10 @@ echo 'this may takes a little bit of time, please wait...'
 # deploy scripts
 $GW_TOOLS_BIN deploy-scripts -r ${ckb_rpc} -i deploy/scripts-deploy.json -o deploy/scripts-deploy-result.json -k ${PRIVKEY}
 
+# update l1_sudt_script_hash in rollup-config.json file(if it exits) with lumos script.sudt.code_hash
+codeHash=$(get_sudt_code_hash_from_lumos_file "${PolyjuiceDir}/packages/runner/configs/lumos-config.json")
+set_key_value_in_json "l1_sudt_script_type_hash" $codeHash "deploy/rollup-config.json"
+
 # deploy genesis block
 $GW_TOOLS_BIN deploy-genesis -r ${ckb_rpc} -d deploy/scripts-deploy-result.json -p deploy/poa-config.json -u deploy/rollup-config.json -o deploy/genesis-deploy-result.json -k ${PRIVKEY}
 

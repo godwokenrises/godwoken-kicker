@@ -115,6 +115,30 @@ set_key_value_in_toml() {
     fi
 }
 
+# set key value in json config file
+# how to use: set_key_value_in_json key value your_json_config_file
+set_key_value_in_json() {
+    if [[ -f $3 ]];
+    then echo 'found json file.'
+    else
+        echo "${3} file not exits, skip this steps."
+        return 0
+    fi
+
+
+    local key=${1}
+    local value=${2}
+    if [ -n $value ]; then
+        # echo $value
+        local current=$(sed -n -e "s/^\s*\(\"$key\": \"\)\([^ \"]*\)\(.*\)$/\2/p" $3) # value带双引号
+        if [ -n $current ];then
+            echo "setting $3 : $key: $value"
+            value="$(echo "${value}" | sed 's|[&]|\\&|g')"
+            sed -i "s|^[#]*[ ]*\"${key}\"\([ ]*\):.*|  \"${key}\": \"${value}\",|" ${3}
+        fi
+    fi
+}
+
 get_sudt_code_hash_from_lumos_file() {
     if [[ -n $1 ]]; 
     then
