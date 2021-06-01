@@ -113,9 +113,7 @@ cp scripts/release/always-success ${PROJECT_DIR}/godwoken/deploy/polyjuice-valid
 $GW_TOOLS_BIN generate-config -d ${DATABASE_URL} -r ${ckb_rpc} -g deploy/genesis-deploy-result.json -s deploy/scripts-deploy-result.json -p deploy -o config.toml
 
 # Update block_producer.wallet_config section to your own lock.
-cp ${PROJECT_DIR}/config/edit_godwoken_config.sh edit_godwoken_config.sh
-./edit_godwoken_config.sh
-rm edit_godwoken_config.sh 
+edit_godwoken_config_toml ${PROJECT_DIR}/godwoken/config.toml
 
 # update l1_sudt_script_hash in config.toml file(if it exits) with lumos script.sudt.code_hash
 codeHash=$(get_sudt_code_hash_from_lumos_file "${PolyjuiceDir}/packages/runner/configs/lumos-config.json")
