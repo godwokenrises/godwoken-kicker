@@ -346,3 +346,25 @@ copy_poa_scripts_from_docker_or_abort(){
 		echo "prebuild image version is lower than v0.2.5, there is no poa scripts in docker. instead, use poa scripts in config folder. do nothing."  
 	fi 
 }
+
+edit_godwoken_config_toml(){
+    if [[ -f $1 ]];
+    then echo 'found json file.'
+    else
+        echo "${1} file not exits, skip this steps."
+        return 0
+    fi
+
+    set_key_value_in_toml "privkey_path" "deploy/private_key" $1
+    set_key_value_in_toml "listen" "0.0.0.0:8119" $1
+
+    # delete the default lock
+    sed -i '/\[block_producer.wallet_config.lock\]/{n;d}' $1 
+    sed -i '/\[block_producer.wallet_config.lock\]/{n;d}' $1 
+    sed -i '/\[block_producer.wallet_config.lock\]/{n;d}' $1 
+
+    # add an new one with your own lock
+    sed -i "/\[block_producer.wallet_config.lock\]/a\code_hash = '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8'" $1 
+    sed -i "/\[block_producer.wallet_config.lock\]/a\hash_type = 'type'" $1
+    sed -i "/\[block_producer.wallet_config.lock\]/a\args = '0x43d509d97f26007a285f39241cffcd411157196c'" $1
+}
