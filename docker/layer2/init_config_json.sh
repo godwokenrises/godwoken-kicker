@@ -9,7 +9,7 @@ cat << EOF > scripts-deploy.json
     "withdrawal_lock": "scripts/release/always-success",
     "challenge_lock": "scripts/release/always-success",
     "stake_lock": "scripts/release/always-success",
-    "state_validator": "scripts/release/always-success",
+    "state_validator": "scripts/release/state-validator",
     "l2_sudt_validator": "scripts/release/always-success",
     "meta_contract_validator": "scripts/release/always-success",
     "eth_account_lock": "scripts/release/always-success",
