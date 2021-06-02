@@ -33,7 +33,7 @@ make sure you have `docker` and `docker-compose` install on your machine.
     docker-compose --version
 ```
 
-clone the code: 
+clone the code:
 
 ```sh
 git clone https://github.com/RetricSu/godwoken-kicker.git
@@ -61,7 +61,7 @@ make sg # sg means show godwoken activities
 
 after everything started, check `http://localhost:6100/` to deploy contract.
 
-![panel](docs/panel.png)
+![panel](docs/main.png)
 
 you will need to change your Metamask network setting like following:
 
@@ -75,7 +75,7 @@ you will need to change your Metamask network setting like following:
 
 #### ***- build custom components on manual***
 
-open `/docker/.build.mode.env` file, under the [mode] section, 
+open `/docker/.build.mode.env` file, under the [mode] section,
 set the component you want to `true`
 
 ```sh
@@ -86,16 +86,18 @@ MANUAL_BUILD_SCRIPTS=false
 MANUAL_BUILD_POLYJUICE=false
 ```
 
-then run 
+then run
+
 ```sh
 make init
 make start
 ```
+
 and the component will be build and run through submodule on manual.
 
 #### ***- set custom submodule for component***
 
-you can also change different submodule of components if you want. 
+you can also change different submodule of components if you want.
 
 by running
 
@@ -121,13 +123,13 @@ GODWOKEN_WEB3_COMMIT=0324166
 ....
 ```
 
-you can change the submodule info (like remote url/branch/commit) to fetch your own submodule. 
+you can change the submodule info (like remote url/branch/commit) to fetch your own submodule.
 
 just run the follwoing command after you edit the `/docker/.submodule.list.env` file.
 
 ```sh
 make update-submodule
-``` 
+```
 
 then you can check submodule again to ensure it indeed updated as you want:
 
@@ -142,18 +144,22 @@ make gen-submodule-env
 0. ***CHANGE YOUR METAMASK NETWORK to GODWOKEN!***
 1. open `http://localhost:6100/`, connect with your metamask address
 2. click `Deposit` button to fund some devnet ckb on your metamask address.
-3. after deposit finished, 
+3. after deposit finished,
     - click `Deploy Contract` button
     - select the contract compiled binary file from your computer
-    - sign the message with metamask 
-   
+    - sign the message with metamask
+
 then the deployment will auto start.
 
 after deployment successfully get done, you will find the contract address listing below.
 
 ## How to test dapp
 
-~~read [doc here](docs/test-simple-dapp.md).~~ needs update.
+~~read [doc here](docs/test-simple-dapp.md).~~
+
+you can use the kicker's built-in `Contract Debugger` right on the page to give your dapp a first simple manual test.
+
+![panel](docs/contract-debugger.png)
 
 ## Some useful command
 
@@ -184,4 +190,3 @@ make down
 make clean
 make start-f
 ```
-

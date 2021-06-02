@@ -233,7 +233,7 @@ update_submodules(){
       # now get the new submodule
       cd `pwd`/$file_path
       # first, let's clean the submodule avoiding merge conflicts
-      git rm .
+      git rm -r .
       # pull the new submodule
       git pull $remote_url_value $branch_value
       git checkout $branch_value
