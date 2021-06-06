@@ -25,6 +25,7 @@ source ${PROJECT_DIR}/gw_util.sh
 
 # wait for polyjuice complete preparing money before godwoken deployment, avoiding cell comsuming conflict.
 cd $PolyjuiceDir
+yarn init_placeholder_config # for first time
 yarn workspace @godwoken-examples/runner clean:temp
 yarn prepare-money
 

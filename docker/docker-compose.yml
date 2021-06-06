@@ -64,6 +64,7 @@ services:
     working_dir: /godwoken-examples
     command: sh -c "
       yarn workspace @godwoken-examples/runner clean &&
+      yarn init_placeholder_config  &&
       yarn workspace @godwoken-examples/runner start"
     ports:
       - 6101:6101
