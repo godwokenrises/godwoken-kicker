@@ -17,3 +17,6 @@
 [submodule "clerkb"]
 	path = clerkb
 	url = https://github.com/nervosnetwork/clerkb.git
+[submodule "godwoken-polyman"]
+	path = godwoken-polyman
+	url = https://github.com/RetricSu/godwoken-polyman.git
