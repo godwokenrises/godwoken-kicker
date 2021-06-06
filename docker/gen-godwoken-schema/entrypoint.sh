@@ -25,6 +25,6 @@ rollup -f umd -i ${ENTRY_DIR}/schemas/store.js -o ${ENTRY_DIR}/schemas/store.esm
 
 echo 'generated. '
 
-cp -r ${ENTRY_DIR}/schemas ${PROJECT_DIR}/godwoken-examples/packages/godwoken/
+cp -r ${ENTRY_DIR}/schemas ${PROJECT_DIR}/godwoken-polyman/packages/godwoken/
 
 echo 'done. '

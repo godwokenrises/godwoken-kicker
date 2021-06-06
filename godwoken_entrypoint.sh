@@ -5,7 +5,7 @@ set -o xtrace
 PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 export TOP=${PROJECT_DIR}/config
-export PolyjuiceDir=${PROJECT_DIR}/godwoken-examples
+export PolyjuiceDir=${PROJECT_DIR}/godwoken-polyman
 export LUMOS_CONFIG_FILE=${PROJECT_DIR}/config/lumos-config.json
 export PRIVKEY=deploy/private_key
 export ckb_rpc=http://ckb:8114
@@ -26,12 +26,12 @@ source ${PROJECT_DIR}/gw_util.sh
 # wait for polyjuice complete preparing money before godwoken deployment, avoiding cell comsuming conflict.
 cd $PolyjuiceDir
 yarn init_placeholder_config # for first time
-yarn workspace @godwoken-examples/runner clean:temp
+yarn workspace @godwoken-polyman/runner clean:temp
 yarn prepare-money
 
-# wait for godwoken-examples deploy layer1 sudt script before starting godwoken
+# wait for godwoken-polyman deploy layer1 sudt script before starting godwoken
 cd $PolyjuiceDir
-yarn workspace @godwoken-examples/runner clean
+yarn workspace @godwoken-polyman/runner clean
 yarn prepare-sudt
 
 cd ${PROJECT_DIR}

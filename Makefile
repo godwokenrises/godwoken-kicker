@@ -30,7 +30,7 @@ update-submodule:
 install: SHELL:=/bin/bash
 install:
 	source ./gw_util.sh && init_submodule_if_empty
-	docker run --rm -v `pwd`/godwoken-examples:/app -w=/app $$DOCKER_PREBUILD_IMAGE_NAME:$$DOCKER_PREBUILD_IMAGE_TAG yarn
+	docker run --rm -v `pwd`/godwoken-polyman:/app -w=/app $$DOCKER_PREBUILD_IMAGE_NAME:$$DOCKER_PREBUILD_IMAGE_TAG yarn
 # if manual build web3
 	if [ "$(MANUAL_BUILD_WEB3)" = true ] ; then \
 		docker run --rm -v `pwd`/godwoken-web3:/app -w=/app $$DOCKER_PREBUILD_IMAGE_NAME:$$DOCKER_PREBUILD_IMAGE_TAG /bin/bash -c "yarn; yarn workspace @godwoken-web3/godwoken tsc; yarn workspace @godwoken-web3/api-server tsc" ; \
@@ -63,7 +63,7 @@ init:
 	cp ./config/private_key ./godwoken/deploy/private_key
 	sh ./docker/layer2/init_config_json.sh
 # prepare lumos config file (if not exists) for polyjuice
-	[ -e "godwoken-examples/packages/runner/configs/lumos-config.json" ] && echo 'lumos-config file exits' || cp ./config/lumos-config.json ./godwoken-examples/packages/runner/configs/
+	[ -e "godwoken-polyman/packages/runner/configs/lumos-config.json" ] && echo 'lumos-config file exits' || cp ./config/lumos-config.json ./godwoken-polyman/packages/runner/configs/
 # cp godwoken/c/ scripts => TODO: use /scripts in $$DOCKER_PREBUILD_IMAGE_NAME image
 	cp -r ./config/scripts ./godwoken/
 	cp ./config/meta-contract-validator ./godwoken/godwoken-scripts/c/build/meta-contract-validator
@@ -147,10 +147,10 @@ clean:
 	rm -rf ckb-cli-data/*
 	[ -e "indexer-data/ckb-indexer-data" ] && rm -rf indexer-data/ckb-indexer-data || echo 'file not exits.'
 	[ -e "indexer-data/indexer-log" ] && rm indexer-data/indexer-log || echo 'file not exits.'
-	[ -e "godwoken-examples/packages/runner" ] && cd godwoken-examples/packages/runner && rm -rf db && rm -rf temp-db || echo 'file not exits.'
+	[ -e "godwoken-polyman/packages/runner" ] && cd godwoken-polyman/packages/runner && rm -rf db && rm -rf temp-db || echo 'file not exits.'
 	rm -rf postgres-data/*
 # prepare brand new lumos config file for polyjuice
-	[ -e "godwoken-examples/packages/runner" ] && cp config/lumos-config.json godwoken-examples/packages/runner/configs/ || echo 'file not exits.'
+	[ -e "godwoken-polyman/packages/runner" ] && cp config/lumos-config.json godwoken-polyman/packages/runner/configs/ || echo 'file not exits.'
 # delete the godwoken outdated config file as well
 	rm -f godwoken/config.toml 
 	rm -f godwoken/deploy/*-result.json
@@ -159,7 +159,7 @@ smart-clean:
 	rm -rf ckb-cli-data/*
 	[ -e "indexer-data/ckb-indexer-data" ] && rm -rf indexer-data/ckb-indexer-data || echo 'file not exits.'
 	[ -e "indexer-data/indexer-log" ] && rm indexer-data/indexer-log || echo 'file not exits.'
-	[ -e "godwoken-examples/packages/runner" ] && cd godwoken-examples/packages/runner && rm -rf db && rm -rf temp-db  || echo 'file not exits.'
+	[ -e "godwoken-polyman/packages/runner" ] && cd godwoken-polyman/packages/runner && rm -rf db && rm -rf temp-db  || echo 'file not exits.'
 	rm -rf postgres-data/*	
 
 uninit:
@@ -167,7 +167,7 @@ uninit:
 	make clean
 	rm -rf godwoken
 	rm -rf godwoken-polyjuice
-	rm -rf godwoken-examples
+	rm -rf godwoken-polyman
 	rm -rf godwoken-web3
 
 enter-g:
@@ -198,7 +198,7 @@ status:
 
 
 clean-polyjuice:
-	cd godwoken-examples && yarn clean
+	cd godwoken-polyman && yarn clean
 
 reset-polyjuice:
 	make stop-polyjuice
@@ -215,7 +215,7 @@ clean-cargo-cache:
 	rm -rf cargo-cache-data
 
 prepare-money:
-	cd godwoken-examples && yarn clean &&  yarn prepare-money:normal
+	cd godwoken-polyman && yarn clean &&  yarn prepare-money:normal
 
 ########### manual-build-mode #############
 ### rebuild components's scripts and bin all in one

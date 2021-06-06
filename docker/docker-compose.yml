@@ -60,12 +60,12 @@ services:
   polyjuice:
     image: ${DOCKER_PREBUILD_IMAGE_NAME}:${DOCKER_PREBUILD_IMAGE_TAG}
     volumes:
-    - ../godwoken-examples:/godwoken-examples
-    working_dir: /godwoken-examples
+    - ../godwoken-polyman:/godwoken-polyman
+    working_dir: /godwoken-polyman
     command: sh -c "
-      yarn workspace @godwoken-examples/runner clean &&
+      yarn workspace @godwoken-polyman/runner clean &&
       yarn init_placeholder_config  &&
-      yarn workspace @godwoken-examples/runner start"
+      yarn workspace @godwoken-polyman/runner start"
     ports:
       - 6101:6101
       - 6100:6100
