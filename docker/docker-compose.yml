@@ -77,7 +77,7 @@ services:
     build:
       context: web3
       args: 
-        DOCKER_PREBUILD_IMAGE: "${DOCKER_PREBUILD_IMAGE_NAME}:${DOCKER_PREBUILD_IMAGE_TAG}"
+        DOCKER_PREBUILD_IMAGE: "${DOCKER_JS_PREBUILD_IMAGE_NAME}:${DOCKER_JS_PREBUILD_IMAGE_TAG}"
     volumes: 
     - ../:/code # the manual-build resource all stays in /code dir
     environment: 
