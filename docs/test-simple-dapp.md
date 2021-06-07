@@ -1,15 +1,15 @@
 # How to test Dapp on Godwoken-Polyjuice
 
-the quickest way to get familar with and testing out this process is to use the [simple-storage-contract](https://github.com/RetricSu/godwoken-examples/tree/bbb824f8945ac55e48a6482b419ab41a8333e62e/packages/runner/src/sample-contracts) alongside with our PolyjuiceHttpPorviders [example](https://github.com/RetricSu/polyjuice-providers-http/tree/master/example/web).
+the quickest way to get familar with and testing out this process is to use the [simple-storage-contract](https://github.com/RetricSu/godwoken-polyman/tree/bbb824f8945ac55e48a6482b419ab41a8333e62e/packages/runner/src/sample-contracts) alongside with our PolyjuiceHttpPorviders [example](https://github.com/RetricSu/polyjuice-providers-http/tree/master/example/web).
 
 if you want to testing with your own dapp, just jump to second parts.
 
 ## Test simple-storage-contract dapp
 
-### 1. Deploy with the contract binary file under `godwoken-examples` submodule folder
+### 1. Deploy with the contract binary file under `godwoken-polyman` submodule folder
 
 ```sh
-godwoken-kicker/godwoken-examples/packages/runner/src/sample-contracts/SimpleStorage.bin
+godwoken-kicker/godwoken-polyman/packages/runner/src/sample-contracts/SimpleStorage.bin
 ```
 after deployment, copy web3.js-init-code sample and the contract address.
 

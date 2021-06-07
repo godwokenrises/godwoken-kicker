@@ -144,7 +144,7 @@ get_sudt_code_hash_from_lumos_file() {
     then
         local lumosconfigfile="$1"
     else
-        local lumosconfigfile="/code/godwoken-examples/packages/runner/configs/lumos-config.json"
+        local lumosconfigfile="/code/godwoken-polyman/packages/runner/configs/lumos-config.json"
     fi
 
     echo "$(cat $lumosconfigfile)" | grep -Pzo 'SUDT[\s\S]*CODE_HASH": "\K[^"]*'
@@ -157,12 +157,12 @@ generateSubmodulesEnvFile(){
     fi
 
     # if submodule folder is not initialized and updated
-    if [[ -z "$(ls -A godwoken)" || -z "$(ls -A godwoken-examples)" || -z "$(ls -A godwoken-polyjuice)" || -z "$(ls -A godwoken-web3)" || -z "$(ls -A godwoken-scripts)" ]]; then
+    if [[ -z "$(ls -A godwoken)" || -z "$(ls -A godwoken-polyman)" || -z "$(ls -A godwoken-polyjuice)" || -z "$(ls -A godwoken-web3)" || -z "$(ls -A godwoken-scripts)" ]]; then
        echo "one or more of submodule folders is Empty, do init and update first."
        git submodule update --init --recursive
     fi
 
-    local -a arr=("godwoken" "godwoken-web3" "godwoken-polyjuice" "godwoken-examples" "godwoken-scripts" "clerkb")
+    local -a arr=("godwoken" "godwoken-web3" "godwoken-polyjuice" "godwoken-polyman" "godwoken-scripts" "clerkb")
     for i in "${arr[@]}"
     do
        # get origin url
@@ -182,7 +182,7 @@ generateSubmodulesEnvFile(){
         awk '{print $2}' | xargs -i git -C {} log --date=relative --pretty=format:"[%ad] %s by %an" -1)
     
 
-       # renameing godwoken-examples => godwoken_examples, 
+       # renameing godwoken-polyman => godwoken_examples, 
        # cater for env variable naming rule.
        url_name=$(echo "${i^^}_URL" | tr - _ )
        branch_name=$(echo "${i^^}_BRANCH" | tr - _)
@@ -209,7 +209,7 @@ update_submodules(){
    # use these env varibles to update the desired submodules
    source docker/.submodule.list.env
 
-   local -a arr=("godwoken" "godwoken-web3" "godwoken-polyjuice" "godwoken-examples" "godwoken-scripts" "clerkb")
+   local -a arr=("godwoken" "godwoken-web3" "godwoken-polyjuice" "godwoken-polyman" "godwoken-scripts" "clerkb")
    for i in "${arr[@]}"
    do
       # set url for submodule
@@ -250,7 +250,7 @@ update_godwoken_dockerfile_to_manual_mode(){
 
 init_submodule_if_empty(){
     # if submodule folder is empty and not initialized
-    if [[ -z "$(ls -A godwoken)" || -z "$(ls -A godwoken-examples)" || -z "$(ls -A godwoken-polyjuice)" || -z "$(ls -A godwoken-web3)" || -z "$(ls -A godwoken-scripts)" ]]; then
+    if [[ -z "$(ls -A godwoken)" || -z "$(ls -A godwoken-polyman)" || -z "$(ls -A godwoken-polyjuice)" || -z "$(ls -A godwoken-web3)" || -z "$(ls -A godwoken-scripts)" ]]; then
        echo "one or more of submodule folders is Empty, do init and update first."
        git submodule update --init --recursive
     fi
