@@ -139,15 +139,29 @@ set_key_value_in_json() {
     fi
 }
 
-get_sudt_code_hash_from_lumos_file() {
-    if [[ -n $1 ]]; 
+# usage:
+#  get_lumos_config_script_key_value <scripts_name> <key_name> <lumos-config.json file path>
+get_lumos_config_script_key_value(){
+    if [[ ! -n $1 ]]; 
     then
-        local lumosconfigfile="$1"
+        echo 'provide your interested scripts(like SUDT/SECP256K1_BLAKE160)! abort.'
+        return 1
+    fi
+
+    if [[ ! -n $2 ]]; 
+    then
+        echo 'provide your interested key name(like CODE_HASH/TX_HASH)! abort.'
+        return 2
+    fi
+
+    if [[ -n $3 ]]; 
+    then
+        local lumosconfigfile="$3"
     else
         local lumosconfigfile="/code/godwoken-polyman/packages/runner/configs/lumos-config.json"
     fi
-
-    echo "$(cat $lumosconfigfile)" | grep -Pzo 'SUDT[\s\S]*CODE_HASH": "\K[^"]*'
+    
+    echo "$(cat $lumosconfigfile)" | grep -Pzo ''$1'[^}]*'$2'": "\K[^"]*'
 }
  
 generateSubmodulesEnvFile(){
@@ -349,7 +363,7 @@ copy_poa_scripts_from_docker_or_abort(){
 
 edit_godwoken_config_toml(){
     if [[ -f $1 ]];
-    then echo 'found json file.'
+    then echo 'found config.toml file.'
     else
         echo "${1} file not exits, skip this steps."
         return 0
@@ -367,4 +381,48 @@ edit_godwoken_config_toml(){
     sed -i "/\[block_producer.wallet_config.lock\]/a\code_hash = '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8'" $1 
     sed -i "/\[block_producer.wallet_config.lock\]/a\hash_type = 'type'" $1
     sed -i "/\[block_producer.wallet_config.lock\]/a\args = '0x43d509d97f26007a285f39241cffcd411157196c'" $1
+}
+
+# usage:
+#   update_godwoken_config_toml_with_l1_sudt_dep <config.toml file> <dep_type> <tx_hash> <index>
+update_godwoken_config_toml_with_l1_sudt_dep(){
+    if [[ -f $1 ]];
+    then echo 'found config.toml file.'
+    else
+        echo "${1} file not exits, skip this steps."
+        return 0
+    fi
+
+    if [[ -n $2 ]];
+    then echo "dep_type: $2"
+    else
+        echo "dep_tpe not supported. abort."
+        return 1
+    fi
+
+    if [[ -n $3 ]];
+    then echo "tx_hash: $3"
+    else
+        echo "tx_hash not supported. abort."
+        return 2
+    fi
+
+    if [[ -n $4 ]];
+    then echo "tx_hash index: $4"
+    else
+        echo "tx_hash index not supported. abort."
+        return 3
+    fi
+
+    # delete the default l1_sudt_type_dep
+    sed -i '/\[block_producer.l1_sudt_type_dep\]/{n;d}' $1 
+    # add an new one
+    sed -i "/\[block_producer.l1_sudt_type_dep\]/a\dep_type = '$2'" $1
+
+    # delete the default l1_sudt_type_dep.out_point
+    sed -i '/\[block_producer.l1_sudt_type_dep.out_point\]/{n;d}' $1 
+    sed -i '/\[block_producer.l1_sudt_type_dep.out_point\]/{n;d}' $1 
+    # add an new one
+    sed -i "/\[block_producer.l1_sudt_type_dep.out_point\]/a\index = '$4'" $1
+    sed -i "/\[block_producer.l1_sudt_type_dep.out_point\]/a\tx_hash = '$3'" $1
 }
