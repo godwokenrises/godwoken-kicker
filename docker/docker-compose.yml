@@ -60,8 +60,8 @@ services:
   polyjuice:
     image: ${DOCKER_PREBUILD_IMAGE_NAME}:${DOCKER_PREBUILD_IMAGE_TAG}
     volumes:
-    - ../godwoken-polyman:/godwoken-polyman
-    working_dir: /godwoken-polyman
+      - ../:/code
+    working_dir: /code/godwoken-polyman
     command: sh -c "
       yarn workspace @godwoken-polyman/runner clean &&
       yarn init_placeholder_config  &&
@@ -69,6 +69,7 @@ services:
     ports:
       - 6101:6101
       - 6100:6100
+      - 6102:6102
     depends_on:
       - ckb
       - postgres

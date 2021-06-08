@@ -290,6 +290,31 @@ isGodwokenRpcRunning(){
     fi
 }
 
+isPolymanPrepareRpcRunning(){
+    echo $1
+    if [[ -n $1 ]]; 
+    then
+        local rpc_url="$1"
+    else
+        local rpc_url="http://localhost:6102"
+    fi
+
+    # curl retry on connrefused, considering ECONNREFUSED as a transient error(network issues)
+    # connections with ipv6 are not retried because it returns EADDRNOTAVAIL instead of ECONNREFUSED,
+    # hence we should use --ipv4
+    result=$(curl --ipv4 $rpc_url/ping)
+
+    if [[ $result =~ "pong" ]]; then
+        echo "polyman prepare rpc server is up and running!"
+        # 0 equals true
+        return 0
+    else
+        echo "polyman prepare rpc server is down."
+        # 1 equals false
+        return 1
+    fi
+}
+
 version_comp () {
     if [[ $1 == $2 ]]
     then
@@ -367,4 +392,57 @@ edit_godwoken_config_toml(){
     sed -i "/\[block_producer.wallet_config.lock\]/a\code_hash = '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8'" $1 
     sed -i "/\[block_producer.wallet_config.lock\]/a\hash_type = 'type'" $1
     sed -i "/\[block_producer.wallet_config.lock\]/a\args = '0x43d509d97f26007a285f39241cffcd411157196c'" $1
+}
+
+# check if polyman prepare rpc is running
+# usage:
+#   wait_for_polyman_prepare_rpc <rpc url> 
+wait_for_polyman_prepare_rpc(){
+    while true; do
+        sleep 3;
+        if isPolymanPrepareRpcRunning $1;
+        then
+          break;
+        else echo "keep waitting..."
+        fi
+    done
+}
+
+# call polyman via prepare-rpc server
+#   do things like:
+#       * prepare sudt scriptws
+#       * prepare money
+# usage:
+#   callPolyman <command_router> <rpc_url>
+callPolyman(){
+    if [[ -n $1 ]]; 
+    then
+        echo "ready to call $1 with polyman.."
+    else 
+        echo 'please pass command_router args to call polyman. abort.'
+        return 2;
+    fi
+    
+    if [[ -n $2 ]]; 
+    then
+        local rpc_url="$2"
+    else
+        local rpc_url="http://localhost:6102"
+    fi
+
+    # curl retry on connrefused, considering ECONNREFUSED as a transient error(network issues)
+    # connections with ipv6 are not retried because it returns EADDRNOTAVAIL instead of ECONNREFUSED,
+    # hence we should use --ipv4
+    result=$(curl --ipv4 --retry 3 --retry-connrefused \
+                    $rpc_url/$1)
+
+    if [[ $result =~ '"status":"ok"' ]]; then
+        echo "$1 finished"
+        # 0 equals true
+        return 0
+    else
+        echo "failed to call polyman $1."
+        # 1 equals false
+        return 1
+    fi
 }
