@@ -3,7 +3,7 @@
 set -o errexit
 set -o xtrace
 PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-PolyjuiceDir=${PROJECT_DIR}/godwoken-polyman
+LUMOS_CONFIG_FILE=${PROJECT_DIR}/godwoken/deploy/lumos-config.json
 
 export PRIVKEY=deploy/private_key
 export CKB_RPC=http://ckb:8114
@@ -27,14 +27,20 @@ wait_for_polyman_prepare_rpc "$POLYMAN_RPC"
 # wait for godwoken-polyman deploy layer1 sudt script before starting godwoken
 callPolyman prepare_sudt_scripts "$POLYMAN_RPC"
 
+# save lumos-config file in godwoken folder
+callPolyman get_lumos_config "$POLYMAN_RPC"
+echo $call_result > $LUMOS_CONFIG_FILE
+sed -i -e 's/{"status":"ok","data"://g' $LUMOS_CONFIG_FILE
+sed -i -e 's/}}}}/}}}/g' $LUMOS_CONFIG_FILE
+
 cd ${PROJECT_DIR}
 # update l1_sudt_script_hash in config.toml file(if it exits) with lumos script.sudt.code_hash
-codeHash=$(get_lumos_config_script_key_value SUDT CODE_HASH "${PolyjuiceDir}/packages/runner/configs/lumos-config.json")
+codeHash=$(get_lumos_config_script_key_value SUDT CODE_HASH "$LUMOS_CONFIG_FILE")
 set_key_value_in_toml "l1_sudt_script_type_hash" $codeHash "${PROJECT_DIR}/godwoken/config.toml"
 # update l1_sudt_dep info in config.toml file(if it exits) with lumos script.sudt.dep
-depType=$(get_lumos_config_script_key_value SUDT DEP_TYPE "${PolyjuiceDir}/packages/runner/configs/lumos-config.json")
-txHash=$(get_lumos_config_script_key_value SUDT TX_HASH "${PolyjuiceDir}/packages/runner/configs/lumos-config.json")
-outpointIndex=$(get_lumos_config_script_key_value SUDT INDEX "${PolyjuiceDir}/packages/runner/configs/lumos-config.json")
+depType=$(get_lumos_config_script_key_value SUDT DEP_TYPE "$LUMOS_CONFIG_FILE")
+txHash=$(get_lumos_config_script_key_value SUDT TX_HASH "$LUMOS_CONFIG_FILE")
+outpointIndex=$(get_lumos_config_script_key_value SUDT INDEX "$LUMOS_CONFIG_FILE")
 update_godwoken_config_toml_with_l1_sudt_dep "${PROJECT_DIR}/godwoken/config.toml" $depType $txHash $outpointIndex
 
 # ready to start godwoken
@@ -96,7 +102,7 @@ echo 'this may takes a little bit of time, please wait...'
 $GW_TOOLS_BIN deploy-scripts -r ${CKB_RPC} -i deploy/scripts-deploy.json -o deploy/scripts-deploy-result.json -k ${PRIVKEY}
 
 # update l1_sudt_script_hash in rollup-config.json file(if it exits) with lumos script.sudt.code_hash
-codeHash=$(get_lumos_config_script_key_value SUDT CODE_HASH "${PolyjuiceDir}/packages/runner/configs/lumos-config.json")
+codeHash=$(get_lumos_config_script_key_value SUDT CODE_HASH "$LUMOS_CONFIG_FILE")
 set_key_value_in_json "l1_sudt_script_type_hash" $codeHash "deploy/rollup-config.json"
 
 # deploy genesis block
@@ -115,17 +121,14 @@ $GW_TOOLS_BIN generate-config -d ${DATABASE_URL} -r ${CKB_RPC} -g deploy/genesis
 edit_godwoken_config_toml ${PROJECT_DIR}/godwoken/config.toml
 
 # update l1_sudt_script_hash in config.toml file(if it exits) with lumos script.sudt.code_hash
-codeHash=$(get_lumos_config_script_key_value SUDT CODE_HASH "${PolyjuiceDir}/packages/runner/configs/lumos-config.json")
+codeHash=$(get_lumos_config_script_key_value SUDT CODE_HASH "$LUMOS_CONFIG_FILE")
 set_key_value_in_toml "l1_sudt_script_type_hash" $codeHash "${PROJECT_DIR}/godwoken/config.toml"
 # update l1_sudt_dep info in config.toml file(if it exits) with lumos script.sudt.dep
-depType=$(get_lumos_config_script_key_value SUDT DEP_TYPE "${PolyjuiceDir}/packages/runner/configs/lumos-config.json")
-txHash=$(get_lumos_config_script_key_value SUDT TX_HASH "${PolyjuiceDir}/packages/runner/configs/lumos-config.json")
-outpointIndex=$(get_lumos_config_script_key_value SUDT INDEX "${PolyjuiceDir}/packages/runner/configs/lumos-config.json")
+depType=$(get_lumos_config_script_key_value SUDT DEP_TYPE "$LUMOS_CONFIG_FILE")
+txHash=$(get_lumos_config_script_key_value SUDT TX_HASH "$LUMOS_CONFIG_FILE")
+outpointIndex=$(get_lumos_config_script_key_value SUDT INDEX "$LUMOS_CONFIG_FILE")
 update_godwoken_config_toml_with_l1_sudt_dep "${PROJECT_DIR}/godwoken/config.toml" $depType $txHash $outpointIndex
 
-# prepare runner config file for polyjuice
-cp ${PROJECT_DIR}/godwoken/deploy/scripts-deploy-result.json ${PolyjuiceDir}/packages/runner/configs/scripts-deploy-result.json
-cp ${PROJECT_DIR}/godwoken/config.toml ${PolyjuiceDir}/packages/runner/configs/config.toml
 # generate godwoken config file for polyjuice
 callPolyman gen_config "$POLYMAN_RPC" 
 

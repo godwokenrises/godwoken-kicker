@@ -94,7 +94,7 @@ unpause:
 	cd docker && docker-compose unpause
 
 down:
-	cd docker && docker-compose down
+	cd docker && docker-compose down --remove-orphans
 
 # show polyjuice
 sp:

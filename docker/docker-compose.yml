@@ -58,14 +58,15 @@ services:
       - postgres
       
   polyjuice:
-    image: ${DOCKER_PREBUILD_IMAGE_NAME}:${DOCKER_PREBUILD_IMAGE_TAG}
+    build:
+      context: polyjuice 
+      args: 
+        DOCKER_PREBUILD_IMAGE: "${DOCKER_JS_PREBUILD_IMAGE_NAME}:${DOCKER_JS_PREBUILD_IMAGE_TAG}"
     volumes:
       - ../:/code
-    working_dir: /code/godwoken-polyman
-    command: sh -c "
-      yarn workspace @godwoken-polyman/runner clean &&
-      yarn init_placeholder_config  &&
-      yarn workspace @godwoken-polyman/runner start"
+    environment: 
+      MANUAL_BUILD_POLYMAN: ${MANUAL_BUILD_POLYMAN}
+    command: bash /code/docker/polyjuice/entrypoint.sh 
     ports:
       - 6101:6101
       - 6100:6100

@@ -161,7 +161,7 @@ get_lumos_config_script_key_value(){
         local lumosconfigfile="/code/godwoken-polyman/packages/runner/configs/lumos-config.json"
     fi
     
-    echo "$(cat $lumosconfigfile)" | grep -Pzo ''$1'[^}]*'$2'": "\K[^"]*'
+    echo "$(cat $lumosconfigfile)" | grep -Pzo ''$1'[^}]*'$2'":[\s]*"\K[^"]*'
 }
  
 generateSubmodulesEnvFile(){
@@ -452,8 +452,7 @@ callPolyman(){
 
     if [[ $result =~ '"status":"ok"' ]]; then
         echo "$1 finished"
-        # 0 equals true
-        return 0
+        call_result=$result
     else
         echo "failed to call polyman $1."
         # 1 equals false
