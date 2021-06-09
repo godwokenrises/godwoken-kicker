@@ -61,21 +61,24 @@ install:
 
 init:
 	make install
-	mkdir -p godwoken-polyjuice/build
 	mkdir -p ./godwoken/deploy/polyjuice-backend
 	cp ./config/private_key ./godwoken/deploy/private_key
 	sh ./docker/layer2/init_config_json.sh
-# prepare scripts for Godwoken deployment
+# prepare on-chain scripts for Godwoken deployment
 	cp -r ./config/scripts ./godwoken/
+# prepare three backends: each one's validator needs to be deployed on-chain and push into backends
+#	1. meta-contract backend
+	cp ./config/meta-contract-validator ./godwoken/scripts/release/
 	cp ./config/meta-contract-validator ./godwoken/godwoken-scripts/c/build/meta-contract-validator
-	cp ./config/meta-contract-validator ./godwoken/scripts/release/ 
 	cp ./config/meta-contract-generator ./godwoken/godwoken-scripts/c/build/meta-contract-generator 
-	cp ./config/sudt-validator ./godwoken/godwoken-scripts/c/build/sudt-validator 
+#	2. sudt backend
 	cp ./config/sudt-validator ./godwoken/scripts/release/ 
+	cp ./config/sudt-validator ./godwoken/godwoken-scripts/c/build/sudt-validator 
 	cp ./config/sudt-generator ./godwoken/godwoken-scripts/c/build/sudt-generator
+# 	3. polyjuice backend
+	cp ./config/polyjuice-validator ./godwoken/scripts/release/
 	cp ./config/polyjuice-generator ./godwoken/deploy/polyjuice-backend/
 	cp ./config/polyjuice-validator ./godwoken/deploy/polyjuice-backend/
-	cp ./config/polyjuice-validator ./godwoken/scripts/release/
 # build image for docker-compose build cache
 	make build-image
 
