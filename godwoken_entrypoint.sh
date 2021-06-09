@@ -4,6 +4,7 @@ set -o errexit
 set -o xtrace
 PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 LUMOS_CONFIG_FILE=${PROJECT_DIR}/godwoken/deploy/lumos-config.json
+GODWOKEN_CONFIG_TOML_FILE=${PROJECT_DIR}/godwoken/config.toml
 
 export PRIVKEY=deploy/private_key
 export CKB_RPC=http://ckb:8114
@@ -36,12 +37,12 @@ sed -i -e 's/}}}}/}}}/g' $LUMOS_CONFIG_FILE
 cd ${PROJECT_DIR}
 # update l1_sudt_script_hash in config.toml file(if it exits) with lumos script.sudt.code_hash
 codeHash=$(get_lumos_config_script_key_value SUDT CODE_HASH "$LUMOS_CONFIG_FILE")
-set_key_value_in_toml "l1_sudt_script_type_hash" $codeHash "${PROJECT_DIR}/godwoken/config.toml"
+set_key_value_in_toml "l1_sudt_script_type_hash" $codeHash "$GODWOKEN_CONFIG_TOML_FILE"
 # update l1_sudt_dep info in config.toml file(if it exits) with lumos script.sudt.dep
 depType=$(get_lumos_config_script_key_value SUDT DEP_TYPE "$LUMOS_CONFIG_FILE")
 txHash=$(get_lumos_config_script_key_value SUDT TX_HASH "$LUMOS_CONFIG_FILE")
 outpointIndex=$(get_lumos_config_script_key_value SUDT INDEX "$LUMOS_CONFIG_FILE")
-update_godwoken_config_toml_with_l1_sudt_dep "${PROJECT_DIR}/godwoken/config.toml" $depType $txHash $outpointIndex
+update_godwoken_config_toml_with_l1_sudt_dep "$GODWOKEN_CONFIG_TOML_FILE" $depType $txHash $outpointIndex
 
 # ready to start godwoken
 cd ${PROJECT_DIR}/godwoken
@@ -51,16 +52,14 @@ cd ${PROJECT_DIR}/godwoken
 RUST_LOG=error ckb-indexer -s ${PROJECT_DIR}/indexer-data/ckb-indexer-data -c ${CKB_RPC} > ${PROJECT_DIR}/indexer-data/indexer-log & 
  
 # detect which mode to start godwoken
-GODWOKEN_CONFIG_FILE=${PROJECT_DIR}/godwoken/config.toml
-
-if test -f "$GODWOKEN_CONFIG_FILE"; then
+if test -f "$GODWOKEN_CONFIG_TOML_FILE"; then
   if [ "$FORCE_GODWOKEN_REDEPLOY" = true ]; then
     echo "godwoken config.toml exists, but force_godwoken_redeploy is enabled, so use fat mode."
     # fat start, re-deploy godwoken chain 
     export START_MODE="fat_start" 
   else
     echo "godwoken config.toml exists. try search rollup cell.."
-    if isRollupCellExits "${GODWOKEN_CONFIG_FILE}";
+    if isRollupCellExits "${GODWOKEN_CONFIG_TOML_FILE}";
     then
       # slim start, just start godwoken, no re-deploy scripts
        export START_MODE="slim_start" 
@@ -112,16 +111,16 @@ $GW_TOOLS_BIN deploy-genesis -r ${CKB_RPC} -d deploy/scripts-deploy-result.json 
 $GW_TOOLS_BIN generate-config -d ${DATABASE_URL} -r ${CKB_RPC} -g deploy/genesis-deploy-result.json -s deploy/scripts-deploy-result.json -p deploy/polyjuice-backend -o config.toml
 
 # Update block_producer.wallet_config section to your own lock.
-edit_godwoken_config_toml ${PROJECT_DIR}/godwoken/config.toml
+edit_godwoken_config_toml $GODWOKEN_CONFIG_TOML_FILE
 
 # update l1_sudt_script_hash in config.toml file(if it exits) with lumos script.sudt.code_hash
 codeHash=$(get_lumos_config_script_key_value SUDT CODE_HASH "$LUMOS_CONFIG_FILE")
-set_key_value_in_toml "l1_sudt_script_type_hash" $codeHash "${PROJECT_DIR}/godwoken/config.toml"
+set_key_value_in_toml "l1_sudt_script_type_hash" $codeHash "$GODWOKEN_CONFIG_TOML_FILE"
 # update l1_sudt_dep info in config.toml file(if it exits) with lumos script.sudt.dep
 depType=$(get_lumos_config_script_key_value SUDT DEP_TYPE "$LUMOS_CONFIG_FILE")
 txHash=$(get_lumos_config_script_key_value SUDT TX_HASH "$LUMOS_CONFIG_FILE")
 outpointIndex=$(get_lumos_config_script_key_value SUDT INDEX "$LUMOS_CONFIG_FILE")
-update_godwoken_config_toml_with_l1_sudt_dep "${PROJECT_DIR}/godwoken/config.toml" $depType $txHash $outpointIndex
+update_godwoken_config_toml_with_l1_sudt_dep "$GODWOKEN_CONFIG_TOML_FILE" $depType $txHash $outpointIndex
 
 # generate godwoken config file for polyjuice
 callPolyman gen_config "$POLYMAN_RPC" 
