@@ -108,13 +108,8 @@ set_key_value_in_json "l1_sudt_script_type_hash" $codeHash "deploy/rollup-config
 # deploy genesis block
 $GW_TOOLS_BIN deploy-genesis -r ${CKB_RPC} -d deploy/scripts-deploy-result.json -p deploy/poa-config.json -u deploy/rollup-config.json -o deploy/genesis-deploy-result.json -k ${PRIVKEY}
 
-# copy polyjuice build file
-# todo: We should use real validator in the later version
-cp ${PROJECT_DIR}/godwoken-polyjuice/build/generator ${PROJECT_DIR}/godwoken/deploy/polyjuice-generator
-cp ${PROJECT_DIR}/godwoken-polyjuice/build/validator ${PROJECT_DIR}/godwoken/deploy/polyjuice-validator
-
 # generate config file
-$GW_TOOLS_BIN generate-config -d ${DATABASE_URL} -r ${CKB_RPC} -g deploy/genesis-deploy-result.json -s deploy/scripts-deploy-result.json -p deploy -o config.toml
+$GW_TOOLS_BIN generate-config -d ${DATABASE_URL} -r ${CKB_RPC} -g deploy/genesis-deploy-result.json -s deploy/scripts-deploy-result.json -p deploy/polyjuice-backend -o config.toml
 
 # Update block_producer.wallet_config section to your own lock.
 edit_godwoken_config_toml ${PROJECT_DIR}/godwoken/config.toml

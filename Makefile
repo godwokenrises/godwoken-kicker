@@ -62,12 +62,10 @@ install:
 init:
 	make install
 	mkdir -p godwoken-polyjuice/build
-	mkdir -p ./godwoken/deploy
+	mkdir -p ./godwoken/deploy/polyjuice-backend
 	cp ./config/private_key ./godwoken/deploy/private_key
 	sh ./docker/layer2/init_config_json.sh
-# prepare lumos config file (if not exists) for polyjuice
-	[ -e "godwoken-polyman/packages/runner/configs/lumos-config.json" ] && echo 'lumos-config file exits' || cp ./config/lumos-config.json ./godwoken-polyman/packages/runner/configs/
-# cp godwoken/c/ scripts => TODO: use /scripts in $$DOCKER_PREBUILD_IMAGE_NAME image
+# prepare scripts for Godwoken deployment
 	cp -r ./config/scripts ./godwoken/
 	cp ./config/meta-contract-validator ./godwoken/godwoken-scripts/c/build/meta-contract-validator
 	cp ./config/meta-contract-validator ./godwoken/scripts/release/ 
@@ -75,8 +73,8 @@ init:
 	cp ./config/sudt-validator ./godwoken/godwoken-scripts/c/build/sudt-validator 
 	cp ./config/sudt-validator ./godwoken/scripts/release/ 
 	cp ./config/sudt-generator ./godwoken/godwoken-scripts/c/build/sudt-generator
-	cp ./config/polyjuice-generator godwoken-polyjuice/build/generator
-	cp ./config/polyjuice-validator godwoken-polyjuice/build/validator
+	cp ./config/polyjuice-generator ./godwoken/deploy/polyjuice-backend/
+	cp ./config/polyjuice-validator ./godwoken/deploy/polyjuice-backend/
 	cp ./config/polyjuice-validator ./godwoken/scripts/release/
 # build image for docker-compose build cache
 	make build-image
