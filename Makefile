@@ -78,7 +78,9 @@ init:
 # 	3. polyjuice backend
 	cp ./config/polyjuice-validator ./godwoken/scripts/release/
 	cp ./config/polyjuice-generator ./godwoken/deploy/polyjuice-backend/
-	cp ./config/polyjuice-validator ./godwoken/deploy/polyjuice-backend/
+#	we should use real validator later
+	cp ./config/scripts/release/always-success ./godwoken/deploy/polyjuice-backend/polyjuice-validator
+#	cp ./config/polyjuice-validator ./godwoken/deploy/polyjuice-backend/
 # build image for docker-compose build cache
 	make build-image
 
