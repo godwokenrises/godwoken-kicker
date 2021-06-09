@@ -111,8 +111,7 @@ $GW_TOOLS_BIN deploy-genesis -r ${CKB_RPC} -d deploy/scripts-deploy-result.json 
 # copy polyjuice build file
 # todo: We should use real validator in the later version
 cp ${PROJECT_DIR}/godwoken-polyjuice/build/generator ${PROJECT_DIR}/godwoken/deploy/polyjuice-generator
-cp scripts/release/always-success ${PROJECT_DIR}/godwoken/deploy/polyjuice-validator
-#cp ${PROJECT_DIR}/godwoken-polyjuice/build/validator ${PROJECT_DIR}/godwoken/deploy/polyjuice-validator
+cp ${PROJECT_DIR}/godwoken-polyjuice/build/validator ${PROJECT_DIR}/godwoken/deploy/polyjuice-validator
 
 # generate config file
 $GW_TOOLS_BIN generate-config -d ${DATABASE_URL} -r ${CKB_RPC} -g deploy/genesis-deploy-result.json -s deploy/scripts-deploy-result.json -p deploy -o config.toml
