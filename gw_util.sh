@@ -503,3 +503,43 @@ update_godwoken_config_toml_with_l1_sudt_dep(){
     sed -i "/\[block_producer.l1_sudt_type_dep.out_point\]/a\index = '$4'" $1
     sed -i "/\[block_producer.l1_sudt_type_dep.out_point\]/a\tx_hash = '$3'" $1
 }
+
+# usage:
+#   wait_for_address_got_suffice_money <ckb_rpc> <address> <minimal money threshold, unit: kb>
+wait_for_address_got_suffice_money(){
+
+    if [[ -n $1 ]];
+    then echo "use ckb_rpc: $1"
+    else
+        echo "ckb_rpc not provided. abort."
+        return 1
+    fi
+
+    if [[ -n $2 ]];
+    then echo "use address: $2"
+    else
+        echo "address not provided. abort."
+        return 2
+    fi
+
+    if [[ -n $3 ]];
+    then echo "use threshold: $3"
+    else
+        echo "minimal money threshold not provided. abort."
+        return 3
+    fi
+
+    while true; do
+        sleep 3;
+        MINER_BALANCE=$(ckb-cli --url $1 wallet get-capacity --wait-for-sync --address $2)
+        TOTAL="${MINER_BALANCE##immature*:}"
+        TOTAL="${TOTAL##total: }"
+        TOTAL=" ${TOTAL%%.*} "
+        if [[ "$TOTAL" -gt $3 ]]; then
+          echo 'fund suffice, ready to deploy godwoken script.'
+          break
+        else
+          echo 'fund unsuffice ${TOTAL}, keep waitting.'
+        fi
+    done
+}
