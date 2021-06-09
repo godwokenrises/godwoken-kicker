@@ -30,7 +30,10 @@ update-submodule:
 install: SHELL:=/bin/bash
 install:
 	source ./gw_util.sh && init_submodule_if_empty
-	docker run --rm -v `pwd`/godwoken-polyman:/app -w=/app $$DOCKER_JS_PREBUILD_IMAGE_NAME:$$DOCKER_JS_PREBUILD_IMAGE_TAG yarn
+# if manual build polyman
+	if [ "$(MANUAL_BUILD_POLYMAN)" = true ] ; then \
+		docker run --rm -v `pwd`/godwoken-polyman:/app -w=/app $$DOCKER_JS_PREBUILD_IMAGE_NAME:$$DOCKER_JS_PREBUILD_IMAGE_TAG yarn ; \
+	fi
 # if manual build web3
 	if [ "$(MANUAL_BUILD_WEB3)" = true ] ; then \
 		docker run --rm -v `pwd`/godwoken-web3:/app -w=/app $$DOCKER_JS_PREBUILD_IMAGE_NAME:$$DOCKER_JS_PREBUILD_IMAGE_TAG /bin/bash -c "yarn; yarn workspace @godwoken-web3/godwoken tsc; yarn workspace @godwoken-web3/api-server tsc" ; \
