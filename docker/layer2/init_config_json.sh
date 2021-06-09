@@ -4,17 +4,17 @@ cd godwoken/deploy
 cat << EOF > scripts-deploy.json
 {
   "programs": {
-    "custodian_lock": "scripts/release/custodian-lock",
-    "deposit_lock": "scripts/release/deposit-lock",
-    "withdrawal_lock": "scripts/release/withdrawal-lock",
-    "challenge_lock": "scripts/release/challenge-lock",
-    "stake_lock": "scripts/release/stake-lock",
+    "custodian_lock": "scripts/release/always-success",
+    "deposit_lock": "scripts/release/always-success",
+    "withdrawal_lock": "scripts/release/always-success",
+    "challenge_lock": "scripts/release/always-success",
+    "stake_lock": "scripts/release/always-success",
     "state_validator": "scripts/release/state-validator",
-    "l2_sudt_validator": "scripts/release/sudt-validator",
-    "meta_contract_validator": "scripts/release/meta-contract-validator",
+    "l2_sudt_validator": "scripts/release/always-success",
+    "meta_contract_validator": "scripts/release/always-success",
     "eth_account_lock": "scripts/release/always-success",
     "tron_account_lock": "scripts/release/always-success",
-    "polyjuice_validator": "scripts/release/polyjuice-validator",
+    "polyjuice_validator": "scripts/release/always-success",
     "state_validator_lock": "scripts/release/poa",
     "poa_state": "scripts/release/state"
   },
