@@ -80,24 +80,8 @@ else
 fi
 
 
-# wait for suffice fund to deploy godwoken scripts
-while true; do
-    sleep 3;
-    MINER_BALANCE=$(ckb-cli --url ${CKB_RPC} wallet get-capacity --wait-for-sync --address ckt1qyqy84gfm9ljvqr69p0njfqullx5zy2hr9kq0pd3n5)
-    TOTAL="${MINER_BALANCE##immature*:}"
-    TOTAL="${TOTAL##total: }"
-    TOTAL=" ${TOTAL%%.*} "
-    if [[ "$TOTAL" -gt 1000 ]]; then
-      echo 'fund suffice, ready to deploy godwoken script.'
-      break
-    else
-      echo 'fund unsuffice ${TOTAL}, keep waitting.'
-    fi
-done
-
-echo 'this may takes a little bit of time, please wait...'
-
 # deploy scripts
+echo 'this may takes a little bit of time, please wait...'
 $GW_TOOLS_BIN deploy-scripts -r ${CKB_RPC} -i deploy/scripts-deploy.json -o deploy/scripts-deploy-result.json -k ${PRIVKEY}
 
 # update l1_sudt_script_hash in rollup-config.json file(if it exits) with lumos script.sudt.code_hash
