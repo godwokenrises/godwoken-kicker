@@ -67,11 +67,14 @@ init:
 # cp godwoken/c/ scripts => TODO: use /scripts in $$DOCKER_PREBUILD_IMAGE_NAME image
 	cp -r ./config/scripts ./godwoken/
 	cp ./config/meta-contract-validator ./godwoken/godwoken-scripts/c/build/meta-contract-validator
+	cp ./config/meta-contract-validator ./godwoken/scripts/release/ 
 	cp ./config/meta-contract-generator ./godwoken/godwoken-scripts/c/build/meta-contract-generator 
 	cp ./config/sudt-validator ./godwoken/godwoken-scripts/c/build/sudt-validator 
+	cp ./config/sudt-validator ./godwoken/scripts/release/ 
 	cp ./config/sudt-generator ./godwoken/godwoken-scripts/c/build/sudt-generator
 	cp ./config/polyjuice-generator godwoken-polyjuice/build/generator
 	cp ./config/polyjuice-validator godwoken-polyjuice/build/validator
+	cp ./config/polyjuice-validator ./godwoken/scripts/release/
 # build image for docker-compose build cache
 	make build-image
 
