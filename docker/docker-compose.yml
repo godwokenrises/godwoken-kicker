@@ -58,17 +58,19 @@ services:
       - postgres
       
   polyjuice:
-    image: ${DOCKER_PREBUILD_IMAGE_NAME}:${DOCKER_PREBUILD_IMAGE_TAG}
+    build:
+      context: polyjuice 
+      args: 
+        DOCKER_PREBUILD_IMAGE: "${DOCKER_JS_PREBUILD_IMAGE_NAME}:${DOCKER_JS_PREBUILD_IMAGE_TAG}"
     volumes:
-    - ../godwoken-polyman:/godwoken-polyman
-    working_dir: /godwoken-polyman
-    command: sh -c "
-      yarn workspace @godwoken-polyman/runner clean &&
-      yarn init_placeholder_config  &&
-      yarn workspace @godwoken-polyman/runner start"
+      - ../:/code
+    environment: 
+      MANUAL_BUILD_POLYMAN: ${MANUAL_BUILD_POLYMAN}
+    command: bash /code/docker/polyjuice/entrypoint.sh 
     ports:
       - 6101:6101
       - 6100:6100
+      - 6102:6102
     depends_on:
       - ckb
       - postgres
@@ -77,7 +79,7 @@ services:
     build:
       context: web3
       args: 
-        DOCKER_PREBUILD_IMAGE: "${DOCKER_PREBUILD_IMAGE_NAME}:${DOCKER_PREBUILD_IMAGE_TAG}"
+        DOCKER_PREBUILD_IMAGE: "${DOCKER_JS_PREBUILD_IMAGE_NAME}:${DOCKER_JS_PREBUILD_IMAGE_TAG}"
     volumes: 
     - ../:/code # the manual-build resource all stays in /code dir
     environment: 
