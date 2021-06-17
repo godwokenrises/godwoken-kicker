@@ -248,8 +248,11 @@ update_submodules(){
       cd `pwd`/$file_path
       # first, let's clean the submodule avoiding merge conflicts
       git rm -r .
+      git reset --hard HEAD
       # pull the new submodule
+      git fetch --all
       git pull $remote_url_value $branch_value
+      git submodule update --init --recursive
       git checkout $branch_value
       # checkout the commit we mark
       git reset --hard $commit_value
