@@ -291,5 +291,5 @@ copy-poa-scripts-from-docker:
 	cp quick-mode/clerkb/* config/scripts/release/
 
 prepare-provider:
-	cd polyjuice-providers-http && yarn && yarn build && yarn build:node && cd .. && cp -r ./polyjuice-providers-http/lib ./godwoken-polyman/packages/client/public/
+	cd polyjuice-providers-http && yarn && yarn build && yarn build:node && cd .. && cp -r ./polyjuice-providers-http/lib ./godwoken-polyman/packages/client/public/ && cd godwoken-polyman && yarn prepare-ui
 
