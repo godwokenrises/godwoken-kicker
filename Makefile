@@ -150,6 +150,9 @@ start-ckb:
 enter-ckb:
 	cd docker && docker-compose exec ckb bash
 
+enter-db:
+	cd docker && docker-compose exec postgres bash
+
 clean:
 # FIXME: clean needs sudo privilage
 	rm -rf ckb-data/data

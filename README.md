@@ -9,9 +9,14 @@ this branch is used only in manual-mode.
 ## how to run
 
 ```sh
-make prepare-provider
 make init
 make start
+```
+
+if you ever modify the provider, you should rebuild it:
+
+```sh
+make prepare-provider
 ```
 
 ----

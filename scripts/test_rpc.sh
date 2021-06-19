@@ -1,32 +1,46 @@
 #!/bin/bash
 
-echo -e "get_balance, id: 4 \n"
+echo -e "get_balance, type: contract address \n"
 
 echo '{
     "id": 2,
     "jsonrpc": "2.0",
-    "method": "get_balance",
+    "method": "eth_getBalance",
     "params":
-        ["0x4", "0x1"]
+        ["0x900c05b5d9cf8a9480810c2bd0f899f03020fd33"]
 
 }' \
 | tr -d '\n' \
 | curl -H 'content-type: application/json' -d @- \
-http://localhost:8119
+http://localhost:8024
+
+echo -e "get_balance, type: eoa address \n"
+
+echo '{
+    "id": 2,
+    "jsonrpc": "2.0",
+    "method": "eth_getBalance",
+    "params":
+        ["0x768249aC5ED64517C96c16e26B7A5Aa3E9334217"]
+
+}' \
+| tr -d '\n' \
+| curl -H 'content-type: application/json' -d @- \
+http://localhost:8024
 
 echo -e "get_transaction_receipt \n"
 
 echo '{
     "id": 2,
     "jsonrpc": "2.0",
-    "method": "get_transaction_receipt",
+    "method": "eth_getTransactionReceipt",
     "params":
-        ["0xe04ed3c8472191743290c52dec09ffb140a7f4b15861b41c944ef21a8ef46780"]
+        ["0x955c04c857fa9d3c1d66ef155a496c2aac564381deba12b76a4fef01f5182d7c"]
 
 }' \
 | tr -d '\n' \
 | curl -H 'content-type: application/json' -d @- \
-http://localhost:8119
+http://localhost:8024
 
 echo -e "get_script_hash, id: 5 \n"
 
@@ -36,20 +50,6 @@ echo '{
     "method": "get_script_hash",
     "params":
         ["0x5"]
-
-}' \
-| tr -d '\n' \
-| curl -H 'content-type: application/json' -d @- \
-http://localhost:8119
-
-echo -e "get_account_id \n"
-
-echo '{
-    "id": 2,
-    "jsonrpc": "2.0",
-    "method": "get_account_id_by_script_hash",
-    "params":
-        ["0x683372fdc69ec9745102199529a39dc53d3e9f38fdd1665725d87e3743b01929"]
 
 }' \
 | tr -d '\n' \
