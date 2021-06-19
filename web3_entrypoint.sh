@@ -69,5 +69,6 @@ done
 # start web3 server
 #for debug, you can run: yarn workspace @godwoken-web3/api-server start
 cd packages/api-server 
-DEBUG=godwoken-web3-api:server node ./bin/www
+#DEBUG=godwoken-web3-api:server node ./bin/www
+yarn workspace @godwoken-web3/api-server start
 

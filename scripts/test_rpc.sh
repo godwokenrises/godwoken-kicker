@@ -28,14 +28,14 @@ echo '{
 | curl -H 'content-type: application/json' -d @- \
 http://localhost:8119
 
-echo -e "get_script_hash, id: 8 \n"
+echo -e "get_script_hash, id: 5 \n"
 
 echo '{
     "id": 2,
     "jsonrpc": "2.0",
     "method": "get_script_hash",
     "params":
-        ["0x8"]
+        ["0x5"]
 
 }' \
 | tr -d '\n' \
@@ -49,7 +49,7 @@ echo '{
     "jsonrpc": "2.0",
     "method": "get_account_id_by_script_hash",
     "params":
-        ["0x9e39821b6774239ebc4578af7a0b299145236878c99c9433663e17d6c94d3ed3"]
+        ["0x683372fdc69ec9745102199529a39dc53d3e9f38fdd1665725d87e3743b01929"]
 
 }' \
 | tr -d '\n' \

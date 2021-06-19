@@ -289,3 +289,7 @@ copy-poa-scripts-from-docker:
 	docker rm -f dummy
 # paste the prebuild scripts to config dir for use	
 	cp quick-mode/clerkb/* config/scripts/release/
+
+prepare-provider:
+	cd polyjuice-providers-http && yarn && yarn build && yarn build:node && cd .. && cp -r ./polyjuice-providers-http/lib ./godwoken-polyman/packages/client/public/
+

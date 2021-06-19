@@ -92,10 +92,10 @@ services:
       - postgres
       - godwoken
   
-# gen-godwoken-schema:
-#   image: retricsu/gowoken-build_dev:ubuntu20
-#   profiles: ["cli-only"]
-#   volumes: 
-#     - ../:/code
-#   command: bash /code/docker/gen-godwoken-schema/entrypoint.sh
+  gen-godwoken-schema:
+    image: retricsu/gowoken-build_dev:ubuntu20
+    profiles: ["cli-only"]
+    volumes: 
+      - ../:/code
+    command: bash /code/docker/gen-godwoken-schema/entrypoint.sh
  
