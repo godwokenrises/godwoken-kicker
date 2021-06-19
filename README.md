@@ -19,6 +19,8 @@ if you ever modify the provider, you should rebuild it:
 make prepare-provider
 ```
 
+note: the sudt section in kicker is not updated, please do not use it.
+
 ----
 
 ## How to run
