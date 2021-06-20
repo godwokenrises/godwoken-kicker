@@ -17,6 +17,8 @@ else
   cd /godwoken-polyman
 fi
 
+yarn init_placeholder_config
+
 yarn workspace @godwoken-polyman/runner clean
 
 # start the callPolyman preparation http server in background
