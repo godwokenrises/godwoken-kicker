@@ -28,7 +28,7 @@ cd ${PROJECT_DIR}/godwoken
 
 # first, start ckb-indexer 
 # todo: should remove to another service. but the port mapping some how not working.
-RUST_LOG=error ckb-indexer -s ${PROJECT_DIR}/indexer-data/ckb-indexer-data -c ${CKB_RPC} > ${PROJECT_DIR}/indexer-data/indexer-log & 
+RUST_LOG=error ckb-indexer -s ${PROJECT_DIR}/indexer-data/ckb-indexer-data -c ${CKB_RPC} -l 0.0.0.0:8116 > ${PROJECT_DIR}/indexer-data/indexer-log & 
  
 # detect which mode to start godwoken
 if test -f "$GODWOKEN_CONFIG_TOML_FILE"; then
