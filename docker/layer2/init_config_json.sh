@@ -22,6 +22,25 @@ cat << EOF > scripts-deploy.json
     "code_hash": "0x0000000000000000000000000000000000000000000000000000000000000000",
     "hash_type": "data",
     "args": "0x"
+  },
+  "built_scripts": {
+    "eth_account_lock": "scripts/release/eth-account-lock",
+    "deposit_lock": "scripts/release/deposit-lock",
+    "polyjuice_generator": "deploy/polyjuice-backend/polyjuice-generator",
+    "l2_sudt_validator": "scripts/release/sudt-validator",
+    "meta_contract_validator": "scripts/release/meta-contract-validator",
+    "custodian_lock": "scripts/release/custodian-lock",
+    "l2_sudt_generator": "godwoken-scripts/c/build/sudt-generator",
+    "state_validator_lock": "scripts/release/poa",
+    "challenge_lock": "scripts/release/challenge-lock",
+    "meta_contract_generator": "godwoken-scripts/c/build/meta-contract-generator",
+    "always_success": "scripts/release/always-success",
+    "state_validator": "scripts/release/state-validator",
+    "polyjuice_validator": "scripts/release/polyjuice-validator",
+    "poa_state": "scripts/release/state",
+    "stake_lock": "scripts/release/stake-lock",
+    "withdrawal_lock": "scripts/release/withdrawal-lock",
+    "tron_account_lock": "scripts/release/always-success"
   }
 }
 EOF
