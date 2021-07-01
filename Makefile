@@ -222,7 +222,7 @@ prepare-schema-for-web3:
 	cp -r ./docker/gen-godwoken-schema/schemas/godwoken.* ./godwoken-web3/packages/godwoken/
 	mv ./godwoken-web3/packages/godwoken/godwoken.d.ts ./godwoken-web3/packages/godwoken/schemas/index.d.ts	
 	mv ./godwoken-web3/packages/godwoken/godwoken.esm.js ./godwoken-web3/packages/godwoken/schemas/index.esm.js	
-	mv ./godwoken-web3/packages/godwoken/godwoken.js ./godwoken-web3/packages/godwoken/schemas/schemas/index.js	
+	mv ./godwoken-web3/packages/godwoken/godwoken.js ./godwoken-web3/packages/godwoken/schemas/index.js	
 	mv ./godwoken-web3/packages/godwoken/godwoken.json ./godwoken-web3/packages/godwoken/schemas/index.json
 
 status:
