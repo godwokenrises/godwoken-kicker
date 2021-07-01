@@ -205,6 +205,26 @@ gen-schema:
 clean-schema:
 	cd docker/gen-godwoken-schema && rm -rf schemas/*
 
+prepare-schema-for-polyman:
+	make gen-schema
+	cp -r ./docker/gen-godwoken-schema/schemas ./godwoken-polyman/packages/godwoken/
+
+prepare-schema-for-provider:
+	make gen-schema
+	cp -r ./docker/gen-godwoken-schema/schemas/godwoken.* ./polyjuice-providers-http/src/godwoken/
+	mv ./polyjuice-providers-http/src/godwoken/godwoken.d.ts ./polyjuice-providers-http/src/godwoken/schemas/index.d.ts	
+	mv ./polyjuice-providers-http/src/godwoken/godwoken.esm.js ./polyjuice-providers-http/src/godwoken/schemas/index.esm.js	
+	mv ./polyjuice-providers-http/src/godwoken/godwoken.js ./polyjuice-providers-http/src/godwoken/schemas/index.js	
+	mv ./polyjuice-providers-http/src/godwoken/godwoken.json ./polyjuice-providers-http/src/godwoken/schemas/index.json	
+
+prepare-schema-for-web3:
+	make gen-schema
+	cp -r ./docker/gen-godwoken-schema/schemas/godwoken.* ./godwoken-web3/packages/godwoken/
+	mv ./godwoken-web3/packages/godwoken/godwoken.d.ts ./godwoken-web3/packages/godwoken/schemas/index.d.ts	
+	mv ./godwoken-web3/packages/godwoken/godwoken.esm.js ./godwoken-web3/packages/godwoken/schemas/index.esm.js	
+	mv ./godwoken-web3/packages/godwoken/godwoken.js ./godwoken-web3/packages/godwoken/schemas/schemas/index.js	
+	mv ./godwoken-web3/packages/godwoken/godwoken.json ./godwoken-web3/packages/godwoken/schemas/index.json
+
 status:
 	cd docker && docker-compose ps
 
@@ -293,6 +313,9 @@ copy-poa-scripts-from-docker:
 # paste the prebuild scripts to config dir for use	
 	cp quick-mode/clerkb/* config/scripts/release/
 
+paste-provider:
+	cp -r ./polyjuice-providers-http/lib ./godwoken-polyman/packages/client/src/
+
 prepare-provider:
-	cd polyjuice-providers-http && yarn && yarn build && yarn build:node && cd .. && cp -r ./polyjuice-providers-http/lib ./godwoken-polyman/packages/client/public/ && cd godwoken-polyman && yarn prepare-ui
+	cd polyjuice-providers-http && yarn && yarn build && cd .. && cp -r ./polyjuice-providers-http/lib ./godwoken-polyman/packages/client/src/ && cd godwoken-polyman && yarn prepare-ui
 
