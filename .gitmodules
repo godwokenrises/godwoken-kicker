@@ -22,6 +22,3 @@
 	path = godwoken-polyman
 	url = https://github.com/RetricSu/godwoken-polyman.git
 	branch = master
-[submodule "polyjuice-providers-http"]
-	path = polyjuice-providers-http
-	url = https://github.com/RetricSu/polyjuice-providers-http.git
