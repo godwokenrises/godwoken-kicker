@@ -2,7 +2,7 @@
 
 one line command to start godwoken-polyjuice chain for devnet.
 
-## rc test for interoperability
+## rc test for mainet version 
 
 this branch is used only in manual-mode.
 
@@ -11,12 +11,6 @@ this branch is used only in manual-mode.
 ```sh
 make init
 make start
-```
-
-if you ever modify the provider, you should rebuild it:
-
-```sh
-make prepare-provider
 ```
 
 ----
