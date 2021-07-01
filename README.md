@@ -2,16 +2,7 @@
 
 one line command to start godwoken-polyjuice chain for devnet.
 
-## rc test for mainet version 
-
-this branch is used only in manual-mode.
-
-## how to run
-
-```sh
-make init
-make start
-```
+`note: this branch is used as rc test for mainet version.`
 
 ----
 
