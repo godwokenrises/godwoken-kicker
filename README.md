@@ -67,13 +67,24 @@ after everything started, check `http://localhost:6100/` to deploy contract.
 
 ![panel](docs/main.png)
 
-you will need to change your Metamask network setting like following:
+## How to deploy contract
 
-```sh
-    Network Name: Godwoken
-    New RPC URL: http://localhost:8024
-    Chain ID: 0x100000003
-```
+1. open `http://localhost:6100/`, connect with your metamask address
+2. click `Deposit` button to fund some devnet ckb on your metamask address.
+3. after deposit finished,
+    - click `Deploy Contract` button
+    - select the contract compile artifact json file or binary file from your computer
+    - sign the message with metamask
+
+then the deployment will auto start.
+
+after deployment successfully get done, you will find the contract address listing below.
+
+## How to test dapp
+
+you can use the kicker's built-in `Contract Debugger` right on the page to give your dapp a first simple manual test.
+
+![panel](docs/contract-debugger.png)
 
 ### 2. custom mode
 
@@ -142,28 +153,6 @@ make gen-submodule-env
 ```
 
 ***NOTE: this will remove all local file in submodule. so all your local changed will gone.***
-
-## How to deploy contract
-
-0. ***CHANGE YOUR METAMASK NETWORK to GODWOKEN!***
-1. open `http://localhost:6100/`, connect with your metamask address
-2. click `Deposit` button to fund some devnet ckb on your metamask address.
-3. after deposit finished,
-    - click `Deploy Contract` button
-    - select the contract compiled binary file from your computer
-    - sign the message with metamask
-
-then the deployment will auto start.
-
-after deployment successfully get done, you will find the contract address listing below.
-
-## How to test dapp
-
-~~read [doc here](docs/test-simple-dapp.md).~~
-
-you can use the kicker's built-in `Contract Debugger` right on the page to give your dapp a first simple manual test.
-
-![panel](docs/contract-debugger.png)
 
 ## Some useful command
 
