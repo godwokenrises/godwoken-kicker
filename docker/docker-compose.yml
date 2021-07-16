@@ -23,9 +23,10 @@ services:
       context: layer1
       args: 
         DOCKER_PREBUILD_IMAGE: "${DOCKER_PREBUILD_IMAGE_NAME}:${DOCKER_PREBUILD_IMAGE_TAG}"
-    ports: 
+    ports:
+    - 28114:28114 # rpc.ws_listen_address
     - 8114:8114
-    - 8115:8115 # 8115 is not using for now, but we may need it when extend kicker in the future
+    - 8115:8115   # 8115 is not using for now, but we may need it when extend kicker in the future
     volumes:
     - ../ckb-data/:/ckb-data
     environment:
