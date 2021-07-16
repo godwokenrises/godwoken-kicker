@@ -396,6 +396,8 @@ edit_godwoken_config_toml(){
         echo "${1} file not exits, skip this steps."
         return 0
     fi
+    
+    set_key_value_in_toml "node_mode" "fullnode" $1
 
     set_key_value_in_toml "privkey_path" "deploy/private_key" $1
     set_key_value_in_toml "listen" "0.0.0.0:8119" $1
