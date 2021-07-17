@@ -54,6 +54,7 @@ ROLLUP_TYPE_HASH=$RollupTypeHash
 PORT=8024
 CHAIN_ID=3
 CREATOR_ACCOUNT_ID=3
+DEFAULT_FROM_ADDRESS=0x6daf63d8411d6e23552658e3cfb48416a6a2ca78
 EOF
 
 # wait for godwoken rpc server to start
