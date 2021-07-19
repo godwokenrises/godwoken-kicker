@@ -63,7 +63,7 @@ EOF
 cat << EOF > rollup-config.json
 {
   "l1_sudt_script_type_hash": "0x0000000000000000000000000000000000000000000000000000000000000000",
-  "burn_lock_hash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+  "burn_lock_hash": "0x77c93b0632b5b6c3ef922c5b7cea208fb0a7c427a13d50e13d3fefad17e0c590",
   "required_staking_capacity": 10000000000,
   "challenge_maturity_blocks": 5,
   "finality_blocks": 20,
