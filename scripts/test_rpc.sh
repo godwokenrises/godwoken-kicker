@@ -47,7 +47,7 @@ echo -e "get_script_hash, id: 5 \n"
 echo '{
     "id": 2,
     "jsonrpc": "2.0",
-    "method": "get_script_hash",
+    "method": "gw_get_script_hash",
     "params":
         ["0x5"]
 
