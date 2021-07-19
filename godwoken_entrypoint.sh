@@ -52,7 +52,7 @@ else
 fi
 
 if [ $START_MODE = "slim_start" ]; then
-  RUST_LOG=gw_block_producer=info,gw_generator=debug,info,gw_web3_indexer=debug,info $GODWOKEN_BIN
+  RUST_LOG=gw_block_producer=info,gw_generator=debug,gw_web3_indexer=debug $GODWOKEN_BIN
 else
   echo 'run deploy mode'
 fi
@@ -99,4 +99,4 @@ callPolyman gen_config "$POLYMAN_RPC"
 cd ${PROJECT_DIR}/godwoken 
 
 # start godwoken
-RUST_LOG=gw_block_producer=info,gw_generator=debug,info,gw_web3_indexer=debug,info $GODWOKEN_BIN
+RUST_LOG=gw_block_producer=info,gw_generator=debug,gw_web3_indexer=debug $GODWOKEN_BIN
