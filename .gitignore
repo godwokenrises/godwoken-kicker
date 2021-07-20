@@ -22,3 +22,5 @@ config/scripts/release/*
 
 config/*generator
 config/*validator
+
+packages

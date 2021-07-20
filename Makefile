@@ -17,43 +17,45 @@ build-image:
 		source ./gw_util.sh && update_godwoken_dockerfile_to_manual_mode ; \
 	fi
 # todo: remove env file when build image through cleanning web3 dockerfile 
-	cd docker && docker-compose build --no-rm 
+	cd docker && docker-compose build --no-rm 	
 
-gen-submodule-env: SHELL:=/bin/bash
-gen-submodule-env:
-	source gw_util.sh && generateSubmodulesEnvFile
-
-update-submodule: SHELL:=/bin/bash
-update-submodule:
-	source ./gw_util.sh && update_submodules	
+pass-godwoken-binary: SHELL:=/bin/bash
+pass-godwoken-binary:
+	source ./gw_util.sh && paste_binary_into_path `pwd`/packages/godwoken/target/debug/ 
 
 install: SHELL:=/bin/bash
 install:
-	source ./gw_util.sh && init_submodule_if_empty
 # if manual build polyman
 	if [ "$(MANUAL_BUILD_POLYMAN)" = true ] ; then \
-		docker run --rm -v `pwd`/godwoken-polyman:/app -w=/app $$DOCKER_JS_PREBUILD_IMAGE_NAME:$$DOCKER_JS_PREBUILD_IMAGE_TAG yarn ; \
+		source ./gw_util.sh && prepare_package godwoken-polyman $$POLYMAN_GIT_URL $$POLYMAN_GIT_CHECKOUT ; \
+		docker run --rm -v `pwd`/packages/godwoken-polyman:/app -w=/app $$DOCKER_JS_PREBUILD_IMAGE_NAME:$$DOCKER_JS_PREBUILD_IMAGE_TAG yarn ; \
 	fi
 # if manual build web3
 	if [ "$(MANUAL_BUILD_WEB3)" = true ] ; then \
-		docker run --rm -v `pwd`/godwoken-web3:/app -w=/app $$DOCKER_JS_PREBUILD_IMAGE_NAME:$$DOCKER_JS_PREBUILD_IMAGE_TAG /bin/bash -c "yarn; yarn workspace @godwoken-web3/godwoken tsc; yarn workspace @godwoken-web3/api-server tsc" ; \
+		source ./gw_util.sh && prepare_package godwoken-web3 $$WEB3_GIT_URL $$WEB3_GIT_CHECKOUT ; \
+		docker run --rm -v `pwd`/packages/godwoken-web3:/app -w=/app $$DOCKER_JS_PREBUILD_IMAGE_NAME:$$DOCKER_JS_PREBUILD_IMAGE_TAG /bin/bash -c "yarn; yarn workspace @godwoken-web3/godwoken tsc; yarn workspace @godwoken-web3/api-server tsc" ; \
 	fi
 # if manual build godwoken
 	if [ "$(MANUAL_BUILD_GODWOKEN)" = true ] ; then \
-		docker run --rm -it -v `pwd`/godwoken:/app -v `pwd`/cargo-cache-data:/root/.cargo/registry -w=/app retricsu/godwoken-manual-build cargo build ; \
+		source ./gw_util.sh && prepare_package godwoken $$GODWOKEN_GIT_URL $$GODWOKEN_GIT_CHECKOUT ; \
+		docker run --rm -it -v `pwd`/packages/godwoken:/app -v `pwd`/cargo-cache-data:/root/.cargo/registry -w=/app retricsu/godwoken-manual-build cargo build ; \
 	fi
 # if manual build godwoken-polyjuice
 	if [ "$(MANUAL_BUILD_POLYJUICE)" = true ] ; then \
+		source ./gw_util.sh && prepare_package godwoken-polyjuice $$POLYJUICE_GIT_URL $$POLYJUICE_GIT_CHECKOUT ; \
+		cd packages/godwoken-polyjuice && git submodule update --init --recursive && cd ../.. ; \
 		make rebuild-polyjuice-bin ; \
 	else make copy-polyjuice-bin-from-docker ; \
 	fi
 # if manual build godwoken-scripts
 	if [ "$(MANUAL_BUILD_SCRIPTS)" = true ] ; then \
+		source ./gw_util.sh && prepare_package godwoken-scripts $$SCRIPTS_GIT_URL $$SCRIPTS_GIT_CHECKOUT ; \
 		make rebuild-gw-scripts-and-bin ; \
 	else make copy-gw-scripts-and-bin-from-docker ; \
 	fi
 # if manual build clerkb for POA
 	if [ "$(MANUAL_BUILD_CLERKB)" = true ] ; then \
+		source ./gw_util.sh && prepare_package clerkb $$CLERKB_GIT_URL $$CLERKB_GIT_CHECKOUT ; \
 		make rebuild-poa-scripts ; \
 	else \
 		source ./gw_util.sh && copy_poa_scripts_from_docker_or_abort ;\
@@ -174,12 +176,7 @@ smart-clean:
 	rm -rf postgres-data/*	
 
 uninit:
-	make down
-	make clean
-	rm -rf godwoken
-	rm -rf godwoken-polyjuice
-	rm -rf godwoken-polyman
-	rm -rf godwoken-web3
+	rm -rf packages/*
 
 enter-g:
 	cd docker && docker-compose exec godwoken bash
@@ -257,22 +254,22 @@ rebuild-scripts:
 
 #### rebuild components's scripts and bin standalone
 rebuild-polyjuice-bin:
-	cd godwoken-polyjuice && make all-via-docker
-	cp godwoken-polyjuice/build/generator_log config/polyjuice-generator
-	cp godwoken-polyjuice/build/validator_log config/polyjuice-validator	
+	cd packages/godwoken-polyjuice && make all-via-docker
+	cp packages/godwoken-polyjuice/build/generator_log config/polyjuice-generator
+	cp packages/godwoken-polyjuice/build/validator_log config/polyjuice-validator	
 
 rebuild-gw-scripts-and-bin:
-	cd godwoken-scripts && cd c && make && cd - && capsule build --release --debug-output
-	cp godwoken-scripts/c/build/meta-contract-generator config/meta-contract-generator
-	cp godwoken-scripts/c/build/meta-contract-validator config/meta-contract-validator	
-	cp godwoken-scripts/c/build/sudt-generator config/sudt-generator	
-	cp godwoken-scripts/c/build/sudt-validator config/sudt-validator
-	cp godwoken-scripts/build/release/* config/scripts/release/	
+	cd packages/godwoken-scripts && cd c && make && cd - && capsule build --release --debug-output
+	cp packages/godwoken-scripts/c/build/meta-contract-generator config/meta-contract-generator
+	cp packages/godwoken-scripts/c/build/meta-contract-validator config/meta-contract-validator	
+	cp packages/godwoken-scripts/c/build/sudt-generator config/sudt-generator	
+	cp packages/godwoken-scripts/c/build/sudt-validator config/sudt-validator
+	cp packages/godwoken-scripts/build/release/* config/scripts/release/	
 
 rebuild-poa-scripts:
-	cd clerkb && yarn && make all-via-docker
-	cp clerkb/build/debug/poa config/scripts/release/
-	cp clerkb/build/debug/state config/scripts/release/
+	cd packages/clerkb && yarn && make all-via-docker
+	cp packages/clerkb/build/debug/poa config/scripts/release/
+	cp packages/clerkb/build/debug/state config/scripts/release/
 
 ########## prebuild-quick-mode #############
 copy-polyjuice-bin-from-docker:	
@@ -311,10 +308,3 @@ copy-poa-scripts-from-docker:
 	docker rm -f dummy
 # paste the prebuild scripts to config dir for use	
 	cp quick-mode/clerkb/* config/scripts/release/
-
-paste-provider:
-	cp -r ./polyjuice-providers-http/lib ./godwoken-polyman/packages/client/src/
-
-prepare-provider:
-	cd polyjuice-providers-http && yarn && yarn build && cd .. && cp -r ./polyjuice-providers-http/lib ./godwoken-polyman/packages/client/src/ && cd godwoken-polyman && yarn prepare-ui
-

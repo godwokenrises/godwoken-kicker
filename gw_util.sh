@@ -273,6 +273,41 @@ init_submodule_if_empty(){
     fi
 }
 
+# usage: prepare_package name url checkout
+# if package folder exits and the git remote url is the same, will not remove and re-clone
+prepare_package(){
+    # if subpackage folder is empty
+    if [[ -d "packages/$1" ]]; then
+       cd packages/$1 
+       url=$(git remote get-url origin)
+       printf $url
+       printf $2
+       cd ../..
+       if [[ $url == $2 ]]; then
+          cd packages/$1 && git checkout $3 && cd ../.. || ( rm -rf packages/$1 && pull_code_from_url $1 $2 $3 ) ;
+       else rm -rf packages/$1 && pull_code_from_url $1 $2 $3
+       fi
+    else pull_code_from_url $1 $2 $3
+    fi
+}
+
+# usage: pull_code_from_url name url checkout 
+pull_code_from_url(){
+    cd packages && git clone --recursive $2 && cd $1 && git checkout $3 && cd ../../
+}
+
+get_git_remote_url(){
+    url=$(git remote get-url origin)
+}
+
+paste_binary_into_path(){
+    printf "binary path: ";
+    read;
+    bin_path=${REPLY}
+    mkdir -p $1
+    cp $bin_path $1
+}
+
 isGodwokenRpcRunning(){
     echo $1
     if [[ -n $1 ]]; 
