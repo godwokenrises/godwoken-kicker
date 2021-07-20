@@ -3,6 +3,9 @@ BUILD_MODE_ENV_FILE=./docker/.build.mode.env
 include $(BUILD_MODE_ENV_FILE)
 export $(shell sed 's/=.*//' $(BUILD_MODE_ENV_FILE))
 
+ifndef VERBOSE
+.SILENT:
+endif
 
 ###### command list ########
 
@@ -10,18 +13,13 @@ export $(shell sed 's/=.*//' $(BUILD_MODE_ENV_FILE))
 manual-image:
 	cd docker/manual-image && docker build -t ${DOCKER_MANUAL_BUILD_IMAGE_NAME} .
 
-build-image: SHELL:=/bin/bash
-build-image:
-	cp docker/layer2/Dockerfile.example docker/layer2/Dockerfile
-	if [ "$(MANUAL_BUILD_GODWOKEN)" = true ] ; then \
-		source ./gw_util.sh && update_godwoken_dockerfile_to_manual_mode ; \
-	fi
-# todo: remove env file when build image through cleanning web3 dockerfile 
-	cd docker && docker-compose build --no-rm 	
-
 pass-godwoken-binary: SHELL:=/bin/bash
 pass-godwoken-binary:
-	source ./gw_util.sh && paste_binary_into_path `pwd`/packages/godwoken/target/debug/ 
+	mkdir -p `pwd`/workspace/bin
+	printf "godwoken binary"
+	source ./gw_util.sh && paste_binary_into_path `pwd`/workspace/bin/godwoken
+	printf "gw-tool binary"
+	source ./gw_util.sh && paste_binary_into_path `pwd`/workspace/bin/gw-tools	
 
 install: SHELL:=/bin/bash
 install:
@@ -39,6 +37,11 @@ install:
 	if [ "$(MANUAL_BUILD_GODWOKEN)" = true ] ; then \
 		source ./gw_util.sh && prepare_package godwoken $$GODWOKEN_GIT_URL $$GODWOKEN_GIT_CHECKOUT ; \
 		docker run --rm -it -v `pwd`/packages/godwoken:/app -v `pwd`/cargo-cache-data:/root/.cargo/registry -w=/app retricsu/godwoken-manual-build cargo build ; \
+		copy-godwoken-binary-from-packages-to-workspace ; \
+	fi
+# if skip build godwoken, using paste mode
+	if [ "$(MANUAL_BUILD_GODWOKEN)" = "skip" ] ; then \
+		printf '%b\n' "skip godwoken building.." ; \
 	fi
 # if manual build godwoken-polyjuice
 	if [ "$(MANUAL_BUILD_POLYJUICE)" = true ] ; then \
@@ -63,27 +66,36 @@ install:
 
 init:
 	make install
-	mkdir -p ./godwoken/deploy/polyjuice-backend
-	mkdir -p ./godwoken/deploy/backend
-	cp ./config/private_key ./godwoken/deploy/private_key
+	mkdir -p ./workspace/deploy/polyjuice-backend
+	mkdir -p ./workspace/deploy/backend
+	cp ./config/private_key ./workspace/deploy/private_key
 	sh ./docker/layer2/init_config_json.sh
 # prepare on-chain scripts for Godwoken deployment
-	cp -r ./config/scripts ./godwoken/
+	cp -r ./config/scripts ./workspace/
 # prepare three backends: each one's validator needs to be deployed on-chain and push into backends
 #	1. meta-contract backend
-	cp ./config/meta-contract-validator ./godwoken/scripts/release/
-	cp ./config/meta-contract-validator ./godwoken/deploy/backend/meta-contract-validator
-	cp ./config/meta-contract-generator ./godwoken/deploy/backend/meta-contract-generator 
+	cp ./config/meta-contract-validator ./workspace/scripts/release/
+	cp ./config/meta-contract-validator ./workspace/deploy/backend/meta-contract-validator
+	cp ./config/meta-contract-generator ./workspace/deploy/backend/meta-contract-generator 
 #	2. sudt backend
-	cp ./config/sudt-validator ./godwoken/scripts/release/ 
-	cp ./config/sudt-validator ./godwoken/deploy/backend/sudt-validator 
-	cp ./config/sudt-generator ./godwoken/deploy/backend/sudt-generator
+	cp ./config/sudt-validator ./workspace/scripts/release/ 
+	cp ./config/sudt-validator ./workspace/deploy/backend/sudt-validator 
+	cp ./config/sudt-generator ./workspace/deploy/backend/sudt-generator
 # 	3. polyjuice backend
-	cp ./config/polyjuice-validator ./godwoken/scripts/release/
-	cp ./config/polyjuice-generator ./godwoken/deploy/polyjuice-backend/
-	cp ./config/polyjuice-validator ./godwoken/deploy/polyjuice-backend/
+	cp ./config/polyjuice-validator ./workspace/scripts/release/
+	cp ./config/polyjuice-generator ./workspace/deploy/polyjuice-backend/
+	cp ./config/polyjuice-validator ./workspace/deploy/polyjuice-backend/
 # build image for docker-compose build cache
 	make build-image
+
+build-image: SHELL:=/bin/bash
+build-image:
+	cp docker/layer2/Dockerfile.example docker/layer2/Dockerfile
+	if [ "$(MANUAL_BUILD_GODWOKEN)" = true ] ; then \
+		source ./gw_util.sh && update_godwoken_dockerfile_to_manual_mode ; \
+	fi 
+	cd docker && docker-compose build --no-rm 	
+
 
 start: 
 	cd docker && FORCE_GODWOKEN_REDEPLOY=false docker-compose --env-file .build.mode.env up -d --build
@@ -308,3 +320,8 @@ copy-poa-scripts-from-docker:
 	docker rm -f dummy
 # paste the prebuild scripts to config dir for use	
 	cp quick-mode/clerkb/* config/scripts/release/
+
+copy-godwoken-binary-from-packages-to-workspace:
+	mkdir -p workspace/bin
+	cp packages/godwoken/target/debug/godwoken workspace/bin/godwoken
+	cp packages/godwoken/target/debug/gw-tools workspace/bin/gw-tools

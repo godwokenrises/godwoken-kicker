@@ -1,5 +1,5 @@
 # please invoke this script in the project root dir
-cd godwoken/deploy
+cd workspace/deploy
 
 cat << EOF > scripts-deploy.json
 {

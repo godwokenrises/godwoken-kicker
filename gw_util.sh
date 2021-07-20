@@ -280,8 +280,6 @@ prepare_package(){
     if [[ -d "packages/$1" ]]; then
        cd packages/$1 
        url=$(git remote get-url origin)
-       printf $url
-       printf $2
        cd ../..
        if [[ $url == $2 ]]; then
           cd packages/$1 && git checkout $3 && cd ../.. || ( rm -rf packages/$1 && pull_code_from_url $1 $2 $3 ) ;
