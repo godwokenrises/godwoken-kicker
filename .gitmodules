@@ -1,24 +1,4 @@
-[submodule "godwoken"]
-	path = godwoken
-	url = https://github.com/nervosnetwork/godwoken.git
-	branch = adjust-for-operability
-[submodule "godwoken-polyjuice"]
-	path = godwoken-polyjuice
-	url = https://github.com/nervosnetwork/godwoken-polyjuice.git
-	branch = interoperability-refactor
-[submodule "godwoken-web3"]
-	path = godwoken-web3
-	url = https://github.com/nervosnetwork/godwoken-web3.git
-	branch = main
-[submodule "godwoken-scripts"]
-	path = godwoken-scripts
-	url = https://github.com/nervosnetwork/godwoken-scripts.git
-	branch = adjust-for-operability
 [submodule "clerkb"]
 	path = clerkb
 	url = https://github.com/nervosnetwork/clerkb.git
 	branch = main
-[submodule "godwoken-polyman"]
-	path = godwoken-polyman
-	url = https://github.com/RetricSu/godwoken-polyman.git
-	branch = master
