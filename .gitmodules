@@ -1,4 +1,0 @@
-[submodule "clerkb"]
-	path = clerkb
-	url = https://github.com/nervosnetwork/clerkb.git
-	branch = main
