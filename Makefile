@@ -126,7 +126,7 @@ si:
 	cd docker && docker-compose logs -f ckb-indexer
 
 web3:
-	cd docker && docker-compose logs -f web3
+	cd docker && docker-compose logs -f --tail 200 web3
 
 stop-web3:
 	cd docker && docker-compose stop web3
