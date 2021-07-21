@@ -396,15 +396,27 @@ edit_godwoken_config_toml(){
         echo "${1} file not exits, skip this steps."
         return 0
     fi
+    
+    set_key_value_in_toml "node_mode" "fullnode" $1
 
     set_key_value_in_toml "privkey_path" "deploy/private_key" $1
     set_key_value_in_toml "listen" "0.0.0.0:8119" $1
 
-    # delete the default lock
-    sed -i '/\[block_producer.wallet_config.lock\]/{n;d}' $1 
-    sed -i '/\[block_producer.wallet_config.lock\]/{n;d}' $1 
-    sed -i '/\[block_producer.wallet_config.lock\]/{n;d}' $1 
+    ## 1. reward lock update
+    # delete the default reward lock
+    sed -i '/\[block_producer.challenger_config.rewards_receiver_lock\]/{n;d}' $1 
+    sed -i '/\[block_producer.challenger_config.rewards_receiver_lock\]/{n;d}' $1 
+    sed -i '/\[block_producer.challenger_config.rewards_receiver_lock\]/{n;d}' $1 
+    # add an new one with your own lock
+    sed -i "/\[block_producer.challenger_config.rewards_receiver_lock\]/a\code_hash = '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8'" $1 
+    sed -i "/\[block_producer.challenger_config.rewards_receiver_lock\]/a\hash_type = 'type'" $1
+    sed -i "/\[block_producer.challenger_config.rewards_receiver_lock\]/a\args = '0x74e5c89172c5d447819f1629743ef2221df083be'" $1
 
+    ## 2. miner wallet lock
+    # delete the default wallet lock
+    sed -i '/\[block_producer.wallet_config.lock\]/{n;d}' $1 
+    sed -i '/\[block_producer.wallet_config.lock\]/{n;d}' $1 
+    sed -i '/\[block_producer.wallet_config.lock\]/{n;d}' $1 
     # add an new one with your own lock
     sed -i "/\[block_producer.wallet_config.lock\]/a\code_hash = '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8'" $1 
     sed -i "/\[block_producer.wallet_config.lock\]/a\hash_type = 'type'" $1

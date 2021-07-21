@@ -2,7 +2,7 @@
 
 one line command to start godwoken-polyjuice chain for devnet.
 
-`note: this branch is used as rc test for mainet version.`
+`note: this branch is used as test for all latest componets version. only support manual-build mode(custom-mode).`
 
 ----
 

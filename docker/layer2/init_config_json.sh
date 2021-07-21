@@ -30,10 +30,10 @@ cat << EOF > scripts-deploy.json
     "l2_sudt_validator": "scripts/release/sudt-validator",
     "meta_contract_validator": "scripts/release/meta-contract-validator",
     "custodian_lock": "scripts/release/custodian-lock",
-    "l2_sudt_generator": "godwoken-scripts/c/build/sudt-generator",
+    "l2_sudt_generator": "deploy/backend/sudt-generator",
     "state_validator_lock": "scripts/release/poa",
     "challenge_lock": "scripts/release/challenge-lock",
-    "meta_contract_generator": "godwoken-scripts/c/build/meta-contract-generator",
+    "meta_contract_generator": "deploy/backend/meta-contract-generator",
     "always_success": "scripts/release/always-success",
     "state_validator": "scripts/release/state-validator",
     "polyjuice_validator": "scripts/release/polyjuice-validator",
@@ -63,7 +63,7 @@ EOF
 cat << EOF > rollup-config.json
 {
   "l1_sudt_script_type_hash": "0x0000000000000000000000000000000000000000000000000000000000000000",
-  "burn_lock_hash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+  "burn_lock_hash": "0x77c93b0632b5b6c3ef922c5b7cea208fb0a7c427a13d50e13d3fefad17e0c590",
   "required_staking_capacity": 10000000000,
   "challenge_maturity_blocks": 5,
   "finality_blocks": 20,

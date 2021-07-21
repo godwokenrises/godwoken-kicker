@@ -4,7 +4,7 @@
 	branch = adjust-for-operability
 [submodule "godwoken-polyjuice"]
 	path = godwoken-polyjuice
-	url = https://github.com/TheWaWaR/godwoken-polyjuice.git
+	url = https://github.com/nervosnetwork/godwoken-polyjuice.git
 	branch = interoperability-refactor
 [submodule "godwoken-web3"]
 	path = godwoken-web3
