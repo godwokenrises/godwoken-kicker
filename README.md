@@ -2,7 +2,7 @@
 
 one line command to start godwoken-polyjuice chain for devnet.
 
-`note: this branch is used as refactor version. only support manual-build mode(custom-mode).`
+`develop branch for kicker. most of time, only support manual-build mode(custom-mode).`
 
 ----
 
