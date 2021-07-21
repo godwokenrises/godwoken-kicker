@@ -76,7 +76,7 @@ isRollupCellExits(){
     ]
     }' \
     | tr -d '\n' \
-    | curl --ipv4 --retry 3 --retry-connrefused \
+    | curl -s --ipv4 --retry 3 --retry-connrefused \
     -H 'content-type: application/json' -d @- \
     http://localhost:8116)
 
@@ -273,8 +273,39 @@ init_submodule_if_empty(){
     fi
 }
 
+# usage: prepare_package name url checkout
+# if package folder exits and the git remote url is the same, will not remove and re-clone
+prepare_package(){
+    # if subpackage folder is empty
+    if [[ -d "packages/$1" ]]; then
+       cd packages/$1 
+       url=$(git remote get-url origin)
+       cd ../..
+       if [[ $url == $2 ]]; then
+          cd packages/$1 && git checkout $3 && cd ../.. || ( rm -rf packages/$1 && pull_code_from_url $1 $2 $3 ) ;
+       else rm -rf packages/$1 && pull_code_from_url $1 $2 $3
+       fi
+    else pull_code_from_url $1 $2 $3
+    fi
+}
+
+# usage: pull_code_from_url name url checkout 
+pull_code_from_url(){
+    cd packages && git clone --recursive $2 && cd $1 && git checkout $3 && cd ../../
+}
+
+get_git_remote_url(){
+    url=$(git remote get-url origin)
+}
+
+paste_binary_into_path(){
+    printf "binary path: ";
+    read;
+    bin_path=${REPLY}
+    cp $bin_path $1
+}
+
 isGodwokenRpcRunning(){
-    echo $1
     if [[ -n $1 ]]; 
     then
         local rpc_url="$1"
@@ -292,7 +323,7 @@ isGodwokenRpcRunning(){
     "params": []
     }' \
     | tr -d '\n' \
-    | curl --ipv4 --retry 3 --retry-connrefused \
+    | curl -s --ipv4 --retry 3 --retry-connrefused \
     -H 'content-type: application/json' -d @- \
     $rpc_url)
 
@@ -308,7 +339,6 @@ isGodwokenRpcRunning(){
 }
 
 isPolymanPrepareRpcRunning(){
-    echo $1
     if [[ -n $1 ]]; 
     then
         local rpc_url="$1"
@@ -319,7 +349,7 @@ isPolymanPrepareRpcRunning(){
     # curl retry on connrefused, considering ECONNREFUSED as a transient error(network issues)
     # connections with ipv6 are not retried because it returns EADDRNOTAVAIL instead of ECONNREFUSED,
     # hence we should use --ipv4
-    result=$(curl --ipv4 $rpc_url/ping)
+    result=$(curl -s --ipv4 $rpc_url/ping)
 
     if [[ $result =~ "pong" ]]; then
         echo "polyman prepare rpc server is up and running!"
@@ -462,7 +492,7 @@ callPolyman(){
     # curl retry on connrefused, considering ECONNREFUSED as a transient error(network issues)
     # connections with ipv6 are not retried because it returns EADDRNOTAVAIL instead of ECONNREFUSED,
     # hence we should use --ipv4
-    result=$(curl --ipv4 --retry 3 --retry-connrefused \
+    result=$(curl -s --ipv4 --retry 3 --retry-connrefused \
                     $rpc_url/$1)
 
     if [[ $result =~ '"status":"ok"' ]]; then

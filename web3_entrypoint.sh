@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -o errexit
-set -o xtrace
+#set -o xtrace
 PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 GODWOKEN_RPC_URL="http://godwoken:8119"
 
@@ -11,14 +11,14 @@ source ${PROJECT_DIR}/gw_util.sh
 # detect which mode to start godwoken_web3
 if [ "$MANUAL_BUILD_WEB3" = true ] ; then 
   echo "manual mode.."
-  cd /code/godwoken-web3
+  cd /code/packages/godwoken-web3
 else
   echo "prebuild mode.."
   cd /godwoken-web3
 fi
 
 # read eth_lock_hash from json config file
-LOCKSCRIPTS=${PROJECT_DIR}/godwoken/deploy/scripts-deploy-result.json
+LOCKSCRIPTS=${PROJECT_DIR}/workspace/deploy/scripts-deploy-result.json
 
 # wait for godwoken finished its deployment
 while true; do
@@ -27,13 +27,13 @@ while true; do
       echo 'scripts-deploy-result.json file exits. continue.'
       break
     else
-      echo 'scripts-deploy-result.json file not exits, keep waitting for godwoken deployment.'
+      echo 'keep waitting for godwoken deploy scripts on chain...'
     fi
 done
 EthAccountLockCodeHash=$(jq -r '.eth_account_lock.script_type_hash' $LOCKSCRIPTS)
 
 # read rollup type hash from config.toml file
-CONFIGTOML=${PROJECT_DIR}/godwoken/config.toml
+CONFIGTOML=${PROJECT_DIR}/workspace/config.toml
 # wait for godwoken finished generating config.toml file
 while true; do
     sleep 3;
