@@ -17,19 +17,10 @@ else
   cd /godwoken-polyman
 fi
 
+yarn workspace @godwoken-polyman/runner clean:call-polyman-db
+
 yarn init_placeholder_config
 
-yarn workspace @godwoken-polyman/runner clean
+# start the callPolyman preparation http server in background
+yarn workspace @godwoken-polyman/runner start-call-polyman
 
-# wait for godwoken rpc server to start
-while true; do
-    sleep 5;
-    if isGodwokenRpcRunning "${GODWOKEN_RPC_URL}";
-    then
-      break;
-    else echo "keep waitting..."
-    fi
-done
-
-# start the main http server of polyman
-yarn workspace @godwoken-polyman/runner start

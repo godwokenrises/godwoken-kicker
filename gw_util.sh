@@ -302,7 +302,6 @@ paste_binary_into_path(){
     printf "binary path: ";
     read;
     bin_path=${REPLY}
-    mkdir -p $1
     cp $bin_path $1
 }
 

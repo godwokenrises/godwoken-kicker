@@ -71,10 +71,25 @@ services:
     ports:
       - 6101:6101
       - 6100:6100
-      - 6102:6102
     depends_on:
       - ckb
       - postgres
+    
+  call-polyman:
+    build:
+      context: call-polyman
+      args: 
+        DOCKER_PREBUILD_IMAGE: "${DOCKER_JS_PREBUILD_IMAGE_NAME}:${DOCKER_JS_PREBUILD_IMAGE_TAG}"
+    volumes:
+      - ../:/code
+    environment: 
+      MANUAL_BUILD_POLYMAN: ${MANUAL_BUILD_POLYMAN}
+    command: bash /code/docker/call-polyman/entrypoint.sh 
+    ports:
+      - 6102:6102
+    depends_on:
+      - ckb
+      - postgres 
 
   web3:
     build:
@@ -93,10 +108,10 @@ services:
       - postgres
       - godwoken
   
-  gen-godwoken-schema:
-    image: retricsu/gowoken-build_dev:ubuntu20
-    profiles: ["cli-only"]
-    volumes: 
-      - ../:/code
-    command: bash /code/docker/gen-godwoken-schema/entrypoint.sh
+  # gen-godwoken-schema:
+  #   image: retricsu/gowoken-build_dev:ubuntu20
+  #   profiles: ["cli-only"]
+  #   volumes: 
+  #     - ../:/code
+  #   command: bash /code/docker/gen-godwoken-schema/entrypoint.sh
  

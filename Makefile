@@ -16,10 +16,15 @@ manual-image:
 pass-godwoken-binary: SHELL:=/bin/bash
 pass-godwoken-binary:
 	mkdir -p `pwd`/workspace/bin
-	printf "godwoken binary"
+	printf "godwoken "
 	source ./gw_util.sh && paste_binary_into_path `pwd`/workspace/bin/godwoken
-	printf "gw-tool binary"
+	printf "gw-tools "
 	source ./gw_util.sh && paste_binary_into_path `pwd`/workspace/bin/gw-tools	
+
+create-folder:
+	mkdir -p workspace/deploy/backend
+	mkdir -p workspace/deploy/polyjuice-backend
+	mkdir -p workspace/scripts/release
 
 install: SHELL:=/bin/bash
 install:
@@ -37,7 +42,7 @@ install:
 	if [ "$(MANUAL_BUILD_GODWOKEN)" = true ] ; then \
 		source ./gw_util.sh && prepare_package godwoken $$GODWOKEN_GIT_URL $$GODWOKEN_GIT_CHECKOUT ; \
 		docker run --rm -it -v `pwd`/packages/godwoken:/app -v `pwd`/cargo-cache-data:/root/.cargo/registry -w=/app retricsu/godwoken-manual-build cargo build ; \
-		copy-godwoken-binary-from-packages-to-workspace ; \
+		make copy-godwoken-binary-from-packages-to-workspace ; \
 	fi
 # if skip build godwoken, using paste mode
 	if [ "$(MANUAL_BUILD_GODWOKEN)" = "skip" ] ; then \
@@ -65,33 +70,17 @@ install:
 	fi
 
 init:
+	make create-folder
 	make install
-	mkdir -p ./workspace/deploy/polyjuice-backend
-	mkdir -p ./workspace/deploy/backend
 	cp ./config/private_key ./workspace/deploy/private_key
 	sh ./docker/layer2/init_config_json.sh
-# prepare on-chain scripts for Godwoken deployment
-	cp -r ./config/scripts ./workspace/
-# prepare three backends: each one's validator needs to be deployed on-chain and push into backends
-#	1. meta-contract backend
-	cp ./config/meta-contract-validator ./workspace/scripts/release/
-	cp ./config/meta-contract-validator ./workspace/deploy/backend/meta-contract-validator
-	cp ./config/meta-contract-generator ./workspace/deploy/backend/meta-contract-generator 
-#	2. sudt backend
-	cp ./config/sudt-validator ./workspace/scripts/release/ 
-	cp ./config/sudt-validator ./workspace/deploy/backend/sudt-validator 
-	cp ./config/sudt-generator ./workspace/deploy/backend/sudt-generator
-# 	3. polyjuice backend
-	cp ./config/polyjuice-validator ./workspace/scripts/release/
-	cp ./config/polyjuice-generator ./workspace/deploy/polyjuice-backend/
-	cp ./config/polyjuice-validator ./workspace/deploy/polyjuice-backend/
 # build image for docker-compose build cache
 	make build-image
 
 build-image: SHELL:=/bin/bash
 build-image:
 	cp docker/layer2/Dockerfile.example docker/layer2/Dockerfile
-	if [ "$(MANUAL_BUILD_GODWOKEN)" = true ] ; then \
+	if [ "$(MANUAL_BUILD_GODWOKEN)" = true ] || [ "$(MANUAL_BUILD_GODWOKEN)" = "skip" ]; then \
 		source ./gw_util.sh && update_godwoken_dockerfile_to_manual_mode ; \
 	fi 
 	cd docker && docker-compose build --no-rm 	
@@ -179,6 +168,7 @@ clean:
 # delete the godwoken outdated config file as well
 	rm -f godwoken/config.toml 
 	rm -f godwoken/deploy/*-result.json
+	rm -rf workspace/*
 
 smart-clean:
 	rm -rf ckb-cli-data/*
@@ -245,6 +235,9 @@ reset-polyjuice:
 	make clean-polyjuice	
 	make start-polyjuice
 
+call-polyman:
+	cd docker && docker-compose logs -f call-polyman
+
 start-godwoken:
 	cd docker && docker-compose start godwoken
 
@@ -260,28 +253,31 @@ prepare-money:
 ########### manual-build-mode #############
 ### rebuild components's scripts and bin all in one
 rebuild-scripts:
-	make rebuild-polyjuice-bin
 	make rebuild-gw-scripts-and-bin 
+	make rebuild-polyjuice-bin
 	make rebuild-poa-scripts
 
 #### rebuild components's scripts and bin standalone
 rebuild-polyjuice-bin:
 	cd packages/godwoken-polyjuice && make all-via-docker
-	cp packages/godwoken-polyjuice/build/generator_log config/polyjuice-generator
-	cp packages/godwoken-polyjuice/build/validator_log config/polyjuice-validator	
+	cp packages/godwoken-polyjuice/build/validator_log workspace/scripts/release/polyjuice-validator
+	cp packages/godwoken-polyjuice/build/generator_log workspace/deploy/polyjuice-backend/polyjuice-generator
+	cp packages/godwoken-polyjuice/build/validator_log workspace/deploy/polyjuice-backend/polyjuice-validator	
 
 rebuild-gw-scripts-and-bin:
 	cd packages/godwoken-scripts && cd c && make && cd - && capsule build --release --debug-output
-	cp packages/godwoken-scripts/c/build/meta-contract-generator config/meta-contract-generator
-	cp packages/godwoken-scripts/c/build/meta-contract-validator config/meta-contract-validator	
-	cp packages/godwoken-scripts/c/build/sudt-generator config/sudt-generator	
-	cp packages/godwoken-scripts/c/build/sudt-validator config/sudt-validator
-	cp packages/godwoken-scripts/build/release/* config/scripts/release/	
+	cp packages/godwoken-scripts/build/release/* workspace/scripts/release/
+	cp packages/godwoken-scripts/c/build/meta-contract-validator workspace/scripts/release/	
+	cp packages/godwoken-scripts/c/build/meta-contract-generator workspace/deploy/backend/meta-contract-generator
+	cp packages/godwoken-scripts/c/build/meta-contract-validator workspace/deploy/backend/meta-contract-validator	
+	cp packages/godwoken-scripts/c/build/sudt-validator workspace/scripts/release/ 
+	cp packages/godwoken-scripts/c/build/sudt-generator workspace/deploy/backend/sudt-generator	
+	cp packages/godwoken-scripts/c/build/sudt-validator workspace/deploy/backend/sudt-validator
 
 rebuild-poa-scripts:
 	cd packages/clerkb && yarn && make all-via-docker
-	cp packages/clerkb/build/debug/poa config/scripts/release/
-	cp packages/clerkb/build/debug/state config/scripts/release/
+	cp packages/clerkb/build/debug/poa workspace/scripts/release/
+	cp packages/clerkb/build/debug/state workspace/scripts/release/
 
 ########## prebuild-quick-mode #############
 copy-polyjuice-bin-from-docker:	
@@ -290,8 +286,8 @@ copy-polyjuice-bin-from-docker:
 	docker cp dummy:/scripts/godwoken-polyjuice/. `pwd`/quick-mode/polyjuice
 	docker rm -f dummy
 # paste the prebuild bin to config dir for use
-	cp quick-mode/polyjuice/generator_log config/polyjuice-generator
-	cp quick-mode/polyjuice/validator_log config/polyjuice-validator	
+	cp quick-mode/polyjuice/generator_log workspace/deploy/polyjuice-backend/polyjuice-generator
+	cp quick-mode/polyjuice/validator_log workspace/deploy/polyjuice-backend/polyjuice-validator	
 
 copy-gw-scripts-and-bin-from-docker:
 	mkdir -p `pwd`/quick-mode/godwoken
@@ -301,17 +297,18 @@ copy-gw-scripts-and-bin-from-docker:
 # paste the prebuild bin to config dir for use	
 	cp quick-mode/godwoken/meta-contract-generator config/meta-contract-generator
 	cp quick-mode/godwoken/meta-contract-validator config/meta-contract-validator	
-	cp quick-mode/godwoken/sudt-generator config/sudt-generator	
-	cp quick-mode/godwoken/sudt-validator config/sudt-validator
+	cp quick-mode/godwoken/sudt-generator workspace/deploy/backend/sudt-generator	
+	cp quick-mode/godwoken/sudt-validator workspace/deploy/backend/sudt-validator
 # paste the prebuild scripts to config dir for use
-	cp quick-mode/godwoken/withdrawal-lock config/scripts/release/
-	cp quick-mode/godwoken/eth-account-lock config/scripts/release/
-	cp quick-mode/godwoken/stake-lock config/scripts/release/
-	cp quick-mode/godwoken/challenge-lock config/scripts/release/
-	cp quick-mode/godwoken/state-validator config/scripts/release/
-	cp quick-mode/godwoken/custodian-lock config/scripts/release/
-	cp quick-mode/godwoken/deposit-lock config/scripts/release/
-	cp quick-mode/godwoken/always-success config/scripts/release/
+	cp quick-mode/godwoken/withdrawal-lock workspace/scripts/release/
+	cp quick-mode/godwoken/eth-account-lock workspace/scripts/release/
+	cp quick-mode/godwoken/tron-account-lock workspace/scripts/release/
+	cp quick-mode/godwoken/stake-lock workspace/scripts/release/
+	cp quick-mode/godwoken/challenge-lock workspace/scripts/release/
+	cp quick-mode/godwoken/state-validator workspace/scripts/release/
+	cp quick-mode/godwoken/custodian-lock workspace/scripts/release/
+	cp quick-mode/godwoken/deposit-lock workspace/scripts/release/
+	cp quick-mode/godwoken/always-success workspace/scripts/release/
 
 copy-poa-scripts-from-docker:
 	mkdir -p `pwd`/quick-mode/clerkb
@@ -319,7 +316,7 @@ copy-poa-scripts-from-docker:
 	docker cp dummy:/scripts/clerkb/. `pwd`/quick-mode/clerkb
 	docker rm -f dummy
 # paste the prebuild scripts to config dir for use	
-	cp quick-mode/clerkb/* config/scripts/release/
+	cp quick-mode/clerkb/* workspace/scripts/release/
 
 copy-godwoken-binary-from-packages-to-workspace:
 	mkdir -p workspace/bin

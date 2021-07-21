@@ -9,7 +9,7 @@ RUN apt-get update \
  && echo "Finished installing dependencies"
 
 RUN if [ "$MANUAL_BUILD_WEB3" = true ] ; then \
-        cd /code/godwoken-web3 ;\
+        cd /code/packages/godwoken-web3 ;\
     else \
         cd /godwoken-web3 ;\
 fi

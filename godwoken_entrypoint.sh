@@ -3,18 +3,18 @@
 set -o errexit
 set -o xtrace
 PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-LUMOS_CONFIG_FILE=${PROJECT_DIR}/godwoken/deploy/lumos-config.json
-GODWOKEN_CONFIG_TOML_FILE=${PROJECT_DIR}/godwoken/config.toml
+LUMOS_CONFIG_FILE=${PROJECT_DIR}/workspace/deploy/lumos-config.json
+GODWOKEN_CONFIG_TOML_FILE=${PROJECT_DIR}/workspace/config.toml
 
 export PRIVKEY=deploy/private_key
 export CKB_RPC=http://ckb:8114
-export POLYMAN_RPC=http://polyjuice:6102
+export POLYMAN_RPC=http://call-polyman:6102
 export DATABASE_URL=postgres://user:password@postgres:5432/lumos
 
 # detect which godwoken to start (prebuild version or local manual-build version)
-if [ "$MANUAL_BUILD_GODWOKEN" = true ] ; then
-  export GODWOKEN_BIN=${PROJECT_DIR}/godwoken/target/debug/godwoken
-  export GW_TOOLS_BIN=${PROJECT_DIR}/godwoken/target/debug/gw-tools
+if [ "$MANUAL_BUILD_GODWOKEN" = true ] || [ "$MANUAL_BUILD_GODWOKEN" = "skip" ]; then
+  export GODWOKEN_BIN=${PROJECT_DIR}/workspace/bin/godwoken
+  export GW_TOOLS_BIN=${PROJECT_DIR}/workspace/bin/gw-tools
 else
   export GODWOKEN_BIN=godwoken
   export GW_TOOLS_BIN=gw-tools
@@ -24,7 +24,7 @@ fi
 source ${PROJECT_DIR}/gw_util.sh
 
 # ready to start godwoken
-cd ${PROJECT_DIR}/godwoken
+cd ${PROJECT_DIR}/workspace
 
 # first, start ckb-indexer 
 # todo: should remove to another service. but the port mapping some how not working.
@@ -96,7 +96,7 @@ update_godwoken_config_toml_with_l1_sudt_dep "$GODWOKEN_CONFIG_TOML_FILE" $depTy
 # generate godwoken config file for polyjuice
 callPolyman gen_config "$POLYMAN_RPC" 
 
-cd ${PROJECT_DIR}/godwoken 
+cd ${PROJECT_DIR}/workspace 
 
 # start godwoken
 RUST_LOG=gw_block_producer=info,gw_generator=debug,gw_web3_indexer=debug $GODWOKEN_BIN
