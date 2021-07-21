@@ -3,6 +3,11 @@ BUILD_MODE_ENV_FILE=./docker/.build.mode.env
 include $(BUILD_MODE_ENV_FILE)
 export $(shell sed 's/=.*//' $(BUILD_MODE_ENV_FILE))
 
+ifndef VERBOSE
+.SILENT:
+endif
+
+
 .PHONY: ckb
 
 ###### command list ########
