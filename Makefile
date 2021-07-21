@@ -162,12 +162,12 @@ clean:
 # FIXME: clean needs sudo privilage
 	rm -rf ckb-data/data
 	rm -rf ckb-cli-data/*
-	[ -e "indexer-data/ckb-indexer-data" ] && rm -rf indexer-data/ckb-indexer-data
-	[ -e "indexer-data/indexer-log" ] && rm indexer-data/indexer-log
-	[ -e "godwoken-polyman/packages/runner" ] && cd godwoken-polyman/packages/runner && rm -rf db && rm -rf temp-db
+	[ -e "indexer-data/ckb-indexer-data" ] && rm -rf indexer-data/ckb-indexer-data || echo "indexer-data/ckb-indexer-data already empty."
+	[ -e "indexer-data/indexer-log" ] && rm indexer-data/indexer-log || echo "indexer-data/indexer-log already empty."
+	[ -e "godwoken-polyman/packages/runner" ] && cd godwoken-polyman/packages/runner && rm -rf db && rm -rf temp-db && rm -rf || echo
 	rm -rf postgres-data/*
 # prepare brand new lumos config file for polyman 
-	[ -e "godwoken-polyman/packages/runner" ] && cp config/lumos-config.json godwoken-polyman/packages/runner/configs/
+	[ -e "godwoken-polyman/packages/runner" ] && cp config/lumos-config.json godwoken-polyman/packages/runner/configs/ || echo
 	rm -rf workspace/*
 
 enter-g:
