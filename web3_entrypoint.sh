@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -o errexit
-set -o xtrace
+#set -o xtrace
 PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 GODWOKEN_RPC_URL="http://godwoken:8119"
 
@@ -27,7 +27,7 @@ while true; do
       echo 'scripts-deploy-result.json file exits. continue.'
       break
     else
-      echo 'scripts-deploy-result.json file not exits, keep waitting for godwoken deployment.'
+      echo 'keep waitting for godwoken deploy scripts on chain...'
     fi
 done
 EthAccountLockCodeHash=$(jq -r '.eth_account_lock.script_type_hash' $LOCKSCRIPTS)

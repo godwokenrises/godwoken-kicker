@@ -76,7 +76,7 @@ isRollupCellExits(){
     ]
     }' \
     | tr -d '\n' \
-    | curl --ipv4 --retry 3 --retry-connrefused \
+    | curl -s --ipv4 --retry 3 --retry-connrefused \
     -H 'content-type: application/json' -d @- \
     http://localhost:8116)
 
@@ -306,7 +306,6 @@ paste_binary_into_path(){
 }
 
 isGodwokenRpcRunning(){
-    echo $1
     if [[ -n $1 ]]; 
     then
         local rpc_url="$1"
@@ -324,7 +323,7 @@ isGodwokenRpcRunning(){
     "params": []
     }' \
     | tr -d '\n' \
-    | curl --ipv4 --retry 3 --retry-connrefused \
+    | curl -s --ipv4 --retry 3 --retry-connrefused \
     -H 'content-type: application/json' -d @- \
     $rpc_url)
 
@@ -340,7 +339,6 @@ isGodwokenRpcRunning(){
 }
 
 isPolymanPrepareRpcRunning(){
-    echo $1
     if [[ -n $1 ]]; 
     then
         local rpc_url="$1"
@@ -351,7 +349,7 @@ isPolymanPrepareRpcRunning(){
     # curl retry on connrefused, considering ECONNREFUSED as a transient error(network issues)
     # connections with ipv6 are not retried because it returns EADDRNOTAVAIL instead of ECONNREFUSED,
     # hence we should use --ipv4
-    result=$(curl --ipv4 $rpc_url/ping)
+    result=$(curl -s --ipv4 $rpc_url/ping)
 
     if [[ $result =~ "pong" ]]; then
         echo "polyman prepare rpc server is up and running!"
@@ -494,7 +492,7 @@ callPolyman(){
     # curl retry on connrefused, considering ECONNREFUSED as a transient error(network issues)
     # connections with ipv6 are not retried because it returns EADDRNOTAVAIL instead of ECONNREFUSED,
     # hence we should use --ipv4
-    result=$(curl --ipv4 --retry 3 --retry-connrefused \
+    result=$(curl -s --ipv4 --retry 3 --retry-connrefused \
                     $rpc_url/$1)
 
     if [[ $result =~ '"status":"ok"' ]]; then

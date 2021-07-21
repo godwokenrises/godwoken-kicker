@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -o errexit
-set -o xtrace
+#set -o xtrace
 PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 LUMOS_CONFIG_FILE=${PROJECT_DIR}/workspace/deploy/lumos-config.json
 GODWOKEN_CONFIG_TOML_FILE=${PROJECT_DIR}/workspace/config.toml
@@ -27,8 +27,9 @@ source ${PROJECT_DIR}/gw_util.sh
 cd ${PROJECT_DIR}/workspace
 
 # first, start ckb-indexer 
-# todo: should remove to another service. but the port mapping some how not working.
-RUST_LOG=error ckb-indexer -s ${PROJECT_DIR}/indexer-data/ckb-indexer-data -c ${CKB_RPC} -l 0.0.0.0:8116 > ${PROJECT_DIR}/indexer-data/indexer-log & 
+# todo: should remove to another service. 
+mkdir -p ${PROJECT_DIR}/cache/activity/indexer-data 
+RUST_LOG=error ckb-indexer -s ${PROJECT_DIR}/cache/activity/indexer-data -c ${CKB_RPC} -l 0.0.0.0:8116 > ${PROJECT_DIR}/cache/activity/indexer-data/indexer-log & 
  
 # detect which mode to start godwoken
 if test -f "$GODWOKEN_CONFIG_TOML_FILE"; then
@@ -53,6 +54,8 @@ fi
 
 if [ $START_MODE = "slim_start" ]; then
   RUST_LOG=gw_block_producer=info,gw_generator=debug,gw_web3_indexer=debug $GODWOKEN_BIN
+  echo "Godwoken stopped!"
+  exit 125
 else
   echo 'run deploy mode'
 fi

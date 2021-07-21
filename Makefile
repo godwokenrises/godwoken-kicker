@@ -3,9 +3,7 @@ BUILD_MODE_ENV_FILE=./docker/.build.mode.env
 include $(BUILD_MODE_ENV_FILE)
 export $(shell sed 's/=.*//' $(BUILD_MODE_ENV_FILE))
 
-ifndef VERBOSE
-.SILENT:
-endif
+.PHONY: ckb
 
 ###### command list ########
 
@@ -41,7 +39,7 @@ install:
 # if manual build godwoken
 	if [ "$(MANUAL_BUILD_GODWOKEN)" = true ] ; then \
 		source ./gw_util.sh && prepare_package godwoken $$GODWOKEN_GIT_URL $$GODWOKEN_GIT_CHECKOUT ; \
-		docker run --rm -it -v `pwd`/packages/godwoken:/app -v `pwd`/cargo-cache-data:/root/.cargo/registry -w=/app retricsu/godwoken-manual-build cargo build ; \
+		docker run --rm -it -v `pwd`/packages/godwoken:/app -v `pwd`/cache/build/cargo-registry:/root/.cargo/registry -w=/app retricsu/godwoken-manual-build cargo build ; \
 		make copy-godwoken-binary-from-packages-to-workspace ; \
 	fi
 # if skip build godwoken, using paste mode
@@ -71,6 +69,17 @@ install:
 
 uninstall:
 	rm -rf packages/*
+
+clean:
+# FIXME: clean needs sudo privilage
+	rm -rf cache/activity/*
+	rm -rf workspace/*
+# prepare brand new lumos config file for polyman 
+	[ -e "packages/godwoken-polyman/packages/runner" ] && cp config/lumos-config.json packages/godwoken-polyman/packages/runner/configs/ || : 
+	echo "remove cache data from activities."
+
+clean-build-cache:
+	rm -rf cache/build/*
 
 init:
 	make create-folder
@@ -157,18 +166,6 @@ enter-ckb:
 
 enter-db:
 	cd docker && docker-compose exec postgres bash
-
-clean:
-# FIXME: clean needs sudo privilage
-	rm -rf ckb-data/data
-	rm -rf ckb-cli-data/*
-	[ -e "indexer-data/ckb-indexer-data" ] && rm -rf indexer-data/ckb-indexer-data || echo "indexer-data/ckb-indexer-data already empty."
-	[ -e "indexer-data/indexer-log" ] && rm indexer-data/indexer-log || echo "indexer-data/indexer-log already empty."
-	[ -e "godwoken-polyman/packages/runner" ] && cd godwoken-polyman/packages/runner && rm -rf db && rm -rf temp-db && rm -rf || echo
-	rm -rf postgres-data/*
-# prepare brand new lumos config file for polyman 
-	[ -e "godwoken-polyman/packages/runner" ] && cp config/lumos-config.json godwoken-polyman/packages/runner/configs/ || echo
-	rm -rf workspace/*
 
 enter-g:
 	cd docker && docker-compose exec godwoken bash

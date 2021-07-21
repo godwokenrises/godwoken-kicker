@@ -5,7 +5,7 @@ node_modules/
 yarn-error.log
 polyjuice/node_modules
 polyjuice/*.log
-ckb-data/data
+ckb/data
 indexer-data/ckb-indexer-data
 indexer-data/indexer-log
 ckb-cli-data/
@@ -23,6 +23,9 @@ config/scripts/release/*
 config/*generator
 config/*validator
 
-packages
+packages/*
+!packages/.gitkeep
 workspace/*
 !workspace/.gitkeep
+cache/activity/*
+cache/build/*

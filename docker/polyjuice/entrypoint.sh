@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -o errexit
-set -o xtrace
+#set -o xtrace
 PROJECT_DIR=/code
 GODWOKEN_RPC_URL="http://godwoken:8119"
 
