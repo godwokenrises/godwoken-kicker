@@ -431,6 +431,12 @@ edit_godwoken_config_toml(){
     set_key_value_in_toml "privkey_path" "deploy/private_key" $1
     set_key_value_in_toml "listen" "0.0.0.0:8119" $1
 
+    ## set store path
+    # delete the default path
+    sed -i '/\[store\]/{n;d}' $1
+    # add an new path
+    sed -i "/\[store\]/a\path = '../cache/activity/godwoken-chain-data'" $1
+
     ## 1. reward lock update
     # delete the default reward lock
     sed -i '/\[block_producer.challenger_config.rewards_receiver_lock\]/{n;d}' $1 
