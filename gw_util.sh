@@ -43,7 +43,6 @@ parse_toml_with_section(){
 }
 
 isRollupCellExits(){
-    echo $1
     if [[ -n $1 ]]; 
     then
         local tomlconfigfile="$1"
