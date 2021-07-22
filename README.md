@@ -2,7 +2,7 @@
 
 one line command to start godwoken-polyjuice chain for devnet.
 
-`note: this branch is used as test for all latest componets version. only support manual-build mode(custom-mode).`
+`develop branch for kicker. most of time, only support manual-build mode(custom-mode).`
 
 ----
 
@@ -26,9 +26,9 @@ eg: you can use manual mode to debug with
 - godwoken-polyjuice
 ```
 
-by default, we ship the components with the ***same version*** in both quick-mode(under prebuild-docker-image) and custom-mode(under local submodule folder). you can checkout the specific version information for all components in the release tags descriptions.
+by default, we ship the components with the ***same version*** in both quick-mode(under prebuild-docker-image) and custom-mode(under local packages folder). you can checkout the specific version information for all components in the release tags descriptions.
 
-### 1. quick mode
+## 1. Quick mode
 
 make sure you have `docker` and `docker-compose` install on your machine.
 
@@ -44,7 +44,7 @@ git clone https://github.com/RetricSu/godwoken-kicker.git
 cd godwoken-kicker 
 ```
 
-when you run first time, or everytime after you change mode, please do:
+when you run first time, or everytime after you change mode / clean data, please do:
 
 ```sh
 make init
@@ -59,18 +59,18 @@ make start
 you can monitor godwoken and polyjuice backend real-time activities:
 
 ```sh
-make sp # sp means show polyjuice activities
-make sg # sg means show godwoken activities
+make sp # sp means show polyjuice chain manage-server logs
+make sg # sg means show godwoken logs
 ```
 
 after everything started, check `http://localhost:6100/` to deploy contract.
 
 ![panel](docs/main.png)
 
-## How to deploy contract
+### How to deploy contract
 
 1. open `http://localhost:6100/`, connect with your metamask address
-2. click `Deposit` button to fund some devnet ckb on your metamask address.
+2. click `Deposit` button to fund 400 devnet ckb on your metamask address each time.
 3. after deposit finished,
     - click `Deploy Contract` button
     - select the contract compile artifact json file or binary file from your computer
@@ -80,18 +80,19 @@ then the deployment will auto start.
 
 after deployment successfully get done, you will find the contract address listing below.
 
-## How to test dapp
+### How to test dapp
 
 you can use the kicker's built-in `Contract Debugger` right on the page to give your dapp a first simple manual test.
 
 ![panel](docs/contract-debugger.png)
 
-### 2. custom mode
+## 2. Custom mode
 
-#### ***- build custom components on manual***
+### ***- build custom components on local***
 
 open `/docker/.build.mode.env` file, under the [mode] section,
-set the component you want to `true`
+set the component you want to `true`, 
+and set the github repo url and checkout for componets
 
 ```sh
 ####[mode]
@@ -99,6 +100,16 @@ MANUAL_BUILD_GODWOKEN=false
 MANUAL_BUILD_WEB3=false
 MANUAL_BUILD_SCRIPTS=false
 MANUAL_BUILD_POLYJUICE=false
+...
+
+####[packages]
+GODWOKEN_GIT_URL=https://github.com/nervosnetwork/godwoken.git
+GODWOKEN_GIT_CHECKOUT=master
+POLYMAN_GIT_URL=https://github.com/RetricSu/godwoken-polyman.git
+POLYMAN_GIT_CHECKOUT=master
+WEB3_GIT_URL=https://github.com/nervosnetwork/godwoken-web3.git
+WEB3_GIT_CHECKOUT=main
+...
 ```
 
 then run
@@ -108,51 +119,39 @@ make init
 make start
 ```
 
-and the component will be build and run through submodule on manual.
+and the component will be build and run through submodule on local.
 
-#### ***- set custom submodule for component***
+### ***- skip building Godwoken by providing binary***
 
-you can also change different submodule of components if you want.
+sometimes you don't want to building Godwoken in Kicker beacuse the network inside docker container can be unreliable slow. 
 
-by running
-
-```sh
-make gen-submodule-env
-```
-
-you can have a quick overview about current submodules info at `/docker/.submodule.list.env`:
+you can set `/docker/.build.mode.env` to "skip" option:
 
 ```sh
-####[godwoken]
-#info: tags/v0.2.4-0-gdd58925, dd58925 fix(web3-indexer): Transaction data and v format
-GODWOKEN_URL=https://github.com/nervosnetwork/godwoken.git
-GODWOKEN_BRANCH=master
-GODWOKEN_COMMIT=dd58925
-
-####[godwoken-web3]
-#info: tags/v0.2.2-0-g0324166, 0324166 Merge pull request #5 from nervosnetwork/fix-bugs
-GODWOKEN_WEB3_URL=https://github.com/nervosnetwork/godwoken-web3.git
-GODWOKEN_WEB3_BRANCH=main
-GODWOKEN_WEB3_COMMIT=0324166
-
-....
+####[mode]
+MANUAL_BUILD_GODWOKEN=skip
+MANUAL_BUILD_WEB3=false
+MANUAL_BUILD_SCRIPTS=false
+MANUAL_BUILD_POLYJUICE=false
+...
 ```
 
-you can change the submodule info (like remote url/branch/commit) to fetch your own submodule.
+provide your own godwoken binary:
 
-just run the follwoing command after you edit the `/docker/.submodule.list.env` file.
+```s
+make pass-godwoken-binary
+```
+
+or simply copy the binaries of godwoken and gw-tools into this path `/workspace/bin/` by yourself.
+
+finally, run:
 
 ```sh
-make update-submodule
+make init
+make start
 ```
 
-then you can check submodule again to ensure it indeed updated as you want:
-
-```sh
-make gen-submodule-env
-```
-
-***NOTE: this will remove all local file in submodule. so all your local changed will gone.***
+everything is good!
 
 ## Some useful command
 
