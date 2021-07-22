@@ -47,6 +47,9 @@ while true; do
 done
 RollupTypeHash=$(awk -F'[ ="]+' '$1 == "rollup_type_hash" { print $2 }' $CONFIGTOML | sed 's/\x27//g')
 
+# create folder for address mapping store
+mkdir -p /usr/local/godwoken-web3/address-mapping
+
 cat > ./packages/api-server/.env <<EOF
 DATABASE_URL=postgres://user:password@postgres:5432/lumos
 GODWOKEN_JSON_RPC=http://godwoken:8119
@@ -55,6 +58,7 @@ ROLLUP_TYPE_HASH=$RollupTypeHash
 PORT=8024
 CHAIN_ID=3
 CREATOR_ACCOUNT_ID=3
+ADDRESS_STORE_PATH_ABSOLUTE=/usr/local/godwoken-web3/address-mapping
 DEFAULT_FROM_ADDRESS=0x6daf63d8411d6e23552658e3cfb48416a6a2ca78
 POLYJUICE_VALIDATOR_TYPE_HASH=$PolyjuiceValidatorCodeHash
 EOF
