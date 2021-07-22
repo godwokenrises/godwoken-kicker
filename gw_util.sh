@@ -318,7 +318,7 @@ isGodwokenRpcRunning(){
     result=$( echo '{
     "id": 2,
     "jsonrpc": "2.0",
-    "method": "ping",
+    "method": "gw_ping",
     "params": []
     }' \
     | tr -d '\n' \
