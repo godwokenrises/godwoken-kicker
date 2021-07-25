@@ -261,10 +261,10 @@ update_submodules(){
 
 update_godwoken_dockerfile_to_manual_mode(){
     File="docker/layer2/Dockerfile"
-    if sed -i 's/FROM .*/FROM ${DOCKER_MANUAL_BUILD_IMAGE}/' $File ; then # for linux system
+    if sed -i 's/FROM .*/FROM ${DOCKER_MANUAL_BUILD_IMAGE}/' $File &> /dev/null ; then # for linux system
         echo "update godwoken dockerfile tomanual_mode." ;
     else
-       sed -i "" 's/FROM .*/FROM ${DOCKER_MANUAL_BUILD_IMAGE}/' ; # for unix system
+        sed -i "" 's/FROM .*/FROM ${DOCKER_MANUAL_BUILD_IMAGE}/' $File ; # for unix system
     fi
 }
 
