@@ -4,6 +4,118 @@
 # which doesnt have poa scripts built-in.
 LEGACY_PREBUILD_IMAGE_VERSION=0.2.4
 
+# 1. Create ProgressBar function
+# 1.1 Input is currentState($1) and totalState($2)
+function ProgressBar {
+# Process data
+    let _progress=(${1}*100/${2}*100)/100
+    let _done=(${_progress}*4)/10
+    let _left=40-$_done
+# Build progressbar string lengths
+    _fill=$(printf "%${_done}s")
+    _empty=$(printf "%${_left}s")
+
+# 1.2 Build progressbar strings and print the ProgressBar line
+# 1.2.1 Output example:                           
+# 1.2.1.1 Progress : [########################################] 100%
+    printf "\rProgress : [${_fill// /#}${_empty// /-}] ${_progress}%%"
+}
+
+show_progress(){
+   # multiple stages:
+   #    1. call-polyman => prepare sudt scripts on layer1 (about 1-2 blocks time)
+   #    2. godwoken => deploy scripts (a long time)
+   #    3. godwoken => rpc server up, start produce block
+   #    4. polyjuice => create a account
+   #    5. polyjuice => create creator account
+   #    end => show 6100 frontend.
+
+   stage1_service="godwoken"
+   stage1_info="ready to call prepare_sudt_scripts with polyman.."
+   stage1_number=5
+
+   stage2_service="godwoken"
+   stage2_info="gw_tools::deploy_scripts] deploy binary"
+   stage2_number=10
+   
+   stage3_service="godwoken"
+   stage3_info="gw_block_producer::runner] Rollup type script hash"
+   stage4_number=70
+   
+   stage4_service="godwoken"
+   stage4_info="gw_block_producer::block_producer] produce new block"
+   stage4_number=75
+
+   stage5_service="polyjuice"
+   stage5_info="create deposit account.0x2"
+   stage5_number=85
+
+   stage6_service="polyjuice"
+   stage6_info="create creator account => 0x3"
+   stage6_number=100
+
+   checkLogsToSetProgress "$stage1_info" "$stage1_number" "$stage1_service"
+   checkLogsToSetProgress "$stage2_info" "$stage2_number" "$stage1_service"
+   checkLogsToSetProgress "$stage3_info" "$stage3_number" "$stage1_service"
+   checkLogsToSetProgress "$stage4_info" "$stage4_number" "$stage1_service"
+   checkLogsToSetProgress "$stage5_info" "$stage5_number" "$stage5_service"
+   checkLogsToSetProgress "$stage6_info" "$stage6_number" "$stage6_service"
+
+   # for i in $(seq 1 6)
+   # do
+   #      _info=$(echo "stage${i}_info")
+   #      _number="stage${i}_number"
+   #      _service="stage${i}_service"
+   #      info="${!_info}"
+   #      service=$(echo "${!_service}")
+   #      checkLogsToSetProgress $info $number $service
+   # done
+}
+
+# read_docker_logs docker-compose-path service-name
+read_docker_logs(){
+    _log=$(cd $1 && docker-compose logs --tail 10 $2)
+    echo $_log
+}
+
+# usage:
+#   checkLogsToSetProgress stageInfo targetProgressState docker-service
+checkLogsToSetProgress() {
+    # This accounts as the "totalState" variable for the ProgressBar function
+    _end=100
+    while true
+    do
+        _log=$(read_docker_logs ./docker "$3")
+        if [[  $_log =~ $1 ]]; then
+            ProgressBar $2 ${_end}
+            break
+        fi
+        sleep 2
+    done
+}
+
+show_wait_tips(){
+    red=`tput setaf 1`
+    GREEN=`tput setaf 2`
+    NO_COLOR=`tput sgr0`
+
+    content="
+Starting multiple services for Kicker. 
+once every service is ready, you are good to go!
+notice: this might takes couple minutes to finish...
+
+#=== Type Commands To Check Progress ===# ${GREEN}
+
+    make sg (Godwoken)
+    make sp (Polyjuice)
+    make web3 (web3)
+    make call-polyman (setup service)
+${NO_COLOR}
+"
+    printf "$content"
+    show_progress
+}
+
 # how to use: 
 #    parese_toml_with_section file_path section_name key_name
 parse_toml_with_section(){
