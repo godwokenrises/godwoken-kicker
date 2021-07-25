@@ -31,20 +31,21 @@ create-folder:
 
 install: SHELL:=/bin/bash
 install:
-# if manual build polyman
-	if [ "$(MANUAL_BUILD_POLYMAN)" = true ] ; then \
-		source ./gw_util.sh && prepare_package godwoken-polyman $$POLYMAN_GIT_URL $$POLYMAN_GIT_CHECKOUT ; \
-		docker run --rm -v `pwd`/packages/godwoken-polyman:/app -w=/app $$DOCKER_JS_PREBUILD_IMAGE_NAME:$$DOCKER_JS_PREBUILD_IMAGE_TAG yarn ; \
-	fi
 # if manual build web3
 	if [ "$(MANUAL_BUILD_WEB3)" = true ] ; then \
 		source ./gw_util.sh && prepare_package godwoken-web3 $$WEB3_GIT_URL $$WEB3_GIT_CHECKOUT ; \
-		docker run --rm -v `pwd`/packages/godwoken-web3:/app -w=/app $$DOCKER_JS_PREBUILD_IMAGE_NAME:$$DOCKER_JS_PREBUILD_IMAGE_TAG /bin/bash -c "yarn; yarn workspace @godwoken-web3/godwoken tsc; yarn workspace @godwoken-web3/api-server tsc" ; \
+		make copy-web3-node-modules-from-docker ;\
+		docker run --rm -v `pwd`/packages/godwoken-web3:/app -w=/app $$DOCKER_JS_PREBUILD_IMAGE_NAME:$$DOCKER_JS_PREBUILD_IMAGE_TAG /bin/bash -c "yarn workspace @godwoken-web3/godwoken tsc; yarn workspace @godwoken-web3/api-server tsc;" ; \
+	fi
+# if manual build polyman
+	if [ "$(MANUAL_BUILD_POLYMAN)" = true ] ; then \
+		source ./gw_util.sh && prepare_package godwoken-polyman $$POLYMAN_GIT_URL $$POLYMAN_GIT_CHECKOUT ; \
+		make copy-polyman-node-modules-from-docker ;\
 	fi
 # if manual build godwoken
 	if [ "$(MANUAL_BUILD_GODWOKEN)" = true ] ; then \
 		source ./gw_util.sh && prepare_package godwoken $$GODWOKEN_GIT_URL $$GODWOKEN_GIT_CHECKOUT ; \
-		docker run --rm -it -v `pwd`/packages/godwoken:/app -v `pwd`/cache/build/cargo-registry:/root/.cargo/registry -w=/app retricsu/godwoken-manual-build cargo build ; \
+		source ./gw_util.sh && cargo_build_local_or_docker ; \
 		make copy-godwoken-binary-from-packages-to-workspace ; \
 	fi
 # if skip build godwoken, using paste mode
@@ -91,18 +92,18 @@ clean-cache:
 
 init:
 	make create-folder
-	make install
 	cp ./config/private_key ./workspace/deploy/private_key
 	sh ./docker/layer2/init_config_json.sh
+	cp docker/layer2/Dockerfile.example docker/layer2/Dockerfile
 # build image for docker-compose build cache
 	make build-image
 
 build-image: SHELL:=/bin/bash
-build-image:
-	cp docker/layer2/Dockerfile.example docker/layer2/Dockerfile
+build-image: 
 	if [ "$(MANUAL_BUILD_GODWOKEN)" = true ] || [ "$(MANUAL_BUILD_GODWOKEN)" = "skip" ]; then \
 		source ./gw_util.sh && update_godwoken_dockerfile_to_manual_mode ; \
-	fi 
+	fi
+	make install
 	cd docker && docker-compose build --no-rm 	
 
 show_wait_tips: SHELL:=/bin/bash
@@ -329,3 +330,15 @@ copy-godwoken-binary-from-packages-to-workspace:
 	mkdir -p workspace/bin
 	cp packages/godwoken/target/debug/godwoken workspace/bin/godwoken
 	cp packages/godwoken/target/debug/gw-tools workspace/bin/gw-tools
+
+copy-web3-node-modules-from-docker:
+	mkdir -p `pwd`/packages/godwoken-web3/node_modules 
+	docker run -it -d --name dummy $$DOCKER_JS_PREBUILD_IMAGE_NAME:$$DOCKER_JS_PREBUILD_IMAGE_TAG 
+	docker cp dummy:/godwoken-web3/node_modules `pwd`/packages/godwoken-web3/ 
+	docker rm -f dummy 
+
+copy-polyman-node-modules-from-docker:
+	mkdir -p `pwd`/packages/godwoken-polyman/node_modules
+	docker run -it -d --name dummy $$DOCKER_JS_PREBUILD_IMAGE_NAME:$$DOCKER_JS_PREBUILD_IMAGE_TAG
+	docker cp dummy:/godwoken-polyman/node_modules `pwd`/packages/godwoken-polyman/
+	docker rm -f dummy
