@@ -20,7 +20,8 @@ RUN npm install -g yarn
 RUN cargo install moleculec --version 0.6.1
 RUN echo $HOME 
 RUN moleculec --version
-RUN curl http://ftp.br.debian.org/debian/pool/main/g/glibc/libc6_2.31-11_amd64.deb --output libc6_2.31-11_amd64.deb && dpkg -i libc6_2.31-11_amd64.deb 
+#RUN curl http://ftp.br.debian.org/debian/pool/main/g/glibc/libc6_2.31-11_amd64.deb --output libc6_2.31-11_amd64.deb && dpkg -i libc6_2.31-11_amd64.deb 
+RUN apt-get install libc6 -y
 
 # install ckb tools
 RUN mkdir /ckb

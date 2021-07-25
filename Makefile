@@ -44,7 +44,7 @@ install:
 # if manual build godwoken
 	if [ "$(MANUAL_BUILD_GODWOKEN)" = true ] ; then \
 		source ./gw_util.sh && prepare_package godwoken $$GODWOKEN_GIT_URL $$GODWOKEN_GIT_CHECKOUT ; \
-		source ./gw_util.sh && cargo_build_local_or_docker && cd ../.. \
+		source ./gw_util.sh && cargo_build_local_or_docker ; \
 		make copy-godwoken-binary-from-packages-to-workspace ; \
 	fi
 # if skip build godwoken, using paste mode

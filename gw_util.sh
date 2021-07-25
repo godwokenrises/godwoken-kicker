@@ -261,7 +261,11 @@ update_submodules(){
 
 update_godwoken_dockerfile_to_manual_mode(){
     File="docker/layer2/Dockerfile"
-    sed -i "" 's/FROM .*/FROM ${DOCKER_MANUAL_BUILD_IMAGE}/' $File
+    if sed -i 's/FROM .*/FROM ${DOCKER_MANUAL_BUILD_IMAGE}/' $File ; then # for linux system
+        echo "update godwoken dockerfile tomanual_mode." ;
+    else
+       sed -i "" 's/FROM .*/FROM ${DOCKER_MANUAL_BUILD_IMAGE}/' ; # for unix system
+    fi
 }
 
 init_submodule_if_empty(){
@@ -595,9 +599,9 @@ wait_for_address_got_suffice_money(){
 }
 
 cargo_build_local_or_docker(){
-    if cargo --version ; then
+    if cdargo --version ; then
         echo "build Godwoken on local"
-        cd packages/godwoken && cargo build
+        cd packages/godwoken && cargo build && cd ../..
     else
         echo "build Godwoken via Docker"
         docker run --rm -it -v `pwd`/packages/godwoken:/app -v `pwd`/docker/layer2/cargo:/.cargo/ -v `pwd`/cache/build/cargo-registry:/root/.cargo/registry -w=/app retricsu/godwoken-manual-build cargo build ;
