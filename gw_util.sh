@@ -599,7 +599,7 @@ wait_for_address_got_suffice_money(){
 }
 
 cargo_build_local_or_docker(){
-    if carigo --version ; then
+    if cargo --version ; then
         echo "build Godwoken on local"
         cd packages/godwoken && cargo build && cd ../..
     else
