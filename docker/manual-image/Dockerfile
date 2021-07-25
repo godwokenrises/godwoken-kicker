@@ -8,7 +8,7 @@ RUN apt update -y && \
     DEBIAN_FRONTEND=noninteractive apt-get install cmake musl-tools clang libc++-dev autoconf libtool pkg-config unzip -y
 
 # Install Rust
-RUN curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly-2020-09-28 -y
+RUN curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain 1.50.0 -y
 ENV PATH=/root/.cargo/bin:$PATH
 RUN which cargo
 
