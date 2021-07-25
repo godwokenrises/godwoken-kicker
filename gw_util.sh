@@ -599,11 +599,35 @@ wait_for_address_got_suffice_money(){
 }
 
 cargo_build_local_or_docker(){
-    if cargo --version ; then
+    if carigo --version ; then
         echo "build Godwoken on local"
         cd packages/godwoken && cargo build && cd ../..
     else
         echo "build Godwoken via Docker"
-        docker run --rm -it -v `pwd`/packages/godwoken:/app -v `pwd`/docker/layer2/cargo:/.cargo/ -v `pwd`/cache/build/cargo-registry:/root/.cargo/registry -w=/app retricsu/godwoken-manual-build cargo build ;
+        ## decide how to pass proxy host to docker 
+        ## according to differen docker version
+        ## see: https://stackoverflow.com/questions/24319662/from-inside-of-a-docker-container-how-do-i-connect-to-the-localhost-of-the-mach
+        if [[ $(docker -v) != *20.10.* ]] && [[ "$OSTYPE" == "linux-gnu"* ]]; then
+            echo 'Docker version not 20.10.0+!'
+            docker run --rm -it --network="host" -v `pwd`/packages/godwoken:/app -v `pwd`/docker/layer2/cargo:/.cargo/ -v `pwd`/cache/build/cargo-registry:/root/.cargo/registry -w=/app retricsu/godwoken-manual-build cargo build ;
+            return 0;
+        fi
+
+        if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+            echo "linux-gnu"
+            docker run --rm -it --add-host host.docker.internal:host-gateway -v `pwd`/packages/godwoken:/app -v `pwd`/docker/layer2/cargo:/.cargo/ -v `pwd`/cache/build/cargo-registry:/root/.cargo/registry -w=/app retricsu/godwoken-manual-build cargo build ;
+        elif [[ "$OSTYPE" == "darwin"* ]]; then
+            # Mac OSX
+            echo "mac osx"
+            docker run --rm -it -v `pwd`/packages/godwoken:/app -v `pwd`/docker/layer2/cargo:/.cargo/ -v `pwd`/cache/build/cargo-registry:/root/.cargo/registry -w=/app retricsu/godwoken-manual-build cargo build ;
+        elif [[ "$OSTYPE" == "cygwin" ]]; then
+            echo "windows"
+            # POSIX compatibility layer and Linux environment emulation for Windows
+            docker run --rm -it -v `pwd`/packages/godwoken:/app -v `pwd`/docker/layer2/cargo:/.cargo/ -v `pwd`/cache/build/cargo-registry:/root/.cargo/registry -w=/app retricsu/godwoken-manual-build cargo build ;
+        elif [[ "$OSTYPE" == "msys" ]]; then
+            # Lightweight shell and GNU utilities compiled for Windows (part of MinGW)
+            echo "windows"
+            docker run --rm -it -v `pwd`/packages/godwoken:/app -v `pwd`/docker/layer2/cargo:/.cargo/ -v `pwd`/cache/build/cargo-registry:/root/.cargo/registry -w=/app retricsu/godwoken-manual-build cargo build ;
+        fi
     fi
 }
