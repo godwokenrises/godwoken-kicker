@@ -31,6 +31,16 @@ create-folder:
 
 install: SHELL:=/bin/bash
 install:
+# if manual build polyman
+	if [ "$(MANUAL_BUILD_POLYMAN)" = true ] ; then \
+		source ./gw_util.sh && prepare_package godwoken-polyman $$POLYMAN_GIT_URL $$POLYMAN_GIT_CHECKOUT ; \
+		docker run --rm -v `pwd`/packages/godwoken-polyman:/app -w=/app $$DOCKER_JS_PREBUILD_IMAGE_NAME:$$DOCKER_JS_PREBUILD_IMAGE_TAG yarn ; \
+	fi
+# if manual build web3
+	if [ "$(MANUAL_BUILD_WEB3)" = true ] ; then \
+		source ./gw_util.sh && prepare_package godwoken-web3 $$WEB3_GIT_URL $$WEB3_GIT_CHECKOUT ; \
+		docker run --rm -v `pwd`/packages/godwoken-web3:/app -w=/app $$DOCKER_JS_PREBUILD_IMAGE_NAME:$$DOCKER_JS_PREBUILD_IMAGE_TAG /bin/bash -c "yarn; yarn workspace @godwoken-web3/godwoken tsc; yarn workspace @godwoken-web3/api-server tsc" ; \
+	fi
 # if manual build godwoken
 	if [ "$(MANUAL_BUILD_GODWOKEN)" = true ] ; then \
 		source ./gw_util.sh && prepare_package godwoken $$GODWOKEN_GIT_URL $$GODWOKEN_GIT_CHECKOUT ; \
