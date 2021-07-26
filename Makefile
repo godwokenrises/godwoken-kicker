@@ -115,7 +115,7 @@ start:
 	make show_wait_tips
 
 start-f:
-	cd docker && FORCE_GODWOKEN_REDEPLOY=true docker-compose --env-file .build.mode.env up -d --build
+	cd docker && FORCE_GODWOKEN_REDEPLOY=true docker-compose --env-file .build.mode.env up -d --build > /dev/null
 	make show_wait_tips
 
 restart:
