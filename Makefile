@@ -110,14 +110,6 @@ show_wait_tips: SHELL:=/bin/bash
 show_wait_tips:
 	source ./gw_util.sh && show_wait_tips	
 
-progress: SHELL:=/bin/bash
-progress:
-	source ./gw_util.sh && show_progress
-
-read-log: SHELL:=/bin/bash
-read-log:
-	source ./gw_util.sh && show_progress
-
 start: 
 	cd docker && FORCE_GODWOKEN_REDEPLOY=false docker-compose --env-file .build.mode.env up -d --build > /dev/null
 	make show_wait_tips
