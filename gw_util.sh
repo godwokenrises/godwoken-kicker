@@ -507,7 +507,7 @@ update_submodules(){
 update_godwoken_dockerfile_to_manual_mode(){
     File="docker/layer2/Dockerfile"
     if sed -i 's/FROM .*/FROM ${DOCKER_MANUAL_BUILD_IMAGE}/' $File &> /dev/null ; then # for linux system
-        echo "update godwoken dockerfile tomanual_mode." ;
+        echo "update godwoken dockerfile to manual_mode." ;
     else
         sed -i "" 's/FROM .*/FROM ${DOCKER_MANUAL_BUILD_IMAGE}/' $File ; # for unix system
     fi
@@ -678,6 +678,10 @@ test_version_comp () {
     else
         echo "Pass: '$1 $op $2'"
     fi
+}
+
+remove_dummy_docker_if_exits(){
+    [ "$(docker ps -a | grep dummy)" ] && docker rm -f dummy || :
 }
 
 copy_poa_scripts_from_docker_or_abort(){
