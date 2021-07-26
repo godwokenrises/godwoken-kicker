@@ -116,6 +116,7 @@ start:
 
 start-f:
 	cd docker && FORCE_GODWOKEN_REDEPLOY=true docker-compose --env-file .build.mode.env up -d --build
+	make show_wait_tips
 
 restart:
 	cd docker && docker-compose restart
