@@ -53,7 +53,7 @@ else
 fi
 
 if [ $START_MODE = "slim_start" ]; then
-  RUST_LOG=gw_block_producer=info,gw_generator=debug,gw_web3_indexer=debug $GODWOKEN_BIN
+  GODWOKEN_DEBUG=true RUST_LOG=gw_block_producer=info,gw_generator=debug,gw_web3_indexer=debug $GODWOKEN_BIN
   echo "Godwoken stopped!"
   exit 125
 else
@@ -102,4 +102,4 @@ callPolyman gen_config "$POLYMAN_RPC"
 cd ${PROJECT_DIR}/workspace 
 
 # start godwoken
-RUST_LOG=gw_block_producer=info,gw_generator=debug,gw_web3_indexer=debug $GODWOKEN_BIN
+GODWOKEN_DEBUG=true RUST_LOG=gw_block_producer=info,gw_generator=debug,gw_web3_indexer=debug $GODWOKEN_BIN
