@@ -15,6 +15,13 @@ function ProgressBar {
     GREEN=`tput setaf 2`
     NO_COLOR=`tput sgr0`
 # Process data
+    if [ ${#3} -gt 20 ]; then
+        STR12="${3:0:20}.."
+    else
+        STR12="$3                    "         # 20 spaces here    
+        STR12="${STR12:0:20}"
+    fi
+
     let _progress=(${1}*100/${2}*100)/100
     let _done=(${_progress}*4)/10
     let _left=40-$_done
@@ -25,7 +32,7 @@ function ProgressBar {
 # 1.2 Build progressbar strings and print the ProgressBar line
 # 1.2.1 Output example:                           
 # 1.2.1.1 Progress : [########################################] 100%
-    printf "\rKicker: ${GREEN}[${_fill// /#}${_empty// /-}] ${_progress}%%${NO_COLOR}"
+    printf "\r${STR12}: ${GREEN}[${_fill// /#}${_empty// /-}] ${_progress}%%${NO_COLOR}"
 }
 
 # read_docker_logs docker-compose-path service-name how-many-last-logs-to-show
@@ -46,41 +53,75 @@ checkLogsToSetProgress() {
     _end=100
 
     # godwoken activity
+    stage1_name="sudt script   " # should be 6 word length
     stage1_info="ready to call prepare_sudt_scripts with polyman.."
     stage1_number=5
+
+    stage2_name="deployment"
     stage2_info="gw_tools::deploy_scripts] deploy binary"
     stage2_number=10
+
+    stage2_1_name="custodian-lock"
     stage2_1_info='deploy binary "scripts/release/custodian-lock"'
     stage2_1_number=15
+
+    stage2_2_name="deposit-lock"
     stage2_2_info='deploy binary "scripts/release/deposit-lock"'
     stage2_2_number=20
+
+    stage2_3_name="withdrawal-lock"
     stage2_3_info='deploy binary "scripts/release/withdrawal-lock"'
     stage2_3_number=25
+
+    stage2_4_name="challenge-lock"
     stage2_4_info='deploy binary "scripts/release/challenge-lock"'
     stage2_4_number=30
+
+    stage2_5_name="stake-lock"
     stage2_5_info='deploy binary "scripts/release/stake-lock"'
     stage2_5_number=35
+
+    stage2_6_name="state-validator"
     stage2_6_info='deploy binary "scripts/release/state-validator"'
     stage2_6_number=40
+
+    stage2_7_name="meta-contract"
     stage2_7_info='deploy binary "scripts/release/meta-contract-validator"'
     stage2_7_number=45
+
+    stage2_8_name="eth-account-lock"
     stage2_8_info='deploy binary "scripts/release/eth-account-lock"'
     stage2_8_number=50
+
+    stage2_9_name="tron-account-lock"
     stage2_9_info='deploy binary "scripts/release/tron-account-lock"'
     stage2_9_number=55
+
+    stage2_10_name="polyjuice-validator"
     stage2_10_info='deploy binary "scripts/release/polyjuice-validator"'
     stage2_10_number=60
+
+    stage2_11_name="poa"
     stage2_11_info='deploy binary "scripts/release/poa"'
     stage2_11_number=65
+
+    stage2_12_name="poa-state"
     stage2_12_info='deploy binary "scripts/release/state"'
     stage2_12_number=68
+
+    stage3_name="deploy_genesis"
     stage3_info="gw_tools::deploy_genesis] tx_hash"
     stage3_number=70
+
+    stage4_name="produce block"
     stage4_info="produce new block #"
     stage4_number=75
     # polyjuice activity
+    stage5_name="create account"
     stage5_info="create deposit account.0x2"
     stage5_number=85
+
+    stage6_name="create creator"
     stage6_info="create creator account => 0x3"
     stage6_number=95
 
@@ -90,7 +131,7 @@ checkLogsToSetProgress() {
     do
         # if two rpc is up and all set.
         if isPolymanUIRunning "${POLYMAN_UI_URL}" &> /dev/null && isGodwokenRpcRunning "${GODWOKEN_RPC}" &> /dev/null; then
-          ProgressBar ${_end} ${_end}
+          ProgressBar ${_end} ${_end} "All Jobs Done"
           show_success_finish_info 
           break;
         fi
@@ -118,63 +159,63 @@ checkLogsToSetProgress() {
             _log=$(read_docker_logs ./docker godwoken 20)
 
             if [[  $_log =~ "$stage1_info" ]] && [[  $_log != *"$stage2_info"* ]]; then
-                ProgressBar "$stage1_number" ${_end}
+                ProgressBar "$stage1_number" ${_end} "$stage1_name"
             fi
 
             if [[  $_log =~ "$stage2_1_info" ]]; then
-                ProgressBar "$stage2_1_number" ${_end}
+                ProgressBar "$stage2_1_number" ${_end} "$stage2_1_name"
             fi
 
             if [[  $_log =~ "$stage2_2_info" ]]; then
-                ProgressBar "$stage2_2_number" ${_end}
+                ProgressBar "$stage2_2_number" ${_end} "$stage2_2_name"
             fi
 
             if [[  $_log =~ "$stage2_3_info" ]]; then
-                ProgressBar "$stage2_3_number" ${_end}
+                ProgressBar "$stage2_3_number" ${_end} "$stage2_3_name"
             fi
 
             if [[  $_log =~ "$stage2_4_info" ]]; then
-                ProgressBar "$stage2_4_number" ${_end}
+                ProgressBar "$stage2_4_number" ${_end} "$stage2_4_name"
             fi
 
             if [[  $_log =~ "$stage2_5_info" ]]; then
-                ProgressBar "$stage2_5_number" ${_end}
+                ProgressBar "$stage2_5_number" ${_end} "$stage2_5_name"
             fi
 
             if [[  $_log =~ "$stage2_6_info" ]]; then
-                ProgressBar "$stage2_6_number" ${_end}
+                ProgressBar "$stage2_6_number" ${_end} "$stage2_6_name"
             fi
 
             if [[  $_log =~ "$stage2_7_info" ]]; then
-                ProgressBar "$stage2_7_number" ${_end}
+                ProgressBar "$stage2_7_number" ${_end} "$stage2_7_name"
             fi
 
             if [[  $_log =~ "$stage2_8_info" ]]; then
-                ProgressBar "$stage2_8_number" ${_end}
+                ProgressBar "$stage2_8_number" ${_end} "$stage2_8_name"
             fi
 
             if [[  $_log =~ "$stage2_9_info" ]]; then
-                ProgressBar "$stage2_9_number" ${_end}
+                ProgressBar "$stage2_9_number" ${_end} "$stage2_9_name"
             fi
 
             if [[  $_log =~ "$stage2_10_info" ]]; then
-                ProgressBar "$stage2_10_number" ${_end}
+                ProgressBar "$stage2_10_number" ${_end} "$stage2_10_name"
             fi
 
             if [[  $_log =~ "$stage2_11_info" ]]; then
-                ProgressBar "$stage2_11_number" ${_end}
+                ProgressBar "$stage2_11_number" ${_end} "$stage2_11_name"
             fi
 
             if [[  $_log =~ "$stage2_12_info" ]]; then
-                ProgressBar "$stage2_12_number" ${_end}
+                ProgressBar "$stage2_12_number" ${_end} "$stage2_12_name"
             fi
 
             if [[  $_log =~ "$stage3_info" ]]; then
-                ProgressBar "$stage3_number" ${_end}
+                ProgressBar "$stage3_number" ${_end} "$stage3_name"
             fi
 
             if [[  $_log =~ "$stage4_info" ]]; then
-                ProgressBar "$stage4_number" ${_end}
+                ProgressBar "$stage4_number" ${_end} "$stage4_name"
             fi
         fi
 
@@ -184,11 +225,11 @@ checkLogsToSetProgress() {
         else
             _poly_log=$(read_docker_logs ./docker polyjuice 50)
             if [[  $_poly_log =~ "$stage5_info" ]] && [[ $_poly_log != *"$polyjuice_wait_to_start_info"* ]]; then
-                ProgressBar "$stage5_number" ${_end}
+                ProgressBar "$stage5_number" ${_end} "$stage5_name"
             fi
 
             if [[  $_poly_log =~ "$stage6_info" ]] && [[ $_poly_log != *"$polyjuice_wait_to_start_info"* ]]; then
-                ProgressBar "$stage6_number" ${_end}
+                ProgressBar "$stage6_number" ${_end} "$stage6_name"
             fi
         fi
 
