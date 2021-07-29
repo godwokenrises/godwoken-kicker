@@ -572,7 +572,7 @@ prepare_package(){
        cd ../..
        if [[ $url == $2 ]]; then
           if [[ ALWAYS_FETCH_NEW_PACKAGE ]]; then
-            cd packages/$1 && git fetch --all && git pull origin $(git rev-parse --abbrev-ref HEAD) && git checkout $3 && cd ../.. || ( rm -rf packages/$1 && pull_code_from_url $1 $2 $3 ) ;
+            cd packages/$1 && git fetch --all && git pull origin $(git rev-parse --abbrev-ref HEAD) && git checkout $3 && cd ../.. || ( cd ../.. && rm -rf packages/$1 && pull_code_from_url $1 $2 $3 ) ;
           else
             cd packages/$1 && git checkout $3 && cd ../.. || ( rm -rf packages/$1 && pull_code_from_url $1 $2 $3 ) ;
           fi  
