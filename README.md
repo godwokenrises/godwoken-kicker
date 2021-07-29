@@ -80,7 +80,7 @@ POLYJUICE_GIT_CHECKOUT=v0.8.2-rc
 CLERKB_GIT_URL=https://github.com/nervosnetwork/clerkb.git
 CLERKB_GIT_CHECKOUT=v0.4.0
 ```
-`
+
 if you set `ALWAYS_FETCH_NEW_PACKAGE` to true (default is false) and set package's `CHECKOUT` to branch name like `master`, then the componets will update to newest commit id in that branch everytime you run `make init`.
 
 ```sh
