@@ -65,7 +65,28 @@ make start
 
 you can update componets version under [packages] section in `docker/.build.mode.env` file.
 
-if you set `CHECKOUT` to branch name like `master`, the componets will update to newest commit id in that branch everytime you run `make init`.
+```sh
+####[packages]
+GODWOKEN_GIT_URL=https://github.com/nervosnetwork/godwoken.git
+GODWOKEN_GIT_CHECKOUT=v0.6.0-rc1
+POLYMAN_GIT_URL=https://github.com/RetricSu/godwoken-polyman.git
+POLYMAN_GIT_CHECKOUT=master
+WEB3_GIT_URL=https://github.com/nervosnetwork/godwoken-web3.git
+WEB3_GIT_CHECKOUT=v0.5.0-rc2
+SCRIPTS_GIT_URL=https://github.com/nervosnetwork/godwoken-scripts.git
+SCRIPTS_GIT_CHECKOUT=v0.8.0-rc1
+POLYJUICE_GIT_URL=https://github.com/nervosnetwork/godwoken-polyjuice.git
+POLYJUICE_GIT_CHECKOUT=v0.8.2-rc
+CLERKB_GIT_URL=https://github.com/nervosnetwork/clerkb.git
+CLERKB_GIT_CHECKOUT=v0.4.0
+```
+`
+if you set `ALWAYS_FETCH_NEW_PACKAGE` to true (default is false) and set package's `CHECKOUT` to branch name like `master`, then the componets will update to newest commit id in that branch everytime you run `make init`.
+
+```sh
+####[system]
+ALWAYS_FETCH_NEW_PACKAGE=true
+```
 
 ## More
 
