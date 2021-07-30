@@ -26,6 +26,7 @@ create-folder:
 clean:
 	rm -rf cache/activity/*
 	rm -rf workspace/*
+	rm -rf quick-mode
 	echo "remove workspace and cache activities."
 
 clean-cache:
