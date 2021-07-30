@@ -1,20 +1,20 @@
 # please invoke this script in the project root dir
-cd godwoken/deploy
+cd workspace/deploy
 
 cat << EOF > scripts-deploy.json
 {
   "programs": {
-    "custodian_lock": "scripts/release/always-success",
-    "deposit_lock": "scripts/release/always-success",
-    "withdrawal_lock": "scripts/release/always-success",
-    "challenge_lock": "scripts/release/always-success",
-    "stake_lock": "scripts/release/always-success",
+    "custodian_lock": "scripts/release/custodian-lock",
+    "deposit_lock": "scripts/release/deposit-lock",
+    "withdrawal_lock": "scripts/release/withdrawal-lock",
+    "challenge_lock": "scripts/release/challenge-lock",
+    "stake_lock": "scripts/release/stake-lock",
     "state_validator": "scripts/release/state-validator",
-    "l2_sudt_validator": "scripts/release/always-success",
-    "meta_contract_validator": "scripts/release/always-success",
-    "eth_account_lock": "scripts/release/always-success",
-    "tron_account_lock": "scripts/release/always-success",
-    "polyjuice_validator": "scripts/release/always-success",
+    "l2_sudt_validator": "scripts/release/sudt-validator",
+    "meta_contract_validator": "scripts/release/meta-contract-validator",
+    "eth_account_lock": "scripts/release/eth-account-lock",
+    "tron_account_lock": "scripts/release/tron-account-lock",
+    "polyjuice_validator": "scripts/release/polyjuice-validator",
     "state_validator_lock": "scripts/release/poa",
     "poa_state": "scripts/release/state"
   },
@@ -22,6 +22,25 @@ cat << EOF > scripts-deploy.json
     "code_hash": "0x0000000000000000000000000000000000000000000000000000000000000000",
     "hash_type": "data",
     "args": "0x"
+  },
+  "built_scripts": {
+    "eth_account_lock": "scripts/release/eth-account-lock",
+    "deposit_lock": "scripts/release/deposit-lock",
+    "polyjuice_generator": "deploy/polyjuice-backend/polyjuice-generator",
+    "l2_sudt_validator": "scripts/release/sudt-validator",
+    "meta_contract_validator": "scripts/release/meta-contract-validator",
+    "custodian_lock": "scripts/release/custodian-lock",
+    "l2_sudt_generator": "deploy/backend/sudt-generator",
+    "state_validator_lock": "scripts/release/poa",
+    "challenge_lock": "scripts/release/challenge-lock",
+    "meta_contract_generator": "deploy/backend/meta-contract-generator",
+    "always_success": "scripts/release/always-success",
+    "state_validator": "scripts/release/state-validator",
+    "polyjuice_validator": "scripts/release/polyjuice-validator",
+    "poa_state": "scripts/release/state",
+    "stake_lock": "scripts/release/stake-lock",
+    "withdrawal_lock": "scripts/release/withdrawal-lock",
+    "tron_account_lock": "scripts/release/tron-account-lock"
   }
 }
 EOF
@@ -44,7 +63,7 @@ EOF
 cat << EOF > rollup-config.json
 {
   "l1_sudt_script_type_hash": "0x0000000000000000000000000000000000000000000000000000000000000000",
-  "burn_lock_hash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+  "burn_lock_hash": "0x77c93b0632b5b6c3ef922c5b7cea208fb0a7c427a13d50e13d3fefad17e0c590",
   "required_staking_capacity": 10000000000,
   "challenge_maturity_blocks": 5,
   "finality_blocks": 20,

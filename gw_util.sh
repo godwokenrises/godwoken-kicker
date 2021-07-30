@@ -4,6 +4,292 @@
 # which doesnt have poa scripts built-in.
 LEGACY_PREBUILD_IMAGE_VERSION=0.2.4
 
+POLYMAN_UI_URL=http://localhost:6100
+GODWOKEN_RPC=http://localhost:8119
+
+# 1. Create ProgressBar function
+# 1.1 Input is currentState($1) and totalState($2)
+function ProgressBar {
+    # some naive color const
+    RED=`tput setaf 1`
+    GREEN=`tput setaf 2`
+    NO_COLOR=`tput sgr0`
+# Process data
+    if [ ${#3} -gt 20 ]; then
+        STR12="${3:0:20}.."
+    else
+        STR12="$3                    "         # 20 spaces here    
+        STR12="${STR12:0:20}"
+    fi
+
+    let _progress=(${1}*100/${2}*100)/100
+    let _done=(${_progress}*4)/10
+    let _left=40-$_done
+# Build progressbar string lengths
+    _fill=$(printf "%${_done}s")
+    _empty=$(printf "%${_left}s")
+
+# 1.2 Build progressbar strings and print the ProgressBar line
+# 1.2.1 Output example:                           
+# 1.2.1.1 Progress : [########################################] 100%
+    printf "\r${STR12}: ${GREEN}[${_fill// /#}${_empty// /-}] ${_progress}%%${NO_COLOR}"
+}
+
+# read_docker_logs docker-compose-path service-name how-many-last-logs-to-show
+read_docker_logs(){
+    _log=$(cd $1 && docker-compose logs --tail $3 $2)
+    echo $_log
+}
+
+# usage:
+#   checkLogsToSetProgress
+checkLogsToSetProgress() {
+    # some naive color const
+    RED=`tput setaf 1`
+    GREEN=`tput setaf 2`
+    NO_COLOR=`tput sgr0`
+
+    # This accounts as the "totalState" variable for the ProgressBar function
+    _end=100
+
+    # godwoken activity
+    stage1_name="sudt script   " # should be 6 word length
+    stage1_info="ready to call prepare_sudt_scripts with polyman.."
+    stage1_number=5
+
+    stage2_name="deployment"
+    stage2_info="gw_tools::deploy_scripts] deploy binary"
+    stage2_number=10
+
+    stage2_1_name="custodian-lock"
+    stage2_1_info='deploy binary "scripts/release/custodian-lock"'
+    stage2_1_number=15
+
+    stage2_2_name="deposit-lock"
+    stage2_2_info='deploy binary "scripts/release/deposit-lock"'
+    stage2_2_number=20
+
+    stage2_3_name="withdrawal-lock"
+    stage2_3_info='deploy binary "scripts/release/withdrawal-lock"'
+    stage2_3_number=25
+
+    stage2_4_name="challenge-lock"
+    stage2_4_info='deploy binary "scripts/release/challenge-lock"'
+    stage2_4_number=30
+
+    stage2_5_name="stake-lock"
+    stage2_5_info='deploy binary "scripts/release/stake-lock"'
+    stage2_5_number=35
+
+    stage2_6_name="state-validator"
+    stage2_6_info='deploy binary "scripts/release/state-validator"'
+    stage2_6_number=40
+
+    stage2_7_name="meta-contract"
+    stage2_7_info='deploy binary "scripts/release/meta-contract-validator"'
+    stage2_7_number=45
+
+    stage2_8_name="eth-account-lock"
+    stage2_8_info='deploy binary "scripts/release/eth-account-lock"'
+    stage2_8_number=50
+
+    stage2_9_name="tron-account-lock"
+    stage2_9_info='deploy binary "scripts/release/tron-account-lock"'
+    stage2_9_number=55
+
+    stage2_10_name="polyjuice-validator"
+    stage2_10_info='deploy binary "scripts/release/polyjuice-validator"'
+    stage2_10_number=60
+
+    stage2_11_name="poa"
+    stage2_11_info='deploy binary "scripts/release/poa"'
+    stage2_11_number=65
+
+    stage2_12_name="poa-state"
+    stage2_12_info='deploy binary "scripts/release/state"'
+    stage2_12_number=68
+
+    stage3_name="deploy_genesis"
+    stage3_info="gw_tools::deploy_genesis] tx_hash"
+    stage3_number=70
+
+    stage4_name="produce block"
+    stage4_info="produce new block #"
+    stage4_number=75
+    # polyjuice activity
+    stage5_name="create account"
+    stage5_info="create deposit account.0x2"
+    stage5_number=85
+
+    stage6_name="create creator"
+    stage6_info="create creator account => 0x3"
+    stage6_number=95
+
+    polyjuice_wait_to_start_info="godwoken rpc server is down."
+
+    while true
+    do
+        # if two rpc is up and all set.
+        if isPolymanUIRunning "${POLYMAN_UI_URL}" &> /dev/null && isGodwokenRpcRunning "${GODWOKEN_RPC}" &> /dev/null; then
+          ProgressBar ${_end} ${_end} "All Jobs Done"
+          show_success_finish_info 
+          break;
+        fi
+
+        # if one of service from docker-compose is not Up, then throw error.
+        if !(check_service_status "godwoken" &> /dev/null); then
+            echo "${RED}Godwoken service is not running. please run 'make sg' to check what happend.${NO_COLOR}"
+            break;
+        fi
+
+        if !(check_service_status "polyjuice" &> /dev/null); then
+            echo "${RED}polyjuice service is not running. please run 'make sp' to check what happend.${NO_COLOR}"
+            break;
+        fi
+
+        if !(check_service_status "call-polyman" &> /dev/null); then
+            echo "${RED}call-polyman(a setup-service) is not running. please run 'make call-polyman' to check what happend.${NO_COLOR}"
+            break;
+        fi
+
+        # monitor Godwoekn service logs to display progress info.
+        if isGodwokenRpcRunning "${GODWOKEN_RPC}" &> /dev/null; then
+          :
+        else
+            _log=$(read_docker_logs ./docker godwoken 20)
+
+            if [[  $_log =~ "$stage1_info" ]] && [[  $_log != *"$stage2_info"* ]]; then
+                ProgressBar "$stage1_number" ${_end} "$stage1_name"
+            fi
+
+            if [[  $_log =~ "$stage2_1_info" ]]; then
+                ProgressBar "$stage2_1_number" ${_end} "$stage2_1_name"
+            fi
+
+            if [[  $_log =~ "$stage2_2_info" ]]; then
+                ProgressBar "$stage2_2_number" ${_end} "$stage2_2_name"
+            fi
+
+            if [[  $_log =~ "$stage2_3_info" ]]; then
+                ProgressBar "$stage2_3_number" ${_end} "$stage2_3_name"
+            fi
+
+            if [[  $_log =~ "$stage2_4_info" ]]; then
+                ProgressBar "$stage2_4_number" ${_end} "$stage2_4_name"
+            fi
+
+            if [[  $_log =~ "$stage2_5_info" ]]; then
+                ProgressBar "$stage2_5_number" ${_end} "$stage2_5_name"
+            fi
+
+            if [[  $_log =~ "$stage2_6_info" ]]; then
+                ProgressBar "$stage2_6_number" ${_end} "$stage2_6_name"
+            fi
+
+            if [[  $_log =~ "$stage2_7_info" ]]; then
+                ProgressBar "$stage2_7_number" ${_end} "$stage2_7_name"
+            fi
+
+            if [[  $_log =~ "$stage2_8_info" ]]; then
+                ProgressBar "$stage2_8_number" ${_end} "$stage2_8_name"
+            fi
+
+            if [[  $_log =~ "$stage2_9_info" ]]; then
+                ProgressBar "$stage2_9_number" ${_end} "$stage2_9_name"
+            fi
+
+            if [[  $_log =~ "$stage2_10_info" ]]; then
+                ProgressBar "$stage2_10_number" ${_end} "$stage2_10_name"
+            fi
+
+            if [[  $_log =~ "$stage2_11_info" ]]; then
+                ProgressBar "$stage2_11_number" ${_end} "$stage2_11_name"
+            fi
+
+            if [[  $_log =~ "$stage2_12_info" ]]; then
+                ProgressBar "$stage2_12_number" ${_end} "$stage2_12_name"
+            fi
+
+            if [[  $_log =~ "$stage3_info" ]]; then
+                ProgressBar "$stage3_number" ${_end} "$stage3_name"
+            fi
+
+            if [[  $_log =~ "$stage4_info" ]]; then
+                ProgressBar "$stage4_number" ${_end} "$stage4_name"
+            fi
+        fi
+
+        # monitor Polyjuice service logs to display progress info.
+        if isPolymanUIRunning "${POLYMAN_UI_URL}" &> /dev/null; then
+            :
+        else
+            _poly_log=$(read_docker_logs ./docker polyjuice 50)
+            if [[  $_poly_log =~ "$stage5_info" ]] && [[ $_poly_log != *"$polyjuice_wait_to_start_info"* ]]; then
+                ProgressBar "$stage5_number" ${_end} "$stage5_name"
+            fi
+
+            if [[  $_poly_log =~ "$stage6_info" ]] && [[ $_poly_log != *"$polyjuice_wait_to_start_info"* ]]; then
+                ProgressBar "$stage6_number" ${_end} "$stage6_name"
+            fi
+        fi
+
+        sleep 2
+    done
+}
+
+show_wait_tips(){
+    # some naive color const
+    RED=`tput setaf 1`
+    GREEN=`tput setaf 2`
+    NO_COLOR=`tput sgr0`
+
+    content="
+Run commands to monitor background activities: ${GREEN}
+
+    make sg (Godwoken)
+    make sp (Polyjuice)
+    make web3 (web3)
+    make call-polyman (setup service)
+${NO_COLOR}
+"
+    printf "$content"
+
+    printf "Note: this might takes couple minutes to finish.."
+    checkLogsToSetProgress
+}
+
+show_success_finish_info(){
+    # some naive color const
+    RED=`tput setaf 1`
+    GREEN=`tput setaf 2`
+    NO_COLOR=`tput sgr0`
+
+    echo ""
+    echo ""
+    printf "Great! Checkout${GREEN} ${POLYMAN_UI_URL} ${NO_COLOR}to deploy contract!"
+    echo ""
+    echo ""
+}
+
+check_service_status(){
+    if [[ -n $1 ]]; 
+    then
+        local service="$1"
+    else
+        local service="godwoken"
+    fi
+    result=$(cd docker && docker-compose ps "$service")
+    if [[ $result =~ "   Up   " ]]; then
+        echo "$service Service is up and running!"
+        # 0 equals true
+        return 0
+    else
+        echo "$service rpc server is down/paused/exits."
+        # 1 equals false
+        return 1
+    fi
+}
+
 # how to use: 
 #    parese_toml_with_section file_path section_name key_name
 parse_toml_with_section(){
@@ -43,7 +329,6 @@ parse_toml_with_section(){
 }
 
 isRollupCellExits(){
-    echo $1
     if [[ -n $1 ]]; 
     then
         local tomlconfigfile="$1"
@@ -76,7 +361,7 @@ isRollupCellExits(){
     ]
     }' \
     | tr -d '\n' \
-    | curl --ipv4 --retry 3 --retry-connrefused \
+    | curl -s --ipv4 --retry 3 --retry-connrefused \
     -H 'content-type: application/json' -d @- \
     http://localhost:8116)
 
@@ -248,6 +533,7 @@ update_submodules(){
       cd `pwd`/$file_path
       # first, let's clean the submodule avoiding merge conflicts
       git rm -r .
+      git reset --hard HEAD
       # pull the new submodule
       git fetch --all
       git pull $remote_url_value $branch_value
@@ -261,7 +547,11 @@ update_submodules(){
 
 update_godwoken_dockerfile_to_manual_mode(){
     File="docker/layer2/Dockerfile"
-    sed -i 's/FROM .*/FROM ${DOCKER_MANUAL_BUILD_IMAGE}/' $File
+    if sed -i 's/FROM .*/FROM ${DOCKER_MANUAL_BUILD_IMAGE}/' $File &> /dev/null ; then # for linux system
+        echo "update godwoken dockerfile to manual_mode." ;
+    else
+        sed -i "" 's/FROM .*/FROM ${DOCKER_MANUAL_BUILD_IMAGE}/' $File ; # for unix system
+    fi
 }
 
 init_submodule_if_empty(){
@@ -272,8 +562,43 @@ init_submodule_if_empty(){
     fi
 }
 
+# usage: prepare_package name url checkout
+# if package folder exits and the git remote url is the same, will not remove and re-clone
+prepare_package(){
+    # if subpackage folder is empty
+    if [[ -d "packages/$1" ]]; then
+       cd packages/$1 
+       url=$(git remote get-url origin)
+       cd ../..
+       if [[ $url == $2 ]]; then
+          if [[ ALWAYS_FETCH_NEW_PACKAGE ]]; then
+            cd packages/$1 && git fetch --all && git pull origin $(git rev-parse --abbrev-ref HEAD) && git checkout $3 && cd ../.. || ( cd ../.. && rm -rf packages/$1 && pull_code_from_url $1 $2 $3 ) ;
+          else
+            cd packages/$1 && git checkout $3 && cd ../.. || ( rm -rf packages/$1 && pull_code_from_url $1 $2 $3 ) ;
+          fi  
+       else rm -rf packages/$1 && pull_code_from_url $1 $2 $3
+       fi
+    else pull_code_from_url $1 $2 $3
+    fi
+}
+
+# usage: pull_code_from_url name url checkout 
+pull_code_from_url(){
+    cd packages && git clone --recursive $2 && cd $1 && git checkout $3 && cd ../../
+}
+
+get_git_remote_url(){
+    url=$(git remote get-url origin)
+}
+
+paste_binary_into_path(){
+    printf "binary path: ";
+    read;
+    bin_path=${REPLY}
+    cp $bin_path $1
+}
+
 isGodwokenRpcRunning(){
-    echo $1
     if [[ -n $1 ]]; 
     then
         local rpc_url="$1"
@@ -287,11 +612,11 @@ isGodwokenRpcRunning(){
     result=$( echo '{
     "id": 2,
     "jsonrpc": "2.0",
-    "method": "ping",
+    "method": "gw_ping",
     "params": []
     }' \
     | tr -d '\n' \
-    | curl --ipv4 --retry 3 --retry-connrefused \
+    | curl -s --ipv4 --retry 3 --retry-connrefused \
     -H 'content-type: application/json' -d @- \
     $rpc_url)
 
@@ -307,7 +632,6 @@ isGodwokenRpcRunning(){
 }
 
 isPolymanPrepareRpcRunning(){
-    echo $1
     if [[ -n $1 ]]; 
     then
         local rpc_url="$1"
@@ -318,7 +642,7 @@ isPolymanPrepareRpcRunning(){
     # curl retry on connrefused, considering ECONNREFUSED as a transient error(network issues)
     # connections with ipv6 are not retried because it returns EADDRNOTAVAIL instead of ECONNREFUSED,
     # hence we should use --ipv4
-    result=$(curl --ipv4 $rpc_url/ping)
+    result=$(curl -s --ipv4 $rpc_url/ping)
 
     if [[ $result =~ "pong" ]]; then
         echo "polyman prepare rpc server is up and running!"
@@ -326,6 +650,30 @@ isPolymanPrepareRpcRunning(){
         return 0
     else
         echo "polyman prepare rpc server is down."
+        # 1 equals false
+        return 1
+    fi
+}
+
+isPolymanUIRunning(){
+    if [[ -n $1 ]]; 
+    then
+        local rpc_url="$1"
+    else
+        local rpc_url="http://localhost:6100"
+    fi
+
+    # curl retry on connrefused, considering ECONNREFUSED as a transient error(network issues)
+    # connections with ipv6 are not retried because it returns EADDRNOTAVAIL instead of ECONNREFUSED,
+    # hence we should use --ipv4
+    result=$(curl -s --ipv4 $rpc_url)
+
+    if [[ $result =~ "<!doctype html>" ]]; then
+        echo "polyman UI is up and running!"
+        # 0 equals true
+        return 0
+    else
+        echo "polyman UI is down."
         # 1 equals false
         return 1
     fi
@@ -377,6 +725,10 @@ test_version_comp () {
     fi
 }
 
+remove_dummy_docker_if_exits(){
+    [ "$(docker ps -a | grep dummy)" ] && docker rm -f dummy || :
+}
+
 copy_poa_scripts_from_docker_or_abort(){
     version_comp "${DOCKER_PREBUILD_IMAGE_TAG//v}" $LEGACY_PREBUILD_IMAGE_VERSION 
     # if version large than legacy_version
@@ -395,15 +747,33 @@ edit_godwoken_config_toml(){
         echo "${1} file not exits, skip this steps."
         return 0
     fi
+    
+    set_key_value_in_toml "node_mode" "fullnode" $1
 
     set_key_value_in_toml "privkey_path" "deploy/private_key" $1
     set_key_value_in_toml "listen" "0.0.0.0:8119" $1
 
-    # delete the default lock
-    sed -i '/\[block_producer.wallet_config.lock\]/{n;d}' $1 
-    sed -i '/\[block_producer.wallet_config.lock\]/{n;d}' $1 
-    sed -i '/\[block_producer.wallet_config.lock\]/{n;d}' $1 
+    ## set store path
+    # delete the default path
+    sed -i '/\[store\]/{n;d}' $1
+    # add an new path
+    sed -i "/\[store\]/a\path = '../cache/activity/godwoken-chain-data'" $1
 
+    ## 1. reward lock update
+    # delete the default reward lock
+    sed -i '/\[block_producer.challenger_config.rewards_receiver_lock\]/{n;d}' $1 
+    sed -i '/\[block_producer.challenger_config.rewards_receiver_lock\]/{n;d}' $1 
+    sed -i '/\[block_producer.challenger_config.rewards_receiver_lock\]/{n;d}' $1 
+    # add an new one with your own lock
+    sed -i "/\[block_producer.challenger_config.rewards_receiver_lock\]/a\code_hash = '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8'" $1 
+    sed -i "/\[block_producer.challenger_config.rewards_receiver_lock\]/a\hash_type = 'type'" $1
+    sed -i "/\[block_producer.challenger_config.rewards_receiver_lock\]/a\args = '0x74e5c89172c5d447819f1629743ef2221df083be'" $1
+
+    ## 2. miner wallet lock
+    # delete the default wallet lock
+    sed -i '/\[block_producer.wallet_config.lock\]/{n;d}' $1 
+    sed -i '/\[block_producer.wallet_config.lock\]/{n;d}' $1 
+    sed -i '/\[block_producer.wallet_config.lock\]/{n;d}' $1 
     # add an new one with your own lock
     sed -i "/\[block_producer.wallet_config.lock\]/a\code_hash = '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8'" $1 
     sed -i "/\[block_producer.wallet_config.lock\]/a\hash_type = 'type'" $1
@@ -449,7 +819,7 @@ callPolyman(){
     # curl retry on connrefused, considering ECONNREFUSED as a transient error(network issues)
     # connections with ipv6 are not retried because it returns EADDRNOTAVAIL instead of ECONNREFUSED,
     # hence we should use --ipv4
-    result=$(curl --ipv4 --retry 3 --retry-connrefused \
+    result=$(curl -s --ipv4 --retry 3 --retry-connrefused \
                     $rpc_url/$1)
 
     if [[ $result =~ '"status":"ok"' ]]; then
@@ -544,4 +914,38 @@ wait_for_address_got_suffice_money(){
           echo 'fund unsuffice ${TOTAL}, keep waitting.'
         fi
     done
+}
+
+cargo_build_local_or_docker(){
+    if cargo --version ; then
+        echo "build Godwoken on local"
+        cd packages/godwoken && cargo build && cd ../..
+    else
+        echo "build Godwoken via Docker"
+        ## decide how to pass proxy host to docker 
+        ## according to differen docker version
+        ## see: https://stackoverflow.com/questions/24319662/from-inside-of-a-docker-container-how-do-i-connect-to-the-localhost-of-the-mach
+        if [[ $(docker -v) != *20.10.* ]] && [[ "$OSTYPE" == "linux-gnu"* ]]; then
+            echo 'Docker version not 20.10.0+!'
+            docker run --rm -it --network="host" -v `pwd`/packages/godwoken:/app -v `pwd`/docker/layer2/cargo:/.cargo/ -v `pwd`/cache/build/cargo-registry:/root/.cargo/registry -w=/app retricsu/godwoken-manual-build cargo build ;
+            return 0;
+        fi
+
+        if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+            echo "linux-gnu"
+            docker run --rm -it --add-host host.docker.internal:host-gateway -v `pwd`/packages/godwoken:/app -v `pwd`/docker/layer2/cargo:/.cargo/ -v `pwd`/cache/build/cargo-registry:/root/.cargo/registry -w=/app retricsu/godwoken-manual-build cargo build ;
+        elif [[ "$OSTYPE" == "darwin"* ]]; then
+            # Mac OSX
+            echo "mac osx"
+            docker run --rm -it -v `pwd`/packages/godwoken:/app -v `pwd`/docker/layer2/cargo:/.cargo/ -v `pwd`/cache/build/cargo-registry:/root/.cargo/registry -w=/app retricsu/godwoken-manual-build cargo build ;
+        elif [[ "$OSTYPE" == "cygwin" ]]; then
+            echo "windows"
+            # POSIX compatibility layer and Linux environment emulation for Windows
+            docker run --rm -it -v `pwd`/packages/godwoken:/app -v `pwd`/docker/layer2/cargo:/.cargo/ -v `pwd`/cache/build/cargo-registry:/root/.cargo/registry -w=/app retricsu/godwoken-manual-build cargo build ;
+        elif [[ "$OSTYPE" == "msys" ]]; then
+            # Lightweight shell and GNU utilities compiled for Windows (part of MinGW)
+            echo "windows"
+            docker run --rm -it -v `pwd`/packages/godwoken:/app -v `pwd`/docker/layer2/cargo:/.cargo/ -v `pwd`/cache/build/cargo-registry:/root/.cargo/registry -w=/app retricsu/godwoken-manual-build cargo build ;
+        fi
+    fi
 }

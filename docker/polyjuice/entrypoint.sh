@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -o errexit
-set -o xtrace
+#set -o xtrace
 PROJECT_DIR=/code
 GODWOKEN_RPC_URL="http://godwoken:8119"
 
@@ -11,16 +11,15 @@ source ${PROJECT_DIR}/gw_util.sh
 # detect which mode to start godwoken_web3
 if [ "$MANUAL_BUILD_POLYMAN" = true ] ; then 
   echo "manual mode.."
-  cd /code/godwoken-polyman
+  cd /code/packages/godwoken-polyman
 else
   echo "prebuild mode.."
   cd /godwoken-polyman
 fi
 
-yarn workspace @godwoken-polyman/runner clean
+yarn init_placeholder_config
 
-# start the callPolyman preparation http server in background
-yarn workspace @godwoken-polyman/runner start-call-polyman &
+yarn workspace @godwoken-polyman/runner clean
 
 # wait for godwoken rpc server to start
 while true; do
@@ -31,6 +30,13 @@ while true; do
     else echo "keep waitting..."
     fi
 done
+
+# generate godwoken configs for polyman using current workspace
+cp /code/workspace/config.toml packages/runner/configs/config.toml && echo 'cp config.toml from workspace'
+cp /code/workspace/deploy/scripts-deploy-result.json packages/runner/configs/scripts-deploy-result.json && echo 'cp scripts-deploy-result.json from workspace'
+cp /code/workspace/deploy/lumos-config.json packages/runner/configs/lumos-config.json && echo 'cp lumos-config from workspace'
+
+yarn gen-config
 
 # start the main http server of polyman
 yarn workspace @godwoken-polyman/runner start

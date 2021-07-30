@@ -8,7 +8,7 @@ RUN apt update -y && \
     DEBIAN_FRONTEND=noninteractive apt-get install cmake musl-tools clang libc++-dev autoconf libtool pkg-config unzip -y
 
 # Install Rust
-RUN curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly-2020-09-28 -y
+RUN curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain 1.50.0 -y
 ENV PATH=/root/.cargo/bin:$PATH
 RUN which cargo
 
@@ -20,7 +20,8 @@ RUN npm install -g yarn
 RUN cargo install moleculec --version 0.6.1
 RUN echo $HOME 
 RUN moleculec --version
-RUN curl http://ftp.br.debian.org/debian/pool/main/g/glibc/libc6_2.31-11_amd64.deb --output libc6_2.31-11_amd64.deb && dpkg -i libc6_2.31-11_amd64.deb 
+#RUN curl http://ftp.br.debian.org/debian/pool/main/g/glibc/libc6_2.31-11_amd64.deb --output libc6_2.31-11_amd64.deb && dpkg -i libc6_2.31-11_amd64.deb 
+RUN apt-get install libc6 -y
 
 # install ckb tools
 RUN mkdir /ckb

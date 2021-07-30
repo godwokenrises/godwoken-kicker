@@ -1,9 +1,6 @@
 # {workspaceDir}/docker/docker-compose.yml
 version: '3.8'
 
-volumes:
-  cargo-cache:
-
 services:
   postgres:
     image: postgres:alpine
@@ -14,20 +11,22 @@ services:
       POSTGRES_DB: lumos
       POSTGRES_PASSWORD: password
     volumes:
-      - ../postgres-data:/var/lib/postgresql/data
+      - ../cache/activity/postgres-data:/var/lib/postgresql/data
       # copy the sql script to create tables
-      - ../web3-sql/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
+      - ../docker/web3/web3-indexer-sql/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
 
   ckb:
     build:
       context: layer1
       args: 
         DOCKER_PREBUILD_IMAGE: "${DOCKER_PREBUILD_IMAGE_NAME}:${DOCKER_PREBUILD_IMAGE_TAG}"
-    ports: 
+    ports:
+    - 28114:28114 # rpc.ws_listen_address
     - 8114:8114
-    - 8115:8115 # 8115 is not using for now, but we may need it when extend kicker in the future
+    - 8115:8115   # 8115 is not using for now, but we may need it when extend kicker in the future
     volumes:
-    - ../ckb-data/:/ckb-data
+    - ../ckb:/ckb 
+    - ../cache/activity/ckb-chain-data:/usr/local/ckb-chain-data
     environment:
       # env of layer 1:
       CKB_CHAIN: dev
@@ -44,8 +43,8 @@ services:
         DOCKER_MANUAL_BUILD_IMAGE: "${DOCKER_MANUAL_BUILD_IMAGE_NAME}:${DOCKER_MANUAL_BUILD_IMAGE_TAG}"
     volumes:
     - ../:/code
-    - cargo-cache:/usr/local/cargo
-    - ../ckb-cli-data:/root/.ckb-cli
+    - ../cache/build/usr-local-cargo:/usr/local/cargo
+    - ../cache/activity/ckb-cli-data:/root/.ckb-cli
     environment:
       FORCE_GODWOKEN_REDEPLOY: ${FORCE_GODWOKEN_REDEPLOY}
       MANUAL_BUILD_GODWOKEN: ${MANUAL_BUILD_GODWOKEN}
@@ -70,10 +69,25 @@ services:
     ports:
       - 6101:6101
       - 6100:6100
-      - 6102:6102
     depends_on:
       - ckb
       - postgres
+    
+  call-polyman:
+    build:
+      context: call-polyman
+      args: 
+        DOCKER_PREBUILD_IMAGE: "${DOCKER_JS_PREBUILD_IMAGE_NAME}:${DOCKER_JS_PREBUILD_IMAGE_TAG}"
+    volumes:
+      - ../:/code
+    environment: 
+      MANUAL_BUILD_POLYMAN: ${MANUAL_BUILD_POLYMAN}
+    command: bash /code/docker/call-polyman/entrypoint.sh 
+    ports:
+      - 6102:6102
+    depends_on:
+      - ckb
+      - postgres 
 
   web3:
     build:
@@ -82,6 +96,7 @@ services:
         DOCKER_PREBUILD_IMAGE: "${DOCKER_JS_PREBUILD_IMAGE_NAME}:${DOCKER_JS_PREBUILD_IMAGE_TAG}"
     volumes: 
     - ../:/code # the manual-build resource all stays in /code dir
+    - ../cache/activity/web3-data/address-mapping:/usr/local/godwoken-web3/address-mapping
     environment: 
       MANUAL_BUILD_WEB3: ${MANUAL_BUILD_WEB3}
       PORT: 8024
@@ -92,10 +107,10 @@ services:
       - postgres
       - godwoken
   
-# gen-godwoken-schema:
-#   image: retricsu/gowoken-build_dev:ubuntu20
-#   profiles: ["cli-only"]
-#   volumes: 
-#     - ../:/code
-#   command: bash /code/docker/gen-godwoken-schema/entrypoint.sh
+  # gen-godwoken-schema:
+  #   image: retricsu/gowoken-build_dev:ubuntu20
+  #   profiles: ["cli-only"]
+  #   volumes: 
+  #     - ../:/code
+  #   command: bash /code/docker/gen-godwoken-schema/entrypoint.sh
  
