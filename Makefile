@@ -186,16 +186,6 @@ enter-g:
 enter-p:
 	cd docker && docker-compose exec polyjuice bash	
 
-test:
-	docker run -t -d --name testimage retricsu/gowoken-build_dev:ubuntu20 
-	docker exec -it testimage bash 
-
-test-rpc:
-	./scripts/test_rpc.sh
-
-test-web3-rpc:
-	./scripts/test_web3_rpc.sh
-
 gen-schema:
 	make clean-schema
 	cd docker && docker-compose up gen-godwoken-schema
@@ -205,23 +195,15 @@ clean-schema:
 
 prepare-schema-for-polyman:
 	make gen-schema
-	cp -r ./docker/gen-godwoken-schema/schemas ./godwoken-polyman/packages/godwoken/
-
-prepare-schema-for-provider:
-	make gen-schema
-	cp -r ./docker/gen-godwoken-schema/schemas/godwoken.* ./polyjuice-providers-http/src/godwoken/
-	mv ./polyjuice-providers-http/src/godwoken/godwoken.d.ts ./polyjuice-providers-http/src/godwoken/schemas/index.d.ts	
-	mv ./polyjuice-providers-http/src/godwoken/godwoken.esm.js ./polyjuice-providers-http/src/godwoken/schemas/index.esm.js	
-	mv ./polyjuice-providers-http/src/godwoken/godwoken.js ./polyjuice-providers-http/src/godwoken/schemas/index.js	
-	mv ./polyjuice-providers-http/src/godwoken/godwoken.json ./polyjuice-providers-http/src/godwoken/schemas/index.json	
+	cp -r ./docker/gen-godwoken-schema/schemas ./packages/godwoken-polyman/packages/godwoken/
 
 prepare-schema-for-web3:
 	make gen-schema
-	cp -r ./docker/gen-godwoken-schema/schemas/godwoken.* ./godwoken-web3/packages/godwoken/
-	mv ./godwoken-web3/packages/godwoken/godwoken.d.ts ./godwoken-web3/packages/godwoken/schemas/index.d.ts	
-	mv ./godwoken-web3/packages/godwoken/godwoken.esm.js ./godwoken-web3/packages/godwoken/schemas/index.esm.js	
-	mv ./godwoken-web3/packages/godwoken/godwoken.js ./godwoken-web3/packages/godwoken/schemas/index.js	
-	mv ./godwoken-web3/packages/godwoken/godwoken.json ./godwoken-web3/packages/godwoken/schemas/index.json
+	cp -r ./docker/gen-godwoken-schema/schemas/godwoken.* ./packages/godwoken-web3/packages/godwoken/
+	mv ./godwoken-web3/packages/godwoken/godwoken.d.ts ./packages/godwoken-web3/packages/godwoken/schemas/index.d.ts	
+	mv ./godwoken-web3/packages/godwoken/godwoken.esm.js ./packages/godwoken-web3/packages/godwoken/schemas/index.esm.js	
+	mv ./godwoken-web3/packages/godwoken/godwoken.js ./packages/godwoken-web3/packages/godwoken/schemas/index.js	
+	mv ./godwoken-web3/packages/godwoken/godwoken.json ./packages/godwoken-web3/packages/godwoken/schemas/index.json
 
 status:
 	cd docker && docker-compose ps
@@ -240,15 +222,6 @@ call-polyman:
 
 start-godwoken:
 	cd docker && docker-compose start godwoken
-
-build-godwoken:
-	docker run --rm -it -v `pwd`/godwoken:/app -v `pwd`/cargo-cache-data:/root/.cargo/registry -w=/app retricsu/godwoken-manual-build cargo build
-
-clean-cargo-cache:
-	rm -rf cargo-cache-data
-
-prepare-money:
-	cd godwoken-polyman && yarn clean &&  yarn prepare-money:normal
 
 ########### manual-build-mode #############
 ### rebuild components's scripts and bin all in one
