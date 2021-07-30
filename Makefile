@@ -16,14 +16,6 @@ endif
 manual-image:
 	cd docker/manual-image && docker build -t ${DOCKER_MANUAL_BUILD_IMAGE_NAME} .
 
-pass-godwoken-binary: SHELL:=/bin/bash
-pass-godwoken-binary:
-	mkdir -p `pwd`/workspace/bin
-	printf "godwoken "
-	source ./gw_util.sh && paste_binary_into_path `pwd`/workspace/bin/godwoken
-	printf "gw-tools "
-	source ./gw_util.sh && paste_binary_into_path `pwd`/workspace/bin/gw-tools	
-
 create-folder:
 	mkdir -p workspace/deploy/backend
 	mkdir -p workspace/deploy/polyjuice-backend
