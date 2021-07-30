@@ -1,10 +1,8 @@
 #!/bin/bash
 
 set -o errexit
-# import some helper function
-source ${PROJECT_DIR}/gw_util.sh
 
-PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+PROJECT_DIR="/code"
 LUMOS_CONFIG_FILE=${PROJECT_DIR}/workspace/deploy/lumos-config.json
 GODWOKEN_CONFIG_TOML_FILE=${PROJECT_DIR}/workspace/config.toml
 
@@ -19,6 +17,9 @@ export GW_TOOLS_BIN=${PROJECT_DIR}/workspace/bin/gw-tools
 function runGodwoken(){
   GODWOKEN_DEBUG=true RUST_LOG=gw_block_producer=info,gw_generator=debug,gw_web3_indexer=debug $GODWOKEN_BIN
 }
+
+# import some helper function
+source ${PROJECT_DIR}/gw_util.sh
 
 # ready to start godwoken
 cd ${PROJECT_DIR}/workspace

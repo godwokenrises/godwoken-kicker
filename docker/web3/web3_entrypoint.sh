@@ -2,7 +2,7 @@
 
 set -o errexit
 #set -o xtrace
-PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+PROJECT_DIR="/code"
 GODWOKEN_RPC_URL="http://godwoken:8119"
 
 # import some helper function

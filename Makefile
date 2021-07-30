@@ -13,7 +13,6 @@ endif
 ###### command list ########
 
 ### 1. utils
-# manual-builded-godwoken binary need this based-image to run
 manual-image:
 	cd docker/manual-image && docker build -t ${DOCKER_MANUAL_BUILD_IMAGE_NAME} .
 

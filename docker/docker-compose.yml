@@ -46,7 +46,7 @@ services:
     - ../cache/activity/ckb-cli-data:/root/.ckb-cli
     environment:
       FORCE_GODWOKEN_REDEPLOY: ${FORCE_GODWOKEN_REDEPLOY}
-    command: bash /code/godwoken_entrypoint.sh
+    command: bash /code/docker/layer2/godwoken_entrypoint.sh
     ports:
       - 8116:8116
       - 8119:8119
@@ -98,7 +98,7 @@ services:
     environment: 
       MANUAL_BUILD_WEB3: ${MANUAL_BUILD_WEB3}
       PORT: 8024
-    command: bash /code/web3_entrypoint.sh
+    command: bash /code/docker/web3/web3_entrypoint.sh
     ports:
       - 8024:8024
     depends_on: 
