@@ -91,37 +91,11 @@ make start
 
 and the component will be build and run through submodule on local.
 
-### ***- skip building Godwoken by providing binary***
+### ***- replace with your own version of binaries or scripts***
 
-sometimes you don't want to building Godwoken in Kicker beacuse the network inside docker container can be unreliable slow. 
+sometimes you don't want to building binary or scripts and you don't want to copy those thing from prebuild docker images too.
 
-you can set `/docker/.build.mode.env` to "skip" option:
-
-```sh
-####[mode]
-MANUAL_BUILD_GODWOKEN=skip
-MANUAL_BUILD_WEB3=false
-MANUAL_BUILD_SCRIPTS=false
-MANUAL_BUILD_POLYJUICE=false
-...
-```
-
-provide your own godwoken binary:
-
-```s
-make pass-godwoken-binary
-```
-
-or simply copy the binaries of godwoken and gw-tools into this path `/workspace/bin/` by yourself.
-
-finally, run:
-
-```sh
-make init
-make start
-```
-
-everything is good!
+for this case, you can simply copy your binaries or scripts into this path `/workspace/`, and replace the files then run `make start` (if you run make init, the files will just got overwrite again). Kicker will use whatever lies in workpace folder for chain deployment.
 
 ## Some useful command
 

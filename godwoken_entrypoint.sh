@@ -11,14 +11,8 @@ export CKB_RPC=http://ckb:8114
 export POLYMAN_RPC=http://call-polyman:6102
 export DATABASE_URL=postgres://user:password@postgres:5432/lumos
 
-# detect which godwoken to start (prebuild version or local manual-build version)
-if [ "$MANUAL_BUILD_GODWOKEN" = true ] || [ "$MANUAL_BUILD_GODWOKEN" = "skip" ]; then
-  export GODWOKEN_BIN=${PROJECT_DIR}/workspace/bin/godwoken
-  export GW_TOOLS_BIN=${PROJECT_DIR}/workspace/bin/gw-tools
-else
-  export GODWOKEN_BIN=godwoken
-  export GW_TOOLS_BIN=gw-tools
-fi
+export GODWOKEN_BIN=${PROJECT_DIR}/workspace/bin/godwoken
+export GW_TOOLS_BIN=${PROJECT_DIR}/workspace/bin/gw-tools 
 
 # import some helper function
 source ${PROJECT_DIR}/gw_util.sh

@@ -47,10 +47,7 @@ install:
 		source ./gw_util.sh && prepare_package godwoken $$GODWOKEN_GIT_URL $$GODWOKEN_GIT_CHECKOUT > /dev/null; \
 		source ./gw_util.sh && cargo_build_local_or_docker ; \
 		make copy-godwoken-binary-from-packages-to-workspace ; \
-	fi
-# if skip build godwoken, using paste mode
-	if [ "$(MANUAL_BUILD_GODWOKEN)" = "skip" ] ; then \
-		printf '%b\n' "skip godwoken building.." ; \
+	else make copy-godwoken-bin-from-docker ; \
 	fi
 # if manual build godwoken-polyjuice
 	if [ "$(MANUAL_BUILD_POLYJUICE)" = true ] ; then \
@@ -93,15 +90,10 @@ init:
 	make create-folder
 	cp ./config/private_key ./workspace/deploy/private_key
 	sh ./docker/layer2/init_config_json.sh
-	cp docker/layer2/Dockerfile.example docker/layer2/Dockerfile
 # build image for docker-compose build cache
 	make build-image
 
-build-image: SHELL:=/bin/bash
-build-image: 
-	if [ "$(MANUAL_BUILD_GODWOKEN)" = true ] || [ "$(MANUAL_BUILD_GODWOKEN)" = "skip" ]; then \
-		source ./gw_util.sh && update_godwoken_dockerfile_to_manual_mode ; \
-	fi
+build-image:
 	make install
 	cd docker && docker-compose build --no-rm
 
@@ -253,7 +245,20 @@ rebuild-poa-scripts:
 	cp packages/clerkb/build/debug/state workspace/scripts/release/
 
 ########## prebuild-quick-mode #############
-copy-polyjuice-bin-from-docker:	
+rm-dummy-docker-if-name-exits: SHELL:=/bin/bash
+rm-dummy-docker-if-name-exits:
+	source ./gw_util.sh && remove_dummy_docker_if_exits
+
+copy-godwoken-bin-from-docker: rm-dummy-docker-if-name-exits
+	mkdir -p `pwd`/quick-mode/godwoken
+	docker run -it -d --name dummy $$DOCKER_PREBUILD_IMAGE_NAME:$$DOCKER_PREBUILD_IMAGE_TAG
+	docker cp dummy:/bin/godwoken `pwd`/quick-mode/godwoken/godwoken
+	docker cp dummy:/bin/gw-tools `pwd`/quick-mode/godwoken/gw-tools
+	docker rm -f dummy
+# paste the prebuild bin to config dir for use
+	cp quick-mode/godwoken/* workspace/bin/
+
+copy-polyjuice-bin-from-docker:	rm-dummy-docker-if-name-exits
 	mkdir -p `pwd`/quick-mode/polyjuice
 	docker run -it -d --name dummy $$DOCKER_PREBUILD_IMAGE_NAME:$$DOCKER_PREBUILD_IMAGE_TAG
 	docker cp dummy:/scripts/godwoken-polyjuice/. `pwd`/quick-mode/polyjuice
@@ -263,8 +268,7 @@ copy-polyjuice-bin-from-docker:
 	cp quick-mode/polyjuice/generator_log workspace/deploy/polyjuice-backend/polyjuice-generator
 	cp quick-mode/polyjuice/validator_log workspace/deploy/polyjuice-backend/polyjuice-validator
 		
-
-copy-gw-scripts-and-bin-from-docker:
+copy-gw-scripts-and-bin-from-docker: rm-dummy-docker-if-name-exits
 	mkdir -p `pwd`/quick-mode/godwoken
 	docker run -it -d --name dummy $$DOCKER_PREBUILD_IMAGE_NAME:$$DOCKER_PREBUILD_IMAGE_TAG
 	docker cp dummy:/scripts/godwoken-scripts/. `pwd`/quick-mode/godwoken
@@ -287,7 +291,7 @@ copy-gw-scripts-and-bin-from-docker:
 	cp quick-mode/godwoken/deposit-lock workspace/scripts/release/
 	cp quick-mode/godwoken/always-success workspace/scripts/release/
 
-copy-poa-scripts-from-docker:
+copy-poa-scripts-from-docker: rm-dummy-docker-if-name-exits
 	mkdir -p `pwd`/quick-mode/clerkb
 	docker run -it -d --name dummy $$DOCKER_PREBUILD_IMAGE_NAME:$$DOCKER_PREBUILD_IMAGE_TAG
 	docker cp dummy:/scripts/clerkb/. `pwd`/quick-mode/clerkb

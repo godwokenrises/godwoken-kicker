@@ -39,15 +39,13 @@ services:
     build: 
       context: layer2
       args: 
-        DOCKER_PREBUILD_IMAGE: "${DOCKER_PREBUILD_IMAGE_NAME}:${DOCKER_PREBUILD_IMAGE_TAG}"
-        DOCKER_MANUAL_BUILD_IMAGE: "${DOCKER_MANUAL_BUILD_IMAGE_NAME}:${DOCKER_MANUAL_BUILD_IMAGE_TAG}"
+        DOCKER_IMAGE: "${DOCKER_MANUAL_BUILD_IMAGE_NAME}:${DOCKER_MANUAL_BUILD_IMAGE_TAG}"
     volumes:
     - ../:/code
     - ../cache/build/usr-local-cargo:/usr/local/cargo
     - ../cache/activity/ckb-cli-data:/root/.ckb-cli
     environment:
       FORCE_GODWOKEN_REDEPLOY: ${FORCE_GODWOKEN_REDEPLOY}
-      MANUAL_BUILD_GODWOKEN: ${MANUAL_BUILD_GODWOKEN}
     command: bash /code/godwoken_entrypoint.sh
     ports:
       - 8116:8116

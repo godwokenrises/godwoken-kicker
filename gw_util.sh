@@ -526,15 +526,6 @@ get_lumos_config_script_key_value(){
     echo "$(cat $lumosconfigfile)" | grep -Pzo ''$1'[^}]*'$2'":[\s]*"\K[^"]*'
 }
  
-update_godwoken_dockerfile_to_manual_mode(){
-    File="docker/layer2/Dockerfile"
-    if sed -i 's/FROM .*/FROM ${DOCKER_MANUAL_BUILD_IMAGE}/' $File &> /dev/null ; then # for linux system
-        echo "update godwoken dockerfile to manual_mode." ;
-    else
-        sed -i "" 's/FROM .*/FROM ${DOCKER_MANUAL_BUILD_IMAGE}/' $File ; # for unix system
-    fi
-}
-
 # usage: prepare_package name url checkout
 # if package folder exits and the git remote url is the same, will not remove and re-clone
 prepare_package(){
