@@ -287,8 +287,10 @@ copy-polyjuice-bin-from-docker:
 	docker cp dummy:/scripts/godwoken-polyjuice/. `pwd`/quick-mode/polyjuice
 	docker rm -f dummy
 # paste the prebuild bin to config dir for use
+	cp quick-mode/polyjuice/validator_log workspace/scripts/release/polyjuice-validator
 	cp quick-mode/polyjuice/generator_log workspace/deploy/polyjuice-backend/polyjuice-generator
-	cp quick-mode/polyjuice/validator_log workspace/deploy/polyjuice-backend/polyjuice-validator	
+	cp quick-mode/polyjuice/validator_log workspace/deploy/polyjuice-backend/polyjuice-validator
+		
 
 copy-gw-scripts-and-bin-from-docker:
 	mkdir -p `pwd`/quick-mode/godwoken
@@ -296,8 +298,10 @@ copy-gw-scripts-and-bin-from-docker:
 	docker cp dummy:/scripts/godwoken-scripts/. `pwd`/quick-mode/godwoken
 	docker rm -f dummy
 # paste the prebuild bin to config dir for use	
-	cp quick-mode/godwoken/meta-contract-generator config/meta-contract-generator
-	cp quick-mode/godwoken/meta-contract-validator config/meta-contract-validator	
+	cp quick-mode/godwoken/meta-contract-validator workspace/scripts/release/
+	cp quick-mode/godwoken/meta-contract-generator workspace/deploy/backend/meta-contract-generator
+	cp quick-mode/godwoken/meta-contract-validator workspace/deploy/backend/meta-contract-validator
+	cp quick-mode/godwoken/sudt-validator workspace/scripts/release/
 	cp quick-mode/godwoken/sudt-generator workspace/deploy/backend/sudt-generator	
 	cp quick-mode/godwoken/sudt-validator workspace/deploy/backend/sudt-validator
 # paste the prebuild scripts to config dir for use

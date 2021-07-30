@@ -63,7 +63,7 @@ make start
 
 ### 3. update componet package
 
-you can update componets version under [packages] section in `docker/.build.mode.env` file.
+when you choose custom-build mode, you can update componets version under [packages] section in `docker/.build.mode.env` file.
 
 ```sh
 ####[packages]
