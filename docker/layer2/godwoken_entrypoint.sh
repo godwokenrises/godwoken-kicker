@@ -23,11 +23,6 @@ source ${PROJECT_DIR}/gw_util.sh
 
 # ready to start godwoken
 cd ${PROJECT_DIR}/workspace
-
-# first, start ckb-indexer 
-# todo: should remove to another service. 
-mkdir -p ${PROJECT_DIR}/cache/activity/indexer-data 
-RUST_LOG=error ckb-indexer -s ${PROJECT_DIR}/cache/activity/indexer-data -c ${CKB_RPC} -l 0.0.0.0:8116 > ${PROJECT_DIR}/cache/activity/indexer-data/indexer-log & 
  
 # detect which mode to start godwoken
 if test -f "$GODWOKEN_CONFIG_TOML_FILE"; then

@@ -129,8 +129,8 @@ sp:
 sg:
 	cd docker && docker-compose logs -f --tail 200 godwoken
 # show ckb-indexer
-si:
-	cd docker && docker-compose logs -f ckb-indexer
+indexer:
+	cd docker && docker-compose logs -f indexer
 # show web3
 web3:
 	cd docker && docker-compose logs -f --tail 200 web3

@@ -48,11 +48,11 @@ services:
       FORCE_GODWOKEN_REDEPLOY: ${FORCE_GODWOKEN_REDEPLOY}
     command: bash /code/docker/layer2/godwoken_entrypoint.sh
     ports:
-      - 8116:8116
       - 8119:8119
     depends_on:
       - ckb
       - postgres
+      - indexer
       
   polyjuice:
     build:
@@ -104,6 +104,17 @@ services:
     depends_on: 
       - postgres
       - godwoken
+  
+  indexer:
+    image: "${DOCKER_PREBUILD_IMAGE_NAME}:${DOCKER_PREBUILD_IMAGE_TAG}" 
+    command: bash /code/docker/indexer/entrypoint.sh 
+    volumes:
+    - ../:/code
+    - ../cache/activity/indexer-data:/usr/local/ckb-indexer/data
+    ports:
+      - 8116:8116
+    depends_on:
+        - ckb
   
   # gen-godwoken-schema:
   #   image: retricsu/gowoken-build_dev:ubuntu20
