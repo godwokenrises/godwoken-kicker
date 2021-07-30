@@ -69,8 +69,7 @@ install:
 	if [ "$(MANUAL_BUILD_CLERKB)" = true ] ; then \
 		source ./gw_util.sh && prepare_package clerkb $$CLERKB_GIT_URL $$CLERKB_GIT_CHECKOUT > /dev/null ; \
 		make rebuild-poa-scripts ; \
-	else \
-		source ./gw_util.sh && copy_poa_scripts_from_docker_or_abort ;\
+	else make copy-poa-scripts-from-docker ;\
 	fi
 
 uninstall:
