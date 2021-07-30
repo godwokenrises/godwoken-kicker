@@ -17,6 +17,7 @@ manual-image:
 	cd docker/manual-image && docker build -t ${DOCKER_MANUAL_BUILD_IMAGE_NAME} .
 
 create-folder:
+	mkdir -p workspace/bin
 	mkdir -p workspace/deploy/backend
 	mkdir -p workspace/deploy/polyjuice-backend
 	mkdir -p workspace/scripts/release
