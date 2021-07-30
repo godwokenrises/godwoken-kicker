@@ -1,7 +1,9 @@
 #!/bin/bash
 
 set -o errexit
-#set -o xtrace
+# import some helper function
+source ${PROJECT_DIR}/gw_util.sh
+
 PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 LUMOS_CONFIG_FILE=${PROJECT_DIR}/workspace/deploy/lumos-config.json
 GODWOKEN_CONFIG_TOML_FILE=${PROJECT_DIR}/workspace/config.toml
@@ -12,10 +14,11 @@ export POLYMAN_RPC=http://call-polyman:6102
 export DATABASE_URL=postgres://user:password@postgres:5432/lumos
 
 export GODWOKEN_BIN=${PROJECT_DIR}/workspace/bin/godwoken
-export GW_TOOLS_BIN=${PROJECT_DIR}/workspace/bin/gw-tools 
+export GW_TOOLS_BIN=${PROJECT_DIR}/workspace/bin/gw-tools
 
-# import some helper function
-source ${PROJECT_DIR}/gw_util.sh
+function runGodwoken(){
+  GODWOKEN_DEBUG=true RUST_LOG=gw_block_producer=info,gw_generator=debug,gw_web3_indexer=debug $GODWOKEN_BIN
+}
 
 # ready to start godwoken
 cd ${PROJECT_DIR}/workspace
@@ -47,7 +50,7 @@ else
 fi
 
 if [ $START_MODE = "slim_start" ]; then
-  GODWOKEN_DEBUG=true RUST_LOG=gw_block_producer=info,gw_generator=debug,gw_web3_indexer=debug $GODWOKEN_BIN
+  runGodwoken
   echo "Godwoken stopped!"
   exit 125
 else
@@ -90,10 +93,7 @@ txHash=$(get_lumos_config_script_key_value SUDT TX_HASH "$LUMOS_CONFIG_FILE")
 outpointIndex=$(get_lumos_config_script_key_value SUDT INDEX "$LUMOS_CONFIG_FILE")
 update_godwoken_config_toml_with_l1_sudt_dep "$GODWOKEN_CONFIG_TOML_FILE" $depType $txHash $outpointIndex
 
-# generate godwoken config file for polyjuice
-callPolyman gen_config "$POLYMAN_RPC" 
-
-cd ${PROJECT_DIR}/workspace 
-
 # start godwoken
-GODWOKEN_DEBUG=true RUST_LOG=gw_block_producer=info,gw_generator=debug,gw_web3_indexer=debug $GODWOKEN_BIN
+cd ${PROJECT_DIR}/workspace
+runGodwoken
+
