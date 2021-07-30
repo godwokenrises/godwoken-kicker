@@ -31,5 +31,12 @@ while true; do
     fi
 done
 
+# generate godwoken configs for polyman using current workspace
+cp /code/workspace/config.toml packages/runner/configs/config.toml && echo 'cp config.toml from workspace'
+cp /code/workspace/deploy/scripts-deploy-result.json packages/runner/configs/scripts-deploy-result.json && echo 'cp scripts-deploy-result.json from workspace'
+cp /code/workspace/deploy/lumos-config.json packages/runner/configs/lumos-config.json && echo 'cp lumos-config from workspace'
+
+yarn gen-config
+
 # start the main http server of polyman
 yarn workspace @godwoken-polyman/runner start
