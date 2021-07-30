@@ -8,6 +8,7 @@ GODWOKEN_CONFIG_TOML_FILE=${PROJECT_DIR}/workspace/config.toml
 
 export PRIVKEY=deploy/private_key
 export CKB_RPC=http://ckb:8114
+export INDEXER_RPC=http://indexer:8119
 export POLYMAN_RPC=http://call-polyman:6102
 export DATABASE_URL=postgres://user:password@postgres:5432/lumos
 
@@ -75,7 +76,7 @@ $GW_TOOLS_BIN deploy-scripts -r ${CKB_RPC} -i deploy/scripts-deploy.json -o depl
 $GW_TOOLS_BIN deploy-genesis -r ${CKB_RPC} -d deploy/scripts-deploy-result.json -p deploy/poa-config.json -u deploy/rollup-config.json -o deploy/genesis-deploy-result.json -k ${PRIVKEY}
 
 # generate config file
-$GW_TOOLS_BIN generate-config -d ${DATABASE_URL} -r ${CKB_RPC} -g deploy/genesis-deploy-result.json -s deploy/scripts-deploy-result.json -k deploy/private_key -o config.toml -c deploy/scripts-deploy.json
+$GW_TOOLS_BIN generate-config -d ${DATABASE_URL} -r ${CKB_RPC} -i ${INDEXER_RPC} -g deploy/genesis-deploy-result.json -s deploy/scripts-deploy-result.json -k deploy/private_key -o config.toml -c deploy/scripts-deploy.json
 
 # Update block_producer.wallet_config section to your own lock.
 edit_godwoken_config_toml $GODWOKEN_CONFIG_TOML_FILE
