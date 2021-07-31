@@ -329,7 +329,14 @@ isRollupCellExits(){
     then
         local tomlconfigfile="$1"
     else
-        local tomlconfigfile="/code/godwoken/config.toml"
+        local tomlconfigfile="/code/workspace/config.toml"
+    fi
+
+    if [[ -n $2 ]];
+    then
+        local indexer_rpc="$2"
+    else
+        local indexer_rpc="http://localhost:8116"
     fi
 
     rollup_code_hash=$( parse_toml_with_section "$tomlconfigfile" "chain.rollup_type_script" "code_hash" )
@@ -359,7 +366,7 @@ isRollupCellExits(){
     | tr -d '\n' \
     | curl -s --ipv4 --retry 3 --retry-connrefused \
     -H 'content-type: application/json' -d @- \
-    http://localhost:8116)
+    $indexer_rpc)
 
     if [[ $result =~ "block_number" ]]; then
         echo "Rollup cell exits!"

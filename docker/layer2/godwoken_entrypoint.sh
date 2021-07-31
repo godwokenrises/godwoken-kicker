@@ -8,7 +8,7 @@ GODWOKEN_CONFIG_TOML_FILE=${PROJECT_DIR}/workspace/config.toml
 
 export PRIVKEY=deploy/private_key
 export CKB_RPC=http://ckb:8114
-export INDEXER_RPC=http://indexer:8119
+export INDEXER_RPC=http://indexer:8116
 export POLYMAN_RPC=http://call-polyman:6102
 export DATABASE_URL=postgres://user:password@postgres:5432/lumos
 
@@ -33,7 +33,7 @@ if test -f "$GODWOKEN_CONFIG_TOML_FILE"; then
     export START_MODE="fat_start" 
   else
     echo "godwoken config.toml exists. try search rollup cell.."
-    if isRollupCellExits "${GODWOKEN_CONFIG_TOML_FILE}";
+    if isRollupCellExits "${GODWOKEN_CONFIG_TOML_FILE}" "${INDEXER_RPC}";
     then
       # slim start, just start godwoken, no re-deploy scripts
        export START_MODE="slim_start" 
