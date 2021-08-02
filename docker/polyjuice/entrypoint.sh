@@ -4,6 +4,7 @@ set -o errexit
 #set -o xtrace
 PROJECT_DIR=/code
 GODWOKEN_RPC_URL="http://godwoken:8119"
+export INDEXER_DB=/usr/local/polyman
 
 # import some helper function
 source ${PROJECT_DIR}/gw_util.sh
@@ -18,8 +19,6 @@ else
 fi
 
 yarn init_placeholder_config
-
-yarn workspace @godwoken-polyman/runner clean
 
 # wait for godwoken rpc server to start
 while true; do

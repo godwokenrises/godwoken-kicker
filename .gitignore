@@ -12,7 +12,6 @@ ckb-cli-data/
 postgres-data/
 docker/gen-godwoken-schema/schemas/*
 docker/.submodule.list.env
-docker/layer2/Dockerfile
 cargo-cache-data/
 quick-mode/
 
