@@ -242,7 +242,8 @@ copy-godwoken-bin-from-docker: rm-dummy-docker-if-name-exits
 	docker cp dummy:/bin/gw-tools `pwd`/quick-mode/godwoken/gw-tools
 	docker rm -f dummy
 # paste the prebuild bin to workspace dir for use
-	cp quick-mode/godwoken/* workspace/bin/
+	cp quick-mode/godwoken/godwoken workspace/bin/
+	cp quick-mode/godwoken/gw-tools workspace/bin/
 
 copy-polyjuice-bin-from-docker:	rm-dummy-docker-if-name-exits
 	mkdir -p `pwd`/quick-mode/polyjuice
