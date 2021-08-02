@@ -61,6 +61,7 @@ services:
         DOCKER_PREBUILD_IMAGE: "${DOCKER_JS_PREBUILD_IMAGE_NAME}:${DOCKER_JS_PREBUILD_IMAGE_TAG}"
     volumes:
       - ../:/code
+      - ../cache/activity/polyjuice:/usr/local/polyman
     environment: 
       MANUAL_BUILD_POLYMAN: ${MANUAL_BUILD_POLYMAN}
     command: bash /code/docker/polyjuice/entrypoint.sh 
@@ -78,6 +79,7 @@ services:
         DOCKER_PREBUILD_IMAGE: "${DOCKER_JS_PREBUILD_IMAGE_NAME}:${DOCKER_JS_PREBUILD_IMAGE_TAG}"
     volumes:
       - ../:/code
+      - ../cache/activity/call-polyman:/usr/local/polyman/call-polyman
     environment: 
       MANUAL_BUILD_POLYMAN: ${MANUAL_BUILD_POLYMAN}
     command: bash /code/docker/call-polyman/entrypoint.sh 
