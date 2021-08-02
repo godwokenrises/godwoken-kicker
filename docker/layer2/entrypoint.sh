@@ -81,9 +81,6 @@ $GW_TOOLS_BIN generate-config -d ${DATABASE_URL} -r ${CKB_RPC} -i ${INDEXER_RPC}
 # Update block_producer.wallet_config section to your own lock.
 edit_godwoken_config_toml $GODWOKEN_CONFIG_TOML_FILE
 
-# update l1_sudt_script_hash in config.toml file(if it exits) with lumos script.sudt.code_hash
-codeHash=$(get_lumos_config_script_key_value SUDT CODE_HASH "$LUMOS_CONFIG_FILE")
-set_key_value_in_toml "l1_sudt_script_type_hash" $codeHash "$GODWOKEN_CONFIG_TOML_FILE"
 # update l1_sudt_dep info in config.toml file(if it exits) with lumos script.sudt.dep
 depType=$(get_lumos_config_script_key_value SUDT DEP_TYPE "$LUMOS_CONFIG_FILE")
 txHash=$(get_lumos_config_script_key_value SUDT TX_HASH "$LUMOS_CONFIG_FILE")
