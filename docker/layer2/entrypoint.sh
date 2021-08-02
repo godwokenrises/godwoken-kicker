@@ -72,6 +72,10 @@ set_key_value_in_json "l1_sudt_script_type_hash" $codeHash "deploy/rollup-config
 echo 'this may takes a little bit of time, please wait...'
 $GW_TOOLS_BIN deploy-scripts -r ${CKB_RPC} -i deploy/scripts-deploy.json -o deploy/scripts-deploy-result.json -k ${PRIVKEY}
 
+# register tron lock to allow-eoa-type-hash in rollup-config.json
+tronAccountLockTypeHash=$(jq -r ".tron_account_lock.script_type_hash" "deploy/scripts-deploy-result.json")
+cat <<< $(jq -r '.allowed_eoa_type_hashes += ["'$tronAccountLockTypeHash'"]' "deploy/rollup-config.json") > "deploy/rollup-config.json" 
+
 # deploy genesis block
 $GW_TOOLS_BIN deploy-genesis -r ${CKB_RPC} -d deploy/scripts-deploy-result.json -p deploy/poa-config.json -u deploy/rollup-config.json -o deploy/genesis-deploy-result.json -k ${PRIVKEY}
 
