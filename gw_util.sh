@@ -566,13 +566,6 @@ reclone_repo_if_checkout_failed(){
     cd ../.. && rm -rf packages/$1 && pull_code_from_url $1 $2 $3
 }
 
-paste_binary_into_path(){
-    printf "binary path: ";
-    read;
-    bin_path=${REPLY}
-    cp $bin_path $1
-}
-
 remove_dummy_docker_if_exits(){
     [ "$(docker ps -a | grep dummy)" ] && docker rm -f dummy || :
 }
