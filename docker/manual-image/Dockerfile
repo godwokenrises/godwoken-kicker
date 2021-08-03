@@ -38,4 +38,7 @@ RUN cp /ckb/ckb_v0.41.0_x86_64-unknown-linux-gnu/ckb /usr/bin/ckb
 RUN cp /ckb/ckb_v0.41.0_x86_64-unknown-linux-gnu/ckb-cli /usr/bin/ckb-cli
 RUN cp /ckb-indexer/ckb-indexer /usr/bin/ckb-indexer
 
+RUN apt-get install jq -y \
+ && echo "Finished installing dependencies"
+
 CMD [ "node", "--version" ]
