@@ -747,7 +747,7 @@ wait_for_address_got_suffice_money(){
 }
 
 cargo_build_local_or_docker(){
-    if cargo --version ; then
+    if [[ "$BUILD_GODWOKEN_ON_LOCAL_OVER_DOCKER" = true ]]; then
         echo "build Godwoken on local"
         cd packages/godwoken && cargo build && cd ../..
     else
