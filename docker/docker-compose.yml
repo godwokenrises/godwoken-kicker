@@ -39,22 +39,20 @@ services:
     build: 
       context: layer2
       args: 
-        DOCKER_PREBUILD_IMAGE: "${DOCKER_PREBUILD_IMAGE_NAME}:${DOCKER_PREBUILD_IMAGE_TAG}"
-        DOCKER_MANUAL_BUILD_IMAGE: "${DOCKER_MANUAL_BUILD_IMAGE_NAME}:${DOCKER_MANUAL_BUILD_IMAGE_TAG}"
+        DOCKER_IMAGE: "${DOCKER_MANUAL_BUILD_IMAGE_NAME}:${DOCKER_MANUAL_BUILD_IMAGE_TAG}"
     volumes:
     - ../:/code
     - ../cache/build/usr-local-cargo:/usr/local/cargo
     - ../cache/activity/ckb-cli-data:/root/.ckb-cli
     environment:
       FORCE_GODWOKEN_REDEPLOY: ${FORCE_GODWOKEN_REDEPLOY}
-      MANUAL_BUILD_GODWOKEN: ${MANUAL_BUILD_GODWOKEN}
-    command: bash /code/godwoken_entrypoint.sh
+    command: bash /code/docker/layer2/entrypoint.sh
     ports:
-      - 8116:8116
       - 8119:8119
     depends_on:
       - ckb
       - postgres
+      - indexer
       
   polyjuice:
     build:
@@ -63,6 +61,7 @@ services:
         DOCKER_PREBUILD_IMAGE: "${DOCKER_JS_PREBUILD_IMAGE_NAME}:${DOCKER_JS_PREBUILD_IMAGE_TAG}"
     volumes:
       - ../:/code
+      - ../cache/activity/polyjuice:/usr/local/polyman
     environment: 
       MANUAL_BUILD_POLYMAN: ${MANUAL_BUILD_POLYMAN}
     command: bash /code/docker/polyjuice/entrypoint.sh 
@@ -80,6 +79,7 @@ services:
         DOCKER_PREBUILD_IMAGE: "${DOCKER_JS_PREBUILD_IMAGE_NAME}:${DOCKER_JS_PREBUILD_IMAGE_TAG}"
     volumes:
       - ../:/code
+      - ../cache/activity/call-polyman:/usr/local/polyman/call-polyman
     environment: 
       MANUAL_BUILD_POLYMAN: ${MANUAL_BUILD_POLYMAN}
     command: bash /code/docker/call-polyman/entrypoint.sh 
@@ -100,12 +100,23 @@ services:
     environment: 
       MANUAL_BUILD_WEB3: ${MANUAL_BUILD_WEB3}
       PORT: 8024
-    command: bash /code/web3_entrypoint.sh
+    command: bash /code/docker/web3/entrypoint.sh
     ports:
       - 8024:8024
     depends_on: 
       - postgres
       - godwoken
+  
+  indexer:
+    image: "${DOCKER_PREBUILD_IMAGE_NAME}:${DOCKER_PREBUILD_IMAGE_TAG}" 
+    command: bash /code/docker/indexer/entrypoint.sh 
+    volumes:
+    - ../:/code
+    - ../cache/activity/indexer-data:/usr/local/ckb-indexer/data
+    ports:
+      - 8116:8116
+    depends_on:
+        - ckb
   
   # gen-godwoken-schema:
   #   image: retricsu/gowoken-build_dev:ubuntu20

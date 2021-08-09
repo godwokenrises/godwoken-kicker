@@ -2,7 +2,7 @@
 
 set -o errexit
 #set -o xtrace
-PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+PROJECT_DIR="/code"
 GODWOKEN_RPC_URL="http://godwoken:8119"
 
 # import some helper function
@@ -56,7 +56,7 @@ GODWOKEN_JSON_RPC=http://godwoken:8119
 ETH_ACCOUNT_LOCK_HASH=$EthAccountLockCodeHash
 ROLLUP_TYPE_HASH=$RollupTypeHash
 PORT=8024
-CHAIN_ID=3
+CHAIN_ID=1024777
 CREATOR_ACCOUNT_ID=3
 ADDRESS_STORE_PATH_ABSOLUTE=/usr/local/godwoken-web3/address-mapping
 DEFAULT_FROM_ADDRESS=0x6daf63d8411d6e23552658e3cfb48416a6a2ca78

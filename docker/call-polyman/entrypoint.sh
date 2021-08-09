@@ -5,6 +5,8 @@ set -o errexit
 PROJECT_DIR=/code
 GODWOKEN_RPC_URL="http://godwoken:8119"
 
+export INDEXER_DB=/usr/local/polyman
+
 # import some helper function
 source ${PROJECT_DIR}/gw_util.sh
 
@@ -17,7 +19,8 @@ else
   cd /godwoken-polyman
 fi
 
-yarn workspace @godwoken-polyman/runner clean:call-polyman-db
+# generate godwoken configs for polyman using current workspace
+cp /code/workspace/deploy/lumos-config.json packages/runner/configs/lumos-config.json && echo 'cp lumos-config from workspace' || echo 'lumos-config.json not found. use brand new one.';
 
 yarn init_placeholder_config
 

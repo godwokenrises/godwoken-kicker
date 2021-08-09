@@ -68,9 +68,7 @@ cat << EOF > rollup-config.json
   "challenge_maturity_blocks": 5,
   "finality_blocks": 20,
   "reward_burn_rate": 50,
-  "allowed_eoa_type_hashes": [
-    "0xf0e03a329803bd033eae42e80c8cd6c6dc81b48afe9f4a630f27e78be54db14c"
-  ],
+  "allowed_eoa_type_hashes": [],
   "compatible_chain_id": 1
 }
 EOF
