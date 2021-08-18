@@ -96,7 +96,6 @@ services:
         DOCKER_PREBUILD_IMAGE: "${DOCKER_JS_PREBUILD_IMAGE_NAME}:${DOCKER_JS_PREBUILD_IMAGE_TAG}"
     volumes: 
     - ../:/code # the manual-build resource all stays in /code dir
-    - ../cache/activity/web3-data/address-mapping:/usr/local/godwoken-web3/address-mapping
     environment: 
       MANUAL_BUILD_WEB3: ${MANUAL_BUILD_WEB3}
       PORT: 8024
