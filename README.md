@@ -40,13 +40,14 @@ make start
 some useful commands:
 
 ```sh
-make clean # remove workspace, requires make init next time.
-make clean-cache # remove chain activity cache data, but keep workspace, packages and building cache unchanged
-make uninstall # remove all componets in packages folder
+make clean # remove all, requires make init next time.
+make clean-data # remove cache activities data (eg: chain-data) and workspace, only keep packages untouched. requires make init next time.
+make clean-cache # remove chain activity cache data, but keep workspace, packages  unchanged
+make uninstall # remove all files in packages folder
 make clean-build-cache # remove packages building cache like cargo crates cache
 ```
 
-### 1. clean current chain data but keep everything else unchanged(best way  to start a new chain) 
+### 1. clean current chain data but keep everything else unchanged(best way to start a new chain) 
 
 ```sh
 make clean-cache
@@ -56,12 +57,20 @@ make start
 ### 2. re-build scripts and bins used for chain deployment
 
 ```sh
+make clean-data
+make init
+make start
+```
+
+### 3. brand-new restart
+
+```sh
 make clean
 make init
 make start
 ```
 
-### 3. update componet package
+### 4. update componet package
 
 when you choose custom-build mode, you can update componets version under [packages] section in `docker/.build.mode.env` file.
 
