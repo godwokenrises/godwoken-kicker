@@ -22,23 +22,31 @@ create-folder:
 	mkdir -p workspace/deploy/polyjuice-backend
 	mkdir -p workspace/scripts/release
 
-clean:
-	rm -rf cache/activity/*
-	rm -rf workspace/*
-	rm -rf quick-mode
-	echo "remove workspace and cache activities."
+uninstall:
+	rm -rf packages/*
+	echo "remove all packages."
 
 clean-cache:
 	rm -rf cache/activity/*
-	echo "remove cache activities."
+	echo "remove all cache activities data."
+
+clean-workspace:
+	rm -rf workspace/*
+	echo "remove all files in workspace."
+
+clean-data:
+	make clean-cache
+	make clean-workspace
+	rm -rf quick-mode
+
+clean:
+	make uninstall
+	make clean-data
+	echo "successful remove packages, workspace and cache activities."
 
 clean-build-cache:
 	rm -rf cache/build/*
 	echo "remove build cache."
-
-uninstall:
-	rm -rf packages/*
-	echo "remove all packages."
 
 ### 2. main command
 init:

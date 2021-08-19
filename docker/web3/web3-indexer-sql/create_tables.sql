@@ -64,3 +64,14 @@ CREATE TABLE logs (
 CREATE INDEX ON logs (transaction_hash);
 CREATE INDEX ON logs (block_hash);
 CREATE INDEX ON logs (address);
+
+-- Add migration script here
+CREATE TABLE accounts (
+    id SERIAL PRIMARY KEY,
+    eth_address bytea NOT NULL,
+    gw_short_address bytea NOT NULL
+);
+
+CREATE UNIQUE INDEX accounts_eth_address_unique ON accounts (eth_address);
+CREATE INDEX accounts_gw_short_address_index ON accounts (gw_short_address);
+
