@@ -35,7 +35,7 @@ make sg # sg means show godwoken logs
 
 after everything started, check `http://localhost:6100/` to deploy contract.
 
-![panel](docs/main.png)
+![panel](main.png)
 
 ### How to deploy contract
 
@@ -54,7 +54,7 @@ after deployment successfully get done, you will find the contract address listi
 
 you can use the kicker's built-in `Contract Debugger` right on the page to give your dapp a first simple manual test.
 
-![panel](docs/contract-debugger.png)
+![panel](contract-debugger.png)
 
 ## 2. Custom mode
 
