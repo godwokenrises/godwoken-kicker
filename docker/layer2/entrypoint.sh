@@ -16,7 +16,7 @@ export GODWOKEN_BIN=${PROJECT_DIR}/workspace/bin/godwoken
 export GW_TOOLS_BIN=${PROJECT_DIR}/workspace/bin/gw-tools
 
 function runGodwoken(){
-  GODWOKEN_DEBUG=true RUST_LOG=gw_block_producer=info,gw_generator=debug,gw_web3_indexer=debug $GODWOKEN_BIN
+  RUST_LOG=info,gw_block_producer=info,gw_generator=debug,gw_web3_indexer=debug $GODWOKEN_BIN
 }
 
 # import some helper function
