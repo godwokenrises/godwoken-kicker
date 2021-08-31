@@ -1,4 +1,5 @@
 .DS_Store
+.vscode/
 config/deployment-results.json
 config/runner_config.json
 node_modules/
