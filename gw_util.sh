@@ -379,6 +379,36 @@ isRollupCellExits(){
     fi
 }
 
+isCkbRpcRunning(){
+    if [[ -n $1 ]]; 
+    then
+        local rpc_url="$1"
+    else
+        local rpc_url="http://localhost:8114"
+    fi
+
+    result=$( echo '{
+    "id": 2,
+    "jsonrpc": "2.0",
+    "method": "ping",
+    "params": []
+    }' \
+    | tr -d '\n' \
+    | curl -s --ipv4 \
+    -H 'content-type: application/json' -d @- \
+    $rpc_url)
+
+    if [[ $result =~ "pong" ]]; then
+        echo "ckb rpc server is up and running!"
+        # 0 equals true
+        return 0
+    else
+        echo "ckb rpc server is down."
+        # 1 equals false
+        return 1
+    fi
+}
+
 isGodwokenRpcRunning(){
     if [[ -n $1 ]]; 
     then
