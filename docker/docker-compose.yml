@@ -25,7 +25,7 @@ services:
     - 8114:8114
     - 8115:8115   # 8115 is not using for now, but we may need it when extend kicker in the future
     volumes:
-    - ../ckb:/ckb 
+    - ../:/code       
     - ../cache/activity/ckb-chain-data:/usr/local/ckb-chain-data
     environment:
       # env of layer 1:
