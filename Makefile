@@ -14,7 +14,8 @@ endif
 
 ### 1. utils
 manual-image:
-	cd docker/manual-image && docker build -t ${DOCKER_MANUAL_BUILD_IMAGE_NAME} .
+	@read -p "Please Enter New Image Tag: " VERSION ; \
+	cd docker/manual-image && docker build . -t ${DOCKER_MANUAL_BUILD_IMAGE_NAME}:$$VERSION ;\
 
 create-folder:
 	mkdir -p workspace/bin
