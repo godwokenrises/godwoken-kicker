@@ -16,6 +16,16 @@ export GODWOKEN_BIN=${PROJECT_DIR}/workspace/bin/godwoken
 export GW_TOOLS_BIN=${PROJECT_DIR}/workspace/bin/gw-tools
 
 function runGodwoken(){
+  # wait for ckb rpc server to start
+  while true; do
+      sleep 0.2;
+      if isCkbRpcRunning "${CKB_RPC}";
+      then
+        break;
+      else echo "keep waitting for ckb rpc..."
+      fi
+  done
+  # running godwoken
   RUST_LOG=info,gw_block_producer=info,gw_generator=debug,gw_web3_indexer=debug $GODWOKEN_BIN
 }
 
