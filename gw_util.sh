@@ -490,6 +490,39 @@ isPolymanUIRunning(){
     fi
 }
 
+isWeb3RpcRunning(){
+    if [[ -n $1 ]]; 
+    then
+        local rpc_url="$1"
+    else
+        local rpc_url="http://localhost:8024"
+    fi
+
+    # curl retry on connrefused, considering ECONNREFUSED as a transient error(network issues)
+    # connections with ipv6 are not retried because it returns EADDRNOTAVAIL instead of ECONNREFUSED,
+    # hence we should use --ipv4
+    result=$( echo '{
+    "id": 2,
+    "jsonrpc": "2.0",
+    "method": "net_listening",
+    "params": []
+    }' \
+    | tr -d '\n' \
+    | curl -s --ipv4 --retry 3 --retry-connrefused \
+    -H 'content-type: application/json' -d @- \
+    $rpc_url)
+
+    if [[ $result =~ "true" ]]; then
+        echo "web3 rpc server is up and running!"
+        # 0 equals true
+        return 0
+    else
+        echo "web3 rpc server is down."
+        # 1 equals false
+        return 1
+    fi
+}
+
 # set key value in toml config file
 # how to use: set_key_value_in_toml key value your_toml_config_file
 set_key_value_in_toml() {
