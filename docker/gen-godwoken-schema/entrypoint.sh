@@ -1,6 +1,8 @@
 PROJECT_DIR='/code';
 ENTRY_DIR=${PROJECT_DIR}/docker/gen-godwoken-schema
 
+# you need to install moleculec on your machine
+# cargo install moleculec
 moleculec -V
 
 mkdir -p ${ENTRY_DIR}/schemas
@@ -9,9 +11,11 @@ moleculec --language - --schema-file ${PROJECT_DIR}/packages/godwoken/crates/typ
 moleculec --language - --schema-file ${PROJECT_DIR}/packages/godwoken/crates/types/schemas/godwoken.mol --format json > ${ENTRY_DIR}/schemas/godwoken.json
 moleculec --language - --schema-file ${PROJECT_DIR}/packages/godwoken/crates/types/schemas/store.mol --format json > ${ENTRY_DIR}/schemas/store.json
 
-${ENTRY_DIR}/moleculec-es -generateTypeScriptDefinition -hasBigInt -inputFile ${ENTRY_DIR}/schemas/blockchain.json -outputFile ${ENTRY_DIR}/schemas/blockchain.esm.js
-${ENTRY_DIR}/moleculec-es -generateTypeScriptDefinition -hasBigInt -inputFile ${ENTRY_DIR}/schemas/godwoken.json -outputFile ${ENTRY_DIR}/schemas/godwoken.esm.js
-${ENTRY_DIR}/moleculec-es -generateTypeScriptDefinition -hasBigInt -inputFile ${ENTRY_DIR}/schemas/store.json -outputFile ${ENTRY_DIR}/schemas/store.esm.js
+# you need to install moleculec-es on your machine
+# https://github.com/nervosnetwork/moleculec-es/releases
+moleculec-es -generateTypeScriptDefinition -hasBigInt -inputFile ${ENTRY_DIR}/schemas/blockchain.json -outputFile ${ENTRY_DIR}/schemas/blockchain.esm.js
+moleculec-es -generateTypeScriptDefinition -hasBigInt -inputFile ${ENTRY_DIR}/schemas/godwoken.json -outputFile ${ENTRY_DIR}/schemas/godwoken.esm.js
+moleculec-es -generateTypeScriptDefinition -hasBigInt -inputFile ${ENTRY_DIR}/schemas/store.json -outputFile ${ENTRY_DIR}/schemas/store.esm.js
 
 # rollup to pack esm file
 npm install -g rollup
