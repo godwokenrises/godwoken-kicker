@@ -31,6 +31,21 @@ make init
 make start
 ```
 
+## Requirement
+
+if you are using quick-mode:
+
+- [curl](https://curl.se/) (this only [effects](https://github.com/RetricSu/godwoken-kicker/issues/115) showing progressbar correctly)
+- [docker-compose](https://docs.docker.com/compose/)
+
+if you are using custom-mode:
+
+- [curl](https://curl.se/) (this only [effects](https://github.com/RetricSu/godwoken-kicker/issues/115) showing progressbar correctly)
+- [docker-compose](https://docs.docker.com/compose/)
+- [moleculec](https://github.com/nervosnetwork/molecule) 0.7.2 (cargo install moleculec)
+- nodejs 14 && yarn ([how to install](https://yarnpkg.com/lang/en/docs/install/))
+- [capsule](https://github.com/nervosnetwork/capsule) 0.4.6 (cargo install capsule)
+
 ## How Kicker Works
 
 - `packages`: contains all componets repo used in custom-mode.
