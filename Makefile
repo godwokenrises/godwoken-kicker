@@ -14,7 +14,8 @@ endif
 
 ### 1. utils
 manual-image:
-	cd docker/manual-image && docker build -t ${DOCKER_MANUAL_BUILD_IMAGE_NAME} .
+	@read -p "Please Enter New Image Tag: " VERSION ; \
+	cd docker/manual-image && docker build . -t ${DOCKER_MANUAL_BUILD_IMAGE_NAME}:$$VERSION ;\
 
 create-folder:
 	mkdir -p workspace/bin
@@ -64,13 +65,13 @@ install:
 # if manual build web3
 	if [ "$(MANUAL_BUILD_WEB3)" = true ] ; then \
 		source ./gw_util.sh && prepare_package godwoken-web3 $$WEB3_GIT_URL $$WEB3_GIT_CHECKOUT > /dev/null; \
-		make copy-web3-node-modules-if-empty;\
+		"$(INSTALL_JS_NODE_MODULE_NOT_COPY)" && make install-web3-node-modules-if-empty || make copy-web3-node-modules-if-empty ;\
 		docker run --rm -v `pwd`/packages/godwoken-web3:/app -w=/app $$DOCKER_JS_PREBUILD_IMAGE_NAME:$$DOCKER_JS_PREBUILD_IMAGE_TAG /bin/bash -c "yarn workspace @godwoken-web3/godwoken tsc;" ; \
 	fi
 # if manual build polyman
 	if [ "$(MANUAL_BUILD_POLYMAN)" = true ] ; then \
 		source ./gw_util.sh && prepare_package godwoken-polyman $$POLYMAN_GIT_URL $$POLYMAN_GIT_CHECKOUT > /dev/null; \
-		make copy-polyman-node-modules-if-empty;\
+		"$(INSTALL_JS_NODE_MODULE_NOT_COPY)" && make install-polyman-node-modules-if-empty || make copy-polyman-node-modules-if-empty ;\
 	fi
 # if manual build godwoken
 	if [ "$(MANUAL_BUILD_GODWOKEN)" = true ] ; then \
@@ -304,6 +305,12 @@ copy-web3-node-modules-if-empty:
 
 copy-polyman-node-modules-if-empty::
 	docker run --rm -v `pwd`/packages/godwoken-polyman:/app $$DOCKER_JS_PREBUILD_IMAGE_NAME:$$DOCKER_JS_PREBUILD_IMAGE_TAG /bin/bash -c "cd app && yarn check --verify-tree && cd .. || ( cd .. && echo 'start copying polyman node_modules from docker to local package..' && cp -r ./godwoken-polyman/node_modules ./app/) ;"	
+
+install-web3-node-modules-if-empty:
+	cd `pwd`/packages/godwoken-web3 && yarn check --verify-tree && cd .. || yarn install
+
+install-polyman-node-modules-if-empty:
+	cd `pwd`/packages/godwoken-polyman && yarn check --verify-tree && cd .. || yarn install
 
 ### 7. godwoken gen schema helper command
 gen-schema:

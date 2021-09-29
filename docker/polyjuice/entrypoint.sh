@@ -4,6 +4,7 @@ set -o errexit
 #set -o xtrace
 PROJECT_DIR=/code
 GODWOKEN_RPC_URL="http://godwoken:8119"
+WEB3_RPC_URL="http://web3:8024"
 export INDEXER_DB=/usr/local/polyman
 
 # import some helper function
@@ -36,6 +37,16 @@ cp /code/workspace/deploy/scripts-deploy-result.json packages/runner/configs/scr
 cp /code/workspace/deploy/lumos-config.json packages/runner/configs/lumos-config.json && echo 'cp lumos-config from workspace'
 
 yarn gen-config
+
+# wait for web3 rpc server to start
+while true; do
+    sleep 2;
+    if isWeb3RpcRunning "${WEB3_RPC_URL}";
+    then
+      break;
+    else echo "keep waitting..."
+    fi
+done
 
 # start the main http server of polyman
 yarn workspace @godwoken-polyman/runner start
