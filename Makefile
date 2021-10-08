@@ -83,7 +83,7 @@ install:
 # if manual build godwoken-polyjuice
 	if [ "$(MANUAL_BUILD_POLYJUICE)" = true ] ; then \
 		source ./gw_util.sh && prepare_package godwoken-polyjuice $$POLYJUICE_GIT_URL $$POLYJUICE_GIT_CHECKOUT > /dev/null ; \
-		cd packages/godwoken-polyjuice && git submodule update --init --recursive && cd ../.. ; \
+		cd packages/godwoken-polyjuice && git submodule update --init --recursive --depth=1 && cd ../.. ; \
 		make rebuild-polyjuice-bin ; \
 	else make copy-polyjuice-bin-from-docker ; \
 	fi
