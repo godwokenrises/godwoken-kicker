@@ -76,30 +76,61 @@ sed -i -e 's/{"status":"ok","data"://g' $LUMOS_CONFIG_FILE
 sed -i -e 's/}}}}/}}}/g' $LUMOS_CONFIG_FILE
 # update l1_sudt_script_hash in rollup-config.json file(if it exits) with lumos script.sudt.code_hash
 codeHash=$(get_lumos_config_script_key_value SUDT CODE_HASH "$LUMOS_CONFIG_FILE")
-set_key_value_in_json "l1_sudt_script_type_hash" $codeHash "deploy/rollup-config.json"
+depType=$(get_lumos_config_script_key_value SUDT DEP_TYPE "$LUMOS_CONFIG_FILE")
+txHash=$(get_lumos_config_script_key_value SUDT TX_HASH "$LUMOS_CONFIG_FILE")
+outpointIndex=$(get_lumos_config_script_key_value SUDT INDEX "$LUMOS_CONFIG_FILE")
+
+rollupConfig="
+{
+  \"l1_sudt_script_type_hash\": \"${codeHash}\",
+  \"l1_sudt_cell_dep\": {
+    \"dep_type\": \"code\",
+    \"out_point\": {
+      \"tx_hash\": \"${txHash}\",
+      \"index\": \"${outpointIndex}\"
+    }
+  },
+  \"cells_lock\": {
+    \"code_hash\": \"0x49027a6b9512ef4144eb41bc5559ef2364869748e65903bd14da08c3425c0503\",
+    \"hash_type\": \"type\",
+    \"args\": \"0x0000000000000000000000000000000000000000\"
+  },
+  \"reward_lock\": {
+    \"code_hash\": \"0x49027a6b9512ef4144eb41bc5559ef2364869748e65903bd14da08c3425c0503\",
+    \"hash_type\": \"type\",
+    \"args\": \"0x0000000000000000000000000000000000000001\"
+  },
+  \"burn_lock\": {
+    \"code_hash\": \"0x0000000000000000000000000000000000000000000000000000000000000000\",
+    \"hash_type\": \"data\",
+    \"args\": \"0x\"
+  },
+  \"required_staking_capacity\": 10000000000,
+  \"challenge_maturity_blocks\": 100,
+  \"finality_blocks\": 100,
+  \"reward_burn_rate\": 50,
+  \"allowed_eoa_type_hashes\": []
+}"
+
+echo 'Generate deploy/rollup-config.json'
+echo $rollupConfig > "deploy/rollup-config.json"
 
 # deploy scripts
 echo 'this may takes a little bit of time, please wait...'
-$GW_TOOLS_BIN deploy-scripts -r ${CKB_RPC} -i deploy/scripts-deploy.json -o deploy/scripts-deploy-result.json -k ${PRIVKEY}
+$GW_TOOLS_BIN deploy-scripts --ckb-rpc ${CKB_RPC} -i deploy/scripts-deploy.json -o deploy/scripts-deploy-result.json -k ${PRIVKEY}
 
 # register tron lock to allow-eoa-type-hash in rollup-config.json
 tronAccountLockTypeHash=$(jq -r ".tron_account_lock.script_type_hash" "deploy/scripts-deploy-result.json")
 cat <<< $(jq -r '.allowed_eoa_type_hashes += ["'$tronAccountLockTypeHash'"]' "deploy/rollup-config.json") > "deploy/rollup-config.json" 
 
 # deploy genesis block
-$GW_TOOLS_BIN deploy-genesis -r ${CKB_RPC} -d deploy/scripts-deploy-result.json -p deploy/poa-config.json -u deploy/rollup-config.json -o deploy/genesis-deploy-result.json -k ${PRIVKEY}
+$GW_TOOLS_BIN deploy-genesis --ckb-rpc ${CKB_RPC} --scripts-deployment-path deploy/scripts-deploy-result.json -p deploy/poa-config.json -r deploy/rollup-config.json -o deploy/genesis-deploy-result.json -k ${PRIVKEY}
 
 # generate config file
-$GW_TOOLS_BIN generate-config -d ${DATABASE_URL} -r ${CKB_RPC} -i ${INDEXER_RPC} -g deploy/genesis-deploy-result.json -s deploy/scripts-deploy-result.json -k deploy/private_key -o config.toml -c deploy/scripts-deploy.json
+$GW_TOOLS_BIN generate-config -d ${DATABASE_URL} --ckb-rpc ${CKB_RPC} --ckb-indexer-rpc ${INDEXER_RPC} -g deploy/genesis-deploy-result.json -r deploy/rollup-config.json --scripts-deployment-path deploy/scripts-deploy-result.json -k deploy/private_key -o config.toml -c deploy/scripts-deploy.json
 
 # Update block_producer.wallet_config section to your own lock.
 edit_godwoken_config_toml $GODWOKEN_CONFIG_TOML_FILE
-
-# update l1_sudt_dep info in config.toml file(if it exits) with lumos script.sudt.dep
-depType=$(get_lumos_config_script_key_value SUDT DEP_TYPE "$LUMOS_CONFIG_FILE")
-txHash=$(get_lumos_config_script_key_value SUDT TX_HASH "$LUMOS_CONFIG_FILE")
-outpointIndex=$(get_lumos_config_script_key_value SUDT INDEX "$LUMOS_CONFIG_FILE")
-update_godwoken_config_toml_with_l1_sudt_dep "$GODWOKEN_CONFIG_TOML_FILE" $depType $txHash $outpointIndex
 
 # start godwoken
 cd ${PROJECT_DIR}/workspace
