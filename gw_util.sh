@@ -714,7 +714,7 @@ callPolyman(){
     # hence we should use --ipv4
     result=$(curl -s --ipv4 --retry 3 --retry-connrefused \
                     $rpc_url/$1)
-
+    echo "result: $result"
     if [[ $result =~ '"status":"ok"' ]]; then
         echo "$1 finished"
         call_result=$result
@@ -723,6 +723,28 @@ callPolyman(){
         # 1 equals false
         return 1
     fi
+}
+
+# usage:
+#   deployGodwokenScripts retry_limit rpc_url scripts_file_path deploy_result_file_path 
+deployGodwokenScripts(){
+    if [[ -n $1 ]]; 
+    then
+        local retryLimit=$1;
+    else 
+        local retryLimit=5; # default retry 5 times max
+    fi
+    local count=0;
+    until [ $count -gt $retryLimit ]; do
+        sleep 3;
+        ((count=count+1))
+        curl -s --ipv4 --retry 3 --retry-connrefused --max-time 300 "$2/deploy_godwoken_scripts?scripts_file_path=$3&deploy_result_file_path=$4"
+        if [[ $call_result =~ '"status":"ok"' ]];
+        then
+          break;
+        else echo "deploy failed, retry {$count}th time.."
+        fi
+    done
 }
 
 # usage:
