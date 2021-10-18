@@ -4,7 +4,7 @@ one line command to start godwoken-polyjuice chain for devnet.
 
 ```md
 - master branch: for production releasement, should support both two modes.
-- develop branch: for newest development. most of time, only support custom-mode.
+- develop branch: for newest development, might be broken. most of time, only support custom-mode.
 ```
 
 

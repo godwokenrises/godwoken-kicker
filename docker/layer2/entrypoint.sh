@@ -68,6 +68,7 @@ fi
 
 # === check and prepare for l1-sudt-script
 wait_for_polyman_prepare_rpc "$POLYMAN_RPC"
+callPolyman "spilt_miner_cells?total_capacity=1000000000000000000&total_pieces=20" "$POLYMAN_RPC"
 callPolyman prepare_sudt_scripts "$POLYMAN_RPC"
 # save lumos-config file with new l1-sudt-script config in godwoken folder
 callPolyman get_lumos_config "$POLYMAN_RPC"
@@ -116,8 +117,9 @@ echo 'Generate deploy/rollup-config.json'
 echo $rollupConfig > "deploy/rollup-config.json"
 
 # deploy scripts
-echo 'this may takes a little bit of time, please wait...'
-$GW_TOOLS_BIN deploy-scripts --ckb-rpc ${CKB_RPC} -i deploy/scripts-deploy.json -o deploy/scripts-deploy-result.json -k ${PRIVKEY}
+echo 'start deploying godwoken scripts, this might takes a little bit of time, please wait...'
+#$GW_TOOLS_BIN deploy-scripts -r ${CKB_RPC} -i deploy/scripts-deploy.json -o deploy/scripts-deploy-result.json -k ${PRIVKEY}
+deployGodwokenScripts 5 $POLYMAN_RPC "/code/workspace/deploy/scripts-deploy.json" "/code/workspace/deploy/scripts-deploy-result.json" 
 
 # register tron lock to allow-eoa-type-hash in rollup-config.json
 tronAccountLockTypeHash=$(jq -r ".tron_account_lock.script_type_hash" "deploy/scripts-deploy-result.json")
