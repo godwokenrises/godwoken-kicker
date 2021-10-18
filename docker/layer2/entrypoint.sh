@@ -68,6 +68,7 @@ fi
 
 # === check and prepare for l1-sudt-script
 wait_for_polyman_prepare_rpc "$POLYMAN_RPC"
+callPolyman "spilt_miner_cells?total_capacity=1000000000000000000&total_pieces=20" "$POLYMAN_RPC"
 callPolyman prepare_sudt_scripts "$POLYMAN_RPC"
 # save lumos-config file with new l1-sudt-script config in godwoken folder
 callPolyman get_lumos_config "$POLYMAN_RPC"
@@ -79,7 +80,7 @@ codeHash=$(get_lumos_config_script_key_value SUDT CODE_HASH "$LUMOS_CONFIG_FILE"
 set_key_value_in_json "l1_sudt_script_type_hash" $codeHash "deploy/rollup-config.json"
 
 # deploy scripts
-echo 'this may takes a little bit of time, please wait...'
+echo 'start deploying godwoken scripts, this might takes a little bit of time, please wait...'
 #$GW_TOOLS_BIN deploy-scripts -r ${CKB_RPC} -i deploy/scripts-deploy.json -o deploy/scripts-deploy-result.json -k ${PRIVKEY}
 deployGodwokenScripts 5 $POLYMAN_RPC "/code/workspace/deploy/scripts-deploy.json" "/code/workspace/deploy/scripts-deploy-result.json" 
 

@@ -1,5 +1,6 @@
 #!/bin/bash
 
+CALL_POLYMAN_URL=http://localhost:6102
 POLYMAN_UI_URL=http://localhost:6100
 GODWOKEN_RPC=http://localhost:8119
 
@@ -33,7 +34,7 @@ function ProgressBar {
 
 # read_docker_logs docker-compose-path service-name how-many-last-logs-to-show
 read_docker_logs(){
-    _log=$(cd $1 && docker-compose logs --tail $3 $2)
+    _log=$(cd $1 && docker-compose logs --tail $3 $2 && cd ..)
     echo $_log
 }
 
@@ -49,72 +50,27 @@ checkLogsToSetProgress() {
     _end=100
 
     # godwoken activity
-    stage1_name="sudt script   " # should be 6 word length
+    stage1_name="deploy sudt   " # should be 6 word length
     stage1_info="ready to call prepare_sudt_scripts with polyman.."
     stage1_number=5
 
-    stage2_name="deployment"
-    stage2_info="gw_tools::deploy_scripts] deploy binary"
+    stage2_info="start deploying godwoken scripts, this might takes a little bit of time"
+    stage2_name="deploy scripts"
+    start_deploying_scripts="start deploying godwoken scripts now."
     stage2_number=10
 
-    stage2_1_name="custodian-lock"
-    stage2_1_info='deploy binary "scripts/release/custodian-lock"'
-    stage2_1_number=15
-
-    stage2_2_name="deposit-lock"
-    stage2_2_info='deploy binary "scripts/release/deposit-lock"'
-    stage2_2_number=20
-
-    stage2_3_name="withdrawal-lock"
-    stage2_3_info='deploy binary "scripts/release/withdrawal-lock"'
-    stage2_3_number=25
-
-    stage2_4_name="challenge-lock"
-    stage2_4_info='deploy binary "scripts/release/challenge-lock"'
-    stage2_4_number=30
-
-    stage2_5_name="stake-lock"
-    stage2_5_info='deploy binary "scripts/release/stake-lock"'
-    stage2_5_number=35
-
-    stage2_6_name="state-validator"
-    stage2_6_info='deploy binary "scripts/release/state-validator"'
-    stage2_6_number=40
-
-    stage2_7_name="meta-contract"
-    stage2_7_info='deploy binary "scripts/release/meta-contract-validator"'
-    stage2_7_number=45
-
-    stage2_8_name="eth-account-lock"
-    stage2_8_info='deploy binary "scripts/release/eth-account-lock"'
-    stage2_8_number=50
-
-    stage2_9_name="tron-account-lock"
-    stage2_9_info='deploy binary "scripts/release/tron-account-lock"'
-    stage2_9_number=55
-
-    stage2_10_name="polyjuice-validator"
-    stage2_10_info='deploy binary "scripts/release/polyjuice-validator"'
-    stage2_10_number=60
-
-    stage2_11_name="poa"
-    stage2_11_info='deploy binary "scripts/release/poa"'
-    stage2_11_number=65
-
-    stage2_12_name="poa-state"
-    stage2_12_info='deploy binary "scripts/release/state"'
-    stage2_12_number=68
-
+    finishe_deploy_scripts="finish deploying godwoken scripts now."
+ 
     stage3_name="deploy_genesis"
     stage3_info="gw_tools::deploy_genesis] tx_hash"
     stage3_number=70
 
     stage4_name="produce block"
-    stage4_info="produce new block #"
+    stage4_info="gw_block_producer::runner"
     stage4_number=75
     # polyjuice activity
     stage5_name="create account"
-    stage5_info="create deposit account.0x2"
+    stage5_info="create deposit account.2"
     stage5_number=85
 
     stage6_name="create creator"
@@ -150,7 +106,7 @@ checkLogsToSetProgress() {
 
         # monitor Godwoekn service logs to display progress info.
         if isGodwokenRpcRunning "${GODWOKEN_RPC}" &> /dev/null; then
-          :
+            :
         else
             _log=$(read_docker_logs ./docker godwoken 20)
 
@@ -158,52 +114,21 @@ checkLogsToSetProgress() {
                 ProgressBar "$stage1_number" ${_end} "$stage1_name"
             fi
 
-            if [[  $_log =~ "$stage2_1_info" ]]; then
-                ProgressBar "$stage2_1_number" ${_end} "$stage2_1_name"
+            # monitor call-polyman service logs to diplay scripts deployment progress info
+            _c_poly_log=$(read_docker_logs ./docker call-polyman 5)
+            total_progress_regex='(total_progress: )([^,]*)';
+            percentage_progress_regex='(percentage: )([^,]*)';
+
+            if [[ $_log =~ $stage2_info ]] && [[ $_c_poly_log != *"successful deployed script: "* ]]; then
+                ProgressBar "$stage2_number" ${_end} "$stage2_name"
             fi
 
-            if [[  $_log =~ "$stage2_2_info" ]]; then
-                ProgressBar "$stage2_2_number" ${_end} "$stage2_2_name"
-            fi
-
-            if [[  $_log =~ "$stage2_3_info" ]]; then
-                ProgressBar "$stage2_3_number" ${_end} "$stage2_3_name"
-            fi
-
-            if [[  $_log =~ "$stage2_4_info" ]]; then
-                ProgressBar "$stage2_4_number" ${_end} "$stage2_4_name"
-            fi
-
-            if [[  $_log =~ "$stage2_5_info" ]]; then
-                ProgressBar "$stage2_5_number" ${_end} "$stage2_5_name"
-            fi
-
-            if [[  $_log =~ "$stage2_6_info" ]]; then
-                ProgressBar "$stage2_6_number" ${_end} "$stage2_6_name"
-            fi
-
-            if [[  $_log =~ "$stage2_7_info" ]]; then
-                ProgressBar "$stage2_7_number" ${_end} "$stage2_7_name"
-            fi
-
-            if [[  $_log =~ "$stage2_8_info" ]]; then
-                ProgressBar "$stage2_8_number" ${_end} "$stage2_8_name"
-            fi
-
-            if [[  $_log =~ "$stage2_9_info" ]]; then
-                ProgressBar "$stage2_9_number" ${_end} "$stage2_9_name"
-            fi
-
-            if [[  $_log =~ "$stage2_10_info" ]]; then
-                ProgressBar "$stage2_10_number" ${_end} "$stage2_10_name"
-            fi
-
-            if [[  $_log =~ "$stage2_11_info" ]]; then
-                ProgressBar "$stage2_11_number" ${_end} "$stage2_11_name"
-            fi
-
-            if [[  $_log =~ "$stage2_12_info" ]]; then
-                ProgressBar "$stage2_12_number" ${_end} "$stage2_12_name"
+            if [[ $_c_poly_log =~ $total_progress_regex ]] && [[ $_log != *"$stage3_info"* ]] && [[ $_log != *"$stage4_info"* ]]; then
+                p_number="scripts(${BASH_REMATCH[2]})"
+                if [[ $_c_poly_log =~ $percentage_progress_regex ]]; then
+                    p_percentage=${BASH_REMATCH[2]}
+                    ProgressBar $p_percentage ${_end} $p_number
+                fi
             fi
 
             if [[  $_log =~ "$stage3_info" ]]; then
@@ -714,7 +639,6 @@ callPolyman(){
     # hence we should use --ipv4
     result=$(curl -s --ipv4 --retry 3 --retry-connrefused \
                     $rpc_url/$1)
-    echo "result: $result"
     if [[ $result =~ '"status":"ok"' ]]; then
         echo "$1 finished"
         call_result=$result
@@ -735,13 +659,13 @@ deployGodwokenScripts(){
         local retryLimit=5; # default retry 5 times max
     fi
     local count=0;
-    until [ $count -gt $retryLimit ]; do
+    while [ $retryLimit -gt $count ]; do
         sleep 3;
         ((count=count+1))
-        curl -s --ipv4 --retry 3 --retry-connrefused --max-time 300 "$2/deploy_godwoken_scripts?scripts_file_path=$3&deploy_result_file_path=$4"
-        if [[ $call_result =~ '"status":"ok"' ]];
+        result=$(curl -s --ipv4 --retry 3 --retry-connrefused --max-time 300 "$2/deploy_godwoken_scripts?scripts_file_path=$3&deploy_result_file_path=$4")
+        if [[ $result =~ '"status":"ok"' ]];
         then
-          break;
+          echo $result && break;
         else echo "deploy failed, retry {$count}th time.."
         fi
     done
