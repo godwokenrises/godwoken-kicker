@@ -304,7 +304,7 @@ copy-web3-node-modules-if-empty:
 	docker run --rm -v `pwd`/packages/godwoken-web3:/app $$DOCKER_JS_PREBUILD_IMAGE_NAME:$$DOCKER_JS_PREBUILD_IMAGE_TAG /bin/bash -c "cd app && yarn check --verify-tree && cd .. || ( cd .. && echo 'start copying web3 node_modules from docker to local package..' && cp -r ./godwoken-web3/node_modules ./app/) ;"	
 
 copy-polyman-node-modules-if-empty::
-	docker run --rm -v `pwd`/packages/godwoken-polyman:/app $$DOCKER_JS_PREBUILD_IMAGE_NAME:$$DOCKER_JS_PREBUILD_IMAGE_TAG /bin/bash -c "cd app && yarn check --verify-tree && cd .. || ( cd .. && echo 'start copying polyman node_modules from docker to local package..' && cp -r ./godwoken-polyman/node_modules ./app/) ;"	
+	docker run --rm -v `pwd`/packages/godwoken-polyman:/app $$DOCKER_POLYMAN_PREBUILD_IMAGE_NAME:$$DOCKER_POLYMAN_PREBUILD_IMAGE_TAG /bin/bash -c "cd app && yarn check --verify-tree && cd .. || ( cd .. && echo 'start copying polyman node_modules from docker to local package..' && cp -r ./godwoken-polyman/node_modules ./app/) ;"	
 
 install-web3-node-modules-if-empty:
 	cd `pwd`/packages/godwoken-web3 && yarn check --verify-tree && cd .. || yarn install

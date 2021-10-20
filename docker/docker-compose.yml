@@ -58,7 +58,7 @@ services:
     build:
       context: polyjuice 
       args: 
-        DOCKER_PREBUILD_IMAGE: "${DOCKER_JS_PREBUILD_IMAGE_NAME}:${DOCKER_JS_PREBUILD_IMAGE_TAG}"
+        DOCKER_PREBUILD_IMAGE: "${DOCKER_POLYMAN_PREBUILD_IMAGE_NAME}:${DOCKER_POLYMAN_PREBUILD_IMAGE_TAG}"
     volumes:
       - ../:/code
       - ../cache/activity/polyjuice:/usr/local/polyman
@@ -76,7 +76,7 @@ services:
     build:
       context: call-polyman
       args: 
-        DOCKER_PREBUILD_IMAGE: "${DOCKER_JS_PREBUILD_IMAGE_NAME}:${DOCKER_JS_PREBUILD_IMAGE_TAG}"
+        DOCKER_PREBUILD_IMAGE: "${DOCKER_POLYMAN_PREBUILD_IMAGE_NAME}:${DOCKER_POLYMAN_PREBUILD_IMAGE_TAG}"
     volumes:
       - ../:/code
       - ../cache/activity/call-polyman:/usr/local/polyman/call-polyman
