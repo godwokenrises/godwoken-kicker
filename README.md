@@ -44,7 +44,7 @@ if you are using custom-mode:
 - [docker-compose](https://docs.docker.com/compose/)
 - [moleculec](https://github.com/nervosnetwork/molecule) 0.7.2 (cargo install moleculec)
 - nodejs 14 && yarn ([how to install](https://yarnpkg.com/lang/en/docs/install/))
-- [capsule](https://github.com/nervosnetwork/capsule) 0.4.6 (cargo install capsule)
+- [capsule](https://github.com/nervosnetwork/capsule) v0.7.0 (cargo install capsule)
 
 ## How Kicker Works
 
