@@ -66,7 +66,7 @@ install:
 	if [ "$(MANUAL_BUILD_WEB3)" = true ] ; then \
 		source ./gw_util.sh && prepare_package godwoken-web3 $$WEB3_GIT_URL $$WEB3_GIT_CHECKOUT > /dev/null; \
 		"$(INSTALL_JS_NODE_MODULE_NOT_COPY)" && make install-web3-node-modules-if-empty || make copy-web3-node-modules-if-empty ;\
-		docker run --rm -v `pwd`/packages/godwoken-web3:/app -w=/app $$DOCKER_JS_PREBUILD_IMAGE_NAME:$$DOCKER_JS_PREBUILD_IMAGE_TAG /bin/bash -c "yarn workspace @godwoken-web3/godwoken tsc;" ; \
+		docker run --rm -v `pwd`/packages/godwoken-web3:/app -w=/app $$DOCKER_WEB3_PREBUILD_IMAGE_NAME:$$DOCKER_WEB3_PREBUILD_IMAGE_TAG /bin/bash -c "yarn workspace @godwoken-web3/godwoken tsc;" ; \
 	fi
 # if manual build polyman
 	if [ "$(MANUAL_BUILD_POLYMAN)" = true ] ; then \
@@ -153,6 +153,10 @@ call-polyman:
 db:
 	cd docker && docker-compose logs -f postgres
 
+# show redis cache
+redis:
+	cd docker && docker-compose logs -f redis
+
 ### 4. component control command
 start-godwoken:
 	cd docker && docker-compose start godwoken
@@ -190,11 +194,17 @@ start-call-polyman:
 stop-call-polyman:
 	cd docker && docker-compose stop call-polyman
 
+start-redis:
+	cd docker && docker-compose start redis
+
+stop-redis:
+	cd docker && docker-compose stop redis
+
 ### 5. component interact command
-enter-g:
+enter-godwoken:
 	cd docker && docker-compose exec godwoken bash
 
-enter-p:
+enter-polyjuice:
 	cd docker && docker-compose exec polyjuice bash	
 
 enter-web3:
@@ -209,6 +219,8 @@ enter-db:
 enter-call-polyman:
 	cd docker && docker-compose exec call-polyman bash
 
+enter-redis:
+	cd docker && docker-compose exec redis bash
 
 ########### manual-build-mode #############
 ### rebuild components's scripts and bin all in one
@@ -301,7 +313,7 @@ copy-godwoken-binary-from-packages-to-workspace:
 	cp packages/godwoken/target/debug/gw-tools workspace/bin/gw-tools
 
 copy-web3-node-modules-if-empty:
-	docker run --rm -v `pwd`/packages/godwoken-web3:/app $$DOCKER_JS_PREBUILD_IMAGE_NAME:$$DOCKER_JS_PREBUILD_IMAGE_TAG /bin/bash -c "cd app && yarn check --verify-tree && cd .. || ( cd .. && echo 'start copying web3 node_modules from docker to local package..' && cp -r ./godwoken-web3/node_modules ./app/) ;"	
+	docker run --rm -v `pwd`/packages/godwoken-web3:/app $$DOCKER_WEB3_PREBUILD_IMAGE_NAME:$$DOCKER_WEB3_PREBUILD_IMAGE_TAG /bin/bash -c "cd app && yarn check --verify-tree && cd .. || ( cd .. && echo 'start copying web3 node_modules from docker to local package..' && cp -r ./godwoken-web3/node_modules ./app/) ;"	
 
 copy-polyman-node-modules-if-empty::
 	docker run --rm -v `pwd`/packages/godwoken-polyman:/app $$DOCKER_POLYMAN_PREBUILD_IMAGE_NAME:$$DOCKER_POLYMAN_PREBUILD_IMAGE_TAG /bin/bash -c "cd app && yarn check --verify-tree && cd .. || ( cd .. && echo 'start copying polyman node_modules from docker to local package..' && cp -r ./godwoken-polyman/node_modules ./app/) ;"	

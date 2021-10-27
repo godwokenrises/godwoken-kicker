@@ -14,6 +14,14 @@ services:
       - ../cache/activity/postgres-data:/var/lib/postgresql/data
       # copy the sql script to create tables
       - ../docker/web3/web3-indexer-sql/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
+    
+  redis:
+    image: redis:bullseye
+    user: redis:redis
+    ports: 
+      - 6379:6379
+    volumes:
+      - ../cache/activity/redis-data:/data
 
   ckb:
     build:
@@ -93,7 +101,7 @@ services:
     build:
       context: web3
       args: 
-        DOCKER_PREBUILD_IMAGE: "${DOCKER_JS_PREBUILD_IMAGE_NAME}:${DOCKER_JS_PREBUILD_IMAGE_TAG}"
+        DOCKER_PREBUILD_IMAGE: "${DOCKER_WEB3_PREBUILD_IMAGE_NAME}:${DOCKER_WEB3_PREBUILD_IMAGE_TAG}"
     volumes: 
     - ../:/code # the manual-build resource all stays in /code dir
     environment: 
@@ -103,6 +111,7 @@ services:
     ports:
       - 8024:8024
     depends_on: 
+      - redis
       - postgres
       - godwoken
   
