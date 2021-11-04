@@ -3,8 +3,8 @@
 one line command to start godwoken-polyjuice chain for devnet.
 
 ```md
-- master branch: for production releasement, should support both two modes.
-- develop branch: for newest development. most of time, only support custom-mode.
+- master branch: for production release, should support both two modes.
+- develop branch: for newest development, might be broken. most of time, only support custom-mode.
 ```
 
 
@@ -15,12 +15,12 @@ one line command to start godwoken-polyjuice chain for devnet.
 ```md
 ## quick-mode
 
-run all componets from prebuild docker images, 
+run all components from prebuild docker images, 
 fast and simple
 
 ## custom-mode
 
-run all componets building from local packages,
+run all components building from local packages,
 more flexible, for more custom needs
 ```
 
@@ -44,13 +44,13 @@ if you are using custom-mode:
 - [docker-compose](https://docs.docker.com/compose/)
 - [moleculec](https://github.com/nervosnetwork/molecule) 0.7.2 (cargo install moleculec)
 - nodejs 14 && yarn ([how to install](https://yarnpkg.com/lang/en/docs/install/))
-- [capsule](https://github.com/nervosnetwork/capsule) 0.4.6 (cargo install capsule)
+- [capsule](https://github.com/nervosnetwork/capsule) v0.7.0 (cargo install ckb-capsule)
 
 ## How Kicker Works
 
-- `packages`: contains all componets repo used in custom-mode.
+- `packages`: contains all components repo used in custom-mode.
 - `workspace`: contains all scripts and bins used for godwoken deployment
-- `cache`: contains all cache files produced by componets activities or building
+- `cache`: contains all cache files produced by components activities or building
 
 some useful commands:
 
@@ -85,9 +85,9 @@ make init
 make start
 ```
 
-### 4. update componet package
+### 4. update component package
 
-when you choose custom-build mode, you can update componets version under [packages] section in `docker/.build.mode.env` file.
+when you choose custom-build mode, you can update components version under [packages] section in `docker/.build.mode.env` file.
 
 ```sh
 ####[packages]
@@ -105,7 +105,7 @@ CLERKB_GIT_URL=https://github.com/nervosnetwork/clerkb.git
 CLERKB_GIT_CHECKOUT=v0.4.0
 ```
 
-if you set `ALWAYS_FETCH_NEW_PACKAGE` to true (default is false) and set package's `CHECKOUT` to branch name like `master`, then the componets will update to newest commit id in that branch everytime you run `make init`.
+if you set `ALWAYS_FETCH_NEW_PACKAGE` to true (default is false) and set package's `CHECKOUT` to branch name like `master`, then the components will update to newest commit id in that branch every time you run `make init`.
 
 ```sh
 ####[system]

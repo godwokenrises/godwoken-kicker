@@ -64,6 +64,7 @@ DEFAULT_FROM_ADDRESS=0x6daf63d8411d6e23552658e3cfb48416a6a2ca78
 POLYJUICE_VALIDATOR_TYPE_HASH=$PolyjuiceValidatorCodeHash
 L2_SUDT_VALIDATOR_SCRIPT_TYPE_HASH=$L2SudtValidatorCodeHash
 TRON_ACCOUNT_LOCK_HASH=$TronAccountLockCodeHash
+REDIS_URL=redis://redis:6379
 EOF
 
 # wait for godwoken rpc server to start
