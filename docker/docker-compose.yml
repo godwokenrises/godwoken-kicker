@@ -13,7 +13,7 @@ services:
     volumes:
       - ../cache/activity/postgres-data:/var/lib/postgresql/data
       # copy the sql script to create tables
-      - ../docker/web3/web3-indexer-sql/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
+      - ../docker/postgres/web3-indexer-sql/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
     
   redis:
     image: redis:bullseye
