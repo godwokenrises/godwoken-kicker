@@ -309,8 +309,8 @@ copy-poa-scripts-from-docker: rm-dummy-docker-if-name-exits
 
 copy-godwoken-binary-from-packages-to-workspace:
 	mkdir -p workspace/bin
-	cp packages/godwoken/target/debug/godwoken workspace/bin/godwoken
-	cp packages/godwoken/target/debug/gw-tools workspace/bin/gw-tools
+	cp packages/godwoken/target/release/godwoken workspace/bin/godwoken
+	cp packages/godwoken/target/release/gw-tools workspace/bin/gw-tools
 
 copy-web3-node-modules-if-empty:
 	docker run --rm -v `pwd`/packages/godwoken-web3:/app $$DOCKER_WEB3_PREBUILD_IMAGE_NAME:$$DOCKER_WEB3_PREBUILD_IMAGE_TAG /bin/bash -c "cd app && yarn check --verify-tree && cd .. || ( cd .. && echo 'start copying web3 node_modules from docker to local package..' && cp -r ./godwoken-web3/node_modules ./app/) ;"	
