@@ -463,7 +463,7 @@ set_key_value_in_toml() {
     local value=${2}
     if [ -n $value ]; then
         #echo $value
-        local current=$(sed -n -e "s/^\($key = '\)\([^ ']*\)\(.*\)$/\2/p" $3}) # value带单引号
+        local current=$(sed -n -e "s/^\($key = '\)\([^ ']*\)\(.*\)$/\2/p" $3) # value带单引号
         if [ -n $current ];then
             echo "setting $3 : $key = $value"
             value="$(echo "${value}" | sed 's|[&]|\\&|g')"
