@@ -50,7 +50,7 @@ while true; do
 done
 RollupTypeHash=$(awk -F'[ ="]+' '$1 == "rollup_type_hash" { print $2 }' $CONFIGTOML | sed 's/\x27//g')
 
-# wait for polyman server rpc server to start
+# wait for polyman main rpc server to start
 while true; do
     sleep 2;
     if isPolymanServerRunning "${POLYMAN_SERVER_RPC_URL}";
@@ -78,16 +78,6 @@ L2_SUDT_VALIDATOR_SCRIPT_TYPE_HASH=$L2SudtValidatorCodeHash
 TRON_ACCOUNT_LOCK_HASH=$TronAccountLockCodeHash
 REDIS_URL=redis://redis:6379
 EOF
-
-# wait for godwoken rpc server to start
-while true; do
-    sleep 5;
-    if isGodwokenRpcRunning "${GODWOKEN_RPC_URL}";
-    then
-      break;
-    else echo "keep waitting..."
-    fi
-done
 
 # start web3 server
 #for debug, you can run: yarn workspace @godwoken-web3/api-server start

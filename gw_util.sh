@@ -83,7 +83,7 @@ checkLogsToSetProgress() {
 
     while true
     do
-        # if two rpc is up and all set.
+        # if 3 RPCs are up and all set.
         if isWeb3RpcRunning "${WEB3_RPC}" &> /dev/null && isPolymanUIRunning "${POLYMAN_UI_URL}" &> /dev/null && isGodwokenRpcRunning "${GODWOKEN_RPC}" &> /dev/null; then
           ProgressBar ${_end} ${_end} "All Jobs Done"
           show_success_finish_info 
