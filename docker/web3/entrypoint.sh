@@ -4,6 +4,7 @@ set -o errexit
 #set -o xtrace
 PROJECT_DIR="/code"
 GODWOKEN_RPC_URL="http://godwoken:8119"
+POLYMAN_SERVER_RPC_URL="http://polyjuice:6101"
 
 # import some helper function
 source ${PROJECT_DIR}/gw_util.sh
@@ -49,6 +50,17 @@ while true; do
 done
 RollupTypeHash=$(awk -F'[ ="]+' '$1 == "rollup_type_hash" { print $2 }' $CONFIGTOML | sed 's/\x27//g')
 
+# wait for polyman server rpc server to start
+while true; do
+    sleep 2;
+    if isPolymanServerRunning "${POLYMAN_SERVER_RPC_URL}";
+    then
+      break;
+    else echo "keep waitting..."
+    fi
+done
+CreatorId=$(get_creator_id_from_polyjuice $POLYMAN_SERVER_RPC_URL)
+
 # create folder for address mapping store
 mkdir -p /usr/local/godwoken-web3/address-mapping
 
@@ -59,7 +71,7 @@ ETH_ACCOUNT_LOCK_HASH=$EthAccountLockCodeHash
 ROLLUP_TYPE_HASH=$RollupTypeHash
 PORT=8024
 CHAIN_ID=1024777
-CREATOR_ACCOUNT_ID=3
+CREATOR_ACCOUNT_ID=$CreatorId
 DEFAULT_FROM_ADDRESS=0x6daf63d8411d6e23552658e3cfb48416a6a2ca78
 POLYJUICE_VALIDATOR_TYPE_HASH=$PolyjuiceValidatorCodeHash
 L2_SUDT_VALIDATOR_SCRIPT_TYPE_HASH=$L2SudtValidatorCodeHash

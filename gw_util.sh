@@ -2,7 +2,9 @@
 
 CALL_POLYMAN_URL=http://localhost:6102
 POLYMAN_UI_URL=http://localhost:6100
+POLYMAN_SERVER_URL=http://localhost:6101
 GODWOKEN_RPC=http://localhost:8119
+WEB3_RPC=http://localhost:8024
 
 # 1. Create ProgressBar function
 # 1.1 Input is currentState($1) and totalState($2)
@@ -82,7 +84,7 @@ checkLogsToSetProgress() {
     while true
     do
         # if two rpc is up and all set.
-        if isPolymanUIRunning "${POLYMAN_UI_URL}" &> /dev/null && isGodwokenRpcRunning "${GODWOKEN_RPC}" &> /dev/null; then
+        if isWeb3RpcRunning "${WEB3_RPC}" &> /dev/null && isPolymanUIRunning "${POLYMAN_UI_URL}" &> /dev/null && isGodwokenRpcRunning "${GODWOKEN_RPC}" &> /dev/null; then
           ProgressBar ${_end} ${_end} "All Jobs Done"
           show_success_finish_info 
           break;
@@ -410,6 +412,30 @@ isPolymanUIRunning(){
         return 0
     else
         echo "polyman UI is down."
+        # 1 equals false
+        return 1
+    fi
+}
+
+isPolymanServerRunning(){
+    if [[ -n $1 ]]; 
+    then
+        local rpc_url="$1"
+    else
+        local rpc_url="http://localhost:6101"
+    fi
+
+    # curl retry on connrefused, considering ECONNREFUSED as a transient error(network issues)
+    # connections with ipv6 are not retried because it returns EADDRNOTAVAIL instead of ECONNREFUSED,
+    # hence we should use --ipv4
+    result=$(curl -s --ipv4 $rpc_url)
+
+    if [[ $result =~ '"status":"ok"' ]]; then
+        echo "polyman server is up and running!"
+        # 0 equals true
+        return 0
+    else
+        echo "polyman server is down."
         # 1 equals false
         return 1
     fi
@@ -786,5 +812,23 @@ cargo_build_local_or_docker(){
             echo "windows"
             docker run --rm -i -v `pwd`/packages/godwoken:/app -v `pwd`/docker/layer2/cargo:/.cargo/ -v `pwd`/cache/build/cargo-registry:/root/.cargo/registry -w=/app "$DOCKER_MANUAL_BUILD_IMAGE_NAME":"$DOCKER_MANUAL_BUILD_IMAGE_TAG" cargo build --release;
         fi
+    fi
+}
+
+get_creator_id_from_polyjuice(){
+    if [[ -n $1 ]]; 
+    then
+        local url=$1;
+    else 
+        local url=$POLYMAN_SERVER_URL;
+    fi
+    
+    result=$(echo $(curl -s --ipv4 --retry 3 --retry-connrefused $url/get_creator_id))
+    if [[ $result =~ '"status":"ok"' ]]; then
+        local creator_id=$(echo $result | jq .data)
+        echo $creator_id
+    else 
+        echo "can not get creator_id from polyjuice $url"
+        exit 138;
     fi
 }

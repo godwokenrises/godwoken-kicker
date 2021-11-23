@@ -38,15 +38,5 @@ cp /code/workspace/deploy/lumos-config.json packages/runner/configs/lumos-config
 
 yarn gen-config
 
-# wait for web3 rpc server to start
-while true; do
-    sleep 2;
-    if isWeb3RpcRunning "${WEB3_RPC_URL}";
-    then
-      break;
-    else echo "keep waitting..."
-    fi
-done
-
 # start the main http server of polyman
 yarn workspace @godwoken-polyman/runner start
