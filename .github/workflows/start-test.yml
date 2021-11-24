@@ -1,0 +1,34 @@
+on:
+  push:
+    branches: [develop, master, ci]
+    # Publish semver tags as releases.
+    tags: ["v*.*.*"]
+  pull_request:
+    branches: [master]
+
+jobs:
+  startup-test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: start kicker
+        run: |
+          make init && make start
+          docker-compose --file docker/docker-compose.yml logs --tail 6
+
+      - name: make sure kicker is starting..
+        run: make start
+
+      - name: stop kicker
+        run: make down
+
+      - name: Setup tmate session
+        if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3
+        timeout-minutes: 15
