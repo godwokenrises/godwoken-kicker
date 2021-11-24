@@ -23,10 +23,10 @@ jobs:
           docker-compose --file docker/docker-compose.yml logs --tail 6
 
       - name: make sure kicker is starting..
-        run: cd tools/kicker && make start
+        run: make start
 
       - name: stop kicker
-        run: cd tools/kicker && make down
+        run: make down
 
       - name: Setup tmate session
         if: ${{ failure() }}
