@@ -80,8 +80,13 @@ REDIS_URL=redis://redis:6379
 EOF
 
 # start web3 server
-#for debug, you can run: yarn workspace @godwoken-web3/api-server start
 cd packages/api-server 
-#DEBUG=godwoken-web3-api:server node ./bin/www
-yarn workspace @godwoken-web3/api-server start
+# use:
+#  - production mode in prebuilds
+#  - debug mode in manual-builds
+if [ "$MANUAL_BUILD_WEB3" = true ] ; then 
+  yarn workspace @godwoken-web3/api-server start
+else
+  yarn workspace @godwoken-web3/api-server start:pm2
+fi
 
