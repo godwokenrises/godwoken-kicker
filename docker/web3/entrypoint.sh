@@ -87,6 +87,7 @@ cd packages/api-server
 if [ "$MANUAL_BUILD_WEB3" = true ] ; then 
   yarn workspace @godwoken-web3/api-server start
 else
-  yarn workspace @godwoken-web3/api-server start:pm2
+  NODE_ENV=production DEBUG=godwoken-web3-api:server pm2 start ./bin/cluster --no-daemon --name gw-web3 --max-memory-restart 1G
+  # yarn workspace @godwoken-web3/api-server start:pm2
 fi
 
