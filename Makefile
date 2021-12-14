@@ -4,12 +4,12 @@ include $(BUILD_MODE_ENV_FILE)
 export $(shell sed 's/=.*//' $(BUILD_MODE_ENV_FILE))
 
 # hide output for clear log
-ifndef VERBOSE
-.SILENT:
-endif
+#ifndef VERBOSE
+#.SILENT:
+#endif
 
 
-.PHONY: ckb
+.PHONY: ckb ckb2
 ###### command list ########
 
 ### 1. utils
@@ -146,6 +146,9 @@ web3:
 # show ckb
 ckb:
 	cd docker && docker-compose logs -f --tail 200 ckb
+# show ckb2
+ckb2:
+	cd docker && docker-compose logs -f --tail 200 ckb2
 # show call-polyman
 call-polyman:
 	cd docker && docker-compose logs -f call-polyman
@@ -179,8 +182,14 @@ stop-web3:
 start-ckb:
 	cd docker && docker-compose start ckb
 
+start-ckb2:
+	cd docker && docker-compose start ckb2
+
 stop-ckb:
 	cd docker && docker-compose stop ckb
+
+stop-ckb2:
+	cd docker && docker-compose stop ckb2
 
 start-db:
 	cd docker && docker-compose start postgres

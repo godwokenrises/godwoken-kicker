@@ -307,6 +307,7 @@ isRollupCellExits(){
 }
 
 isCkbRpcRunning(){
+    echo $1;
     if [[ -n $1 ]]; 
     then
         local rpc_url="$1"
