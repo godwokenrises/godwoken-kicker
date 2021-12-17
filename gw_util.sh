@@ -833,3 +833,31 @@ get_creator_id_from_polyjuice(){
         exit 138;
     fi
 }
+
+connect_ckb(){
+    ip=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' docker_ckb2_1)
+    # curl retry on connrefused, considering ECONNREFUSED as a transient error(network issues)
+    # connections with ipv6 are not retried because it returns EADDRNOTAVAIL instead of ECONNREFUSED,
+    # hence we should use --ipv4
+    result=$( echo '{
+    "id": 2,
+    "jsonrpc": "2.0",
+    "method": "get_cells",
+    "params": [
+        {
+            "script": {
+                "code_hash": "'${rollup_code_hash}'",
+                "hash_type": "'${rollup_hash_type}'",
+                "args": "'${rollup_args}'"
+            },
+            "script_type": "type"
+        },
+        "asc",
+        "0x64"
+    ]
+    }' \
+    | tr -d '\n' \
+    | curl -s --ipv4 --retry 3 --retry-connrefused \
+    -H 'content-type: application/json' -d @- \
+    $indexer_rpc) 
+}

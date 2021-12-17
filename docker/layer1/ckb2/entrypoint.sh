@@ -9,20 +9,23 @@ if ! [ -f ckb.toml ]; then
 fi
 
 
-echo "ready to ckb node2..."
+if [ "$ENABLE_MULTI_CKB_NODES" = true ] ; then
+  echo "ready to ckb node2..."
+  exec /bin/ckb run &
 
-exec /bin/ckb run &
+  # wait for ckb rpc setup
+  while true; do
+      sleep 1;
+      if isCkbRpcRunning "http://localhost:8117";
+      then
+        echo "start ckb-miner now.."
+        break;
+      else echo "keep waitting for ckb rpc .."
+      fi
+  done
 
-# wait for ckb rpc setup
-while true; do
-    sleep 1;
-    if isCkbRpcRunning "http://localhost:8117";
-    then
-      echo "start ckb-miner now.."
-      break;
-    else echo "keep waitting for ckb rpc .."
-    fi
-done
+  exec /bin/ckb miner
+else echo "not starting ckb node 2..."
+fi
 
-exec /bin/ckb miner &
-exec /bin/ckb miner
+

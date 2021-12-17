@@ -222,6 +222,9 @@ enter-web3:
 enter-ckb:
 	cd docker && docker-compose exec ckb bash
 
+enter-ckb2:
+	cd docker && docker-compose exec ckb2 bash
+
 enter-db:
 	cd docker && docker-compose exec postgres bash
 
@@ -333,6 +336,9 @@ install-web3-node-modules-if-empty:
 install-polyman-node-modules-if-empty:
 	cd `pwd`/packages/godwoken-polyman && yarn check --verify-tree && cd .. || yarn install
 
+patch-lumos-indexer-for-polyman:
+	cp `pwd`/patches/lumos-indexer-linux/index.node `pwd`/packages/godwoken-polyman/node_modules/@ckb-lumos/indexer/native/index.node
+
 ### 7. godwoken gen schema helper command
 gen-schema:
 	make clean-schema
@@ -352,3 +358,6 @@ prepare-schema-for-web3:
 	mv ./godwoken-web3/packages/godwoken/godwoken.esm.js ./packages/godwoken-web3/packages/godwoken/schemas/index.esm.js	
 	mv ./godwoken-web3/packages/godwoken/godwoken.js ./packages/godwoken-web3/packages/godwoken/schemas/index.js	
 	mv ./godwoken-web3/packages/godwoken/godwoken.json ./packages/godwoken-web3/packages/godwoken/schemas/index.json
+
+########### helper function #############
+connect-ckb:
