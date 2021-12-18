@@ -6,7 +6,7 @@ USER root
 RUN apt-get update && \
     apt-get install iproute2 iputils-ping -y
 
-EXPOSE 8114 8115
+EXPOSE 6117 6118
 WORKDIR /code
 COPY ./entrypoint.sh /bin/
 

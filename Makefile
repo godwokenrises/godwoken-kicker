@@ -9,7 +9,7 @@ export $(shell sed 's/=.*//' $(BUILD_MODE_ENV_FILE))
 #endif
 
 
-.PHONY: ckb ckb2
+.PHONY: ckb ckb2 ckb3
 ###### command list ########
 
 ### 1. utils
@@ -149,6 +149,10 @@ ckb:
 # show ckb2
 ckb2:
 	cd docker && docker-compose logs -f --tail 200 ckb2
+
+# show ckb3
+ckb3:
+	cd docker && docker-compose logs -f --tail 200 ckb3
 # show call-polyman
 call-polyman:
 	cd docker && docker-compose logs -f call-polyman
@@ -185,11 +189,17 @@ start-ckb:
 start-ckb2:
 	cd docker && docker-compose start ckb2
 
+start-ckb3:
+	cd docker && docker-compose start ckb3
+
 stop-ckb:
 	cd docker && docker-compose stop ckb
 
 stop-ckb2:
 	cd docker && docker-compose stop ckb2
+
+stop-ckb3:
+	cd docker && docker-compose stop ckb3
 
 start-db:
 	cd docker && docker-compose start postgres
@@ -224,6 +234,9 @@ enter-ckb:
 
 enter-ckb2:
 	cd docker && docker-compose exec ckb2 bash
+
+enter-ckb3:
+	cd docker && docker-compose exec ckb3 bash
 
 enter-db:
 	cd docker && docker-compose exec postgres bash
