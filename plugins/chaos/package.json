@@ -4,7 +4,8 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "watch": "node chain-reorg.js"
+    "watch": "node chain-reorg.js",
+    "connect": "node connect.js"
   },
   "dependencies": {
     "@open-rpc/client-js": "^1.7.0",

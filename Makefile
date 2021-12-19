@@ -9,7 +9,7 @@ export $(shell sed 's/=.*//' $(BUILD_MODE_ENV_FILE))
 #endif
 
 
-.PHONY: ckb ckb2 ckb3
+.PHONY: ckb ckb2 ckb3 connect-ckb
 ###### command list ########
 
 ### 1. utils
@@ -374,3 +374,13 @@ prepare-schema-for-web3:
 
 ########### helper function #############
 connect-ckb:
+	cd plugins/chaos && yarn connect
+
+watch-reorg:
+	cd plugins/chaos && yarn watch > chain.log
+
+delay-ckb:
+	pumba -v && echo "ready to delay ckb network..." || echo "you need to install Pumba, https://github.com/alexei-led/pumba";
+	pumba netem --duration 50s --tc-image gaiadocker/iproute2 delay --time 3000 docker_ckb3_1 & pumba netem --duration 50s --tc-image gaiadocker/iproute2 delay --time 3000 docker_ckb2_1
+
+
