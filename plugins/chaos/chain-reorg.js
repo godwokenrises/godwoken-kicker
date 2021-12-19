@@ -8,6 +8,7 @@ const client = new Client(new RequestManager([transport]));
 
 const miner_1 = "0x43d509d97f26007a285f39241cffcd411157196c";
 const miner_2 = "0xc48a45e11c66b2c8b5c61f6036486ad4d9d2fd29";
+const miner_3 = "0xb33248c08c55ed636d2f00d065d223ec1a0d333a";
 
 async function send(method, param) {
   const result = await client.request({ method: method, params: param });
@@ -26,6 +27,9 @@ const getMinerName = (args) => {
     case miner_2:
       return "Bob";
 
+    case miner_3:
+      return "Susan";
+
     default:
       return "unknown miner";
   }
@@ -43,6 +47,7 @@ const run = async () => {
   lastTipBlockHash = hash;
 
   const lastBlock = await send("get_block", [hash]);
+
   const lastBlockProducer = getMinerName(
     lastBlock.transactions[0].outputs[0].lock.args
   );
@@ -54,11 +59,11 @@ const run = async () => {
   );
   let waitTimeSeconds = 0;
   while (true) {
-    await asyncSleep(1000); // 1 seconds
+    await asyncSleep(100); // 0.1 seconds
     waitTimeSeconds++;
 
     const blockNumber2 = (await send("get_tip_header", [])).number;
-    if (parseInt(blockNumber2) === parseInt(blockNumber) + 1) {
+    if (parseInt(blockNumber2) >= parseInt(blockNumber) + 1) {
       const lastBlockHash = (await send("get_header_by_number", [lastTip]))
         .hash;
       const currentBlockHash = (
@@ -75,10 +80,12 @@ const run = async () => {
       );
       if (lastBlockHash !== lastTipBlockHash) {
         console.log(
-          `chain reorgs! =>${lastTip}, ${lastBlockHash}, ${lastTipBlockHash}`
+          `chain reorgs! => ${parseInt(
+            lastTip
+          )}, rollback: ${lastBlockHash}, origin: ${lastTipBlockHash}`
         );
       }
-      console.log(`block time: ${waitTimeSeconds}s`);
+      console.log(`block time: ${waitTimeSeconds / 10}s`);
       break;
     }
   }
