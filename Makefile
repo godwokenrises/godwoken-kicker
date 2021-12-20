@@ -397,5 +397,5 @@ delay-ckb:
 
 chaos: SHELL:=/bin/bash
 chaos:
-	source gw_util.sh && start_chaos > chaos.log 2>&1 
+	source gw_util.sh && start_chaos > chaos.log 2>&1 &
 

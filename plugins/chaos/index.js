@@ -17,17 +17,18 @@ const delayCmd =
   "pumba netem --duration 50s --tc-image gaiadocker/iproute2 delay --time 3000 docker_ckb3_1 & pumba netem --duration 50s --tc-image gaiadocker/iproute2 delay --time 3000 docker_ckb2_1";
 
 const callJam = async () => {
+  console.log("call jam ckb network..");
   await fetch(`${URL}/${jamMethod}?${jamParams}`);
 };
 
 const callPrepareAccounts = async () => {
+  console.log("call prepare accounts..");
   await fetch(`${URL}/${depositMethod}?${depositParams}`);
 };
 
 const callDelayCkbNetwork = () => {
-  child_process.exec(delayCmd, function (error, stdout, stderr) {
-    console.log("child_process execute result =>", error, stdout, stderr);
-  });
+  console.log("delay ckb network..");
+  child_process.exec(delayCmd);
 };
 
 const run = async () => {
