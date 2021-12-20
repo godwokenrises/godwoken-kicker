@@ -99,8 +99,20 @@ install:
 		make rebuild-poa-scripts ; \
 	else make copy-poa-scripts-from-docker ;\
 	fi	
+# if multi ckb nodes, install deps for plugins
+# todo: maybe use prebuild image here
+	if [ "$(ENABLE_MULTI_CKB_NODES)" = true ] ; then \
+		cd plugins/chaos && yarn ;\
+	fi
 
+install: SHELL:=/bin/bash
 start: 
+	if [ "$(ENABLE_MULTI_CKB_NODES)" = true ] ; then \
+		source ./gw_util.sh && wait_to_connect_ckb > connect-ckb.log 2>&1 & \
+	fi
+	if [ "$(WATCH_CKB_REORG)" = true ] ; then \
+		source ./gw_util.sh && watch_ckb_reorg > chain-reorg.log 2>&1 & \
+	fi
 	cd docker && FORCE_GODWOKEN_REDEPLOY=false docker-compose --env-file .build.mode.env up -d --build > /dev/null
 	make show_wait_tips
 
@@ -377,7 +389,7 @@ connect-ckb:
 	cd plugins/chaos && yarn connect
 
 watch-reorg:
-	cd plugins/chaos && yarn watch > chain.log
+	cd plugins/chaos && yarn watch
 
 delay-ckb:
 	pumba -v && echo "ready to delay ckb network..." || echo "you need to install Pumba, https://github.com/alexei-led/pumba";

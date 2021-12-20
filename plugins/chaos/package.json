@@ -4,8 +4,10 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "watch": "node chain-reorg.js",
-    "connect": "node connect.js"
+    "watch": "node reorg-watch.js",
+    "connect": "node connect.js",
+    "account": "node prepare-accounts.js",
+    "jam": "node jam.js"
   },
   "dependencies": {
     "@open-rpc/client-js": "^1.7.0",

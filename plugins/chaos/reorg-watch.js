@@ -3,6 +3,8 @@ const {
   HTTPTransport,
   Client,
 } = require("@open-rpc/client-js");
+const { asyncSleep } = require("./helper");
+
 const transport = new HTTPTransport("http://127.0.0.1:8114/");
 const client = new Client(new RequestManager([transport]));
 
@@ -14,10 +16,6 @@ async function send(method, param) {
   const result = await client.request({ method: method, params: param });
   return result;
 }
-
-const asyncSleep = (ms = 0) => {
-  return new Promise((r) => setTimeout(r, ms));
-};
 
 const getMinerName = (args) => {
   switch (args) {

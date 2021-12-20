@@ -4,7 +4,7 @@ const {
   Client,
 } = require("@open-rpc/client-js");
 const child_process = require("child_process");
-const { connect } = require("http2");
+
 const ckbNode1 = new HTTPTransport("http://127.0.0.1:8114/");
 const ckbNode2 = new HTTPTransport("http://127.0.0.1:8117/");
 const ckbNode3 = new HTTPTransport("http://127.0.0.1:6117/");
@@ -55,7 +55,7 @@ async function connectNode3() {
 
   console.log(id, ipAddress);
 
-  const result = await send2("add_node", [id, ipAddress]);
+  const result = await send1("add_node", [id, ipAddress]);
   console.log(result);
 }
 

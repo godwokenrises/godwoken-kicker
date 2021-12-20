@@ -6,6 +6,10 @@ POLYMAN_SERVER_URL=http://localhost:6101
 GODWOKEN_RPC=http://localhost:8119
 WEB3_RPC=http://localhost:8024
 
+CKB_NODE_1=http://localhost:8114
+CKB_NODE_2=http://localhost:8117
+CKB_NODE_3=http://localhost:6117
+
 # 1. Create ProgressBar function
 # 1.1 Input is currentState($1) and totalState($2)
 function ProgressBar {
@@ -834,30 +838,48 @@ get_creator_id_from_polyjuice(){
     fi
 }
 
-connect_ckb(){
-    ip=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' docker_ckb2_1)
-    # curl retry on connrefused, considering ECONNREFUSED as a transient error(network issues)
-    # connections with ipv6 are not retried because it returns EADDRNOTAVAIL instead of ECONNREFUSED,
-    # hence we should use --ipv4
-    result=$( echo '{
-    "id": 2,
-    "jsonrpc": "2.0",
-    "method": "get_cells",
-    "params": [
-        {
-            "script": {
-                "code_hash": "'${rollup_code_hash}'",
-                "hash_type": "'${rollup_hash_type}'",
-                "args": "'${rollup_args}'"
-            },
-            "script_type": "type"
-        },
-        "asc",
-        "0x64"
-    ]
-    }' \
-    | tr -d '\n' \
-    | curl -s --ipv4 --retry 3 --retry-connrefused \
-    -H 'content-type: application/json' -d @- \
-    $indexer_rpc) 
+wait_to_connect_ckb(){
+    local i=0;
+    while true; do
+        i=$((i+1));
+        sleep 3;
+
+        if isCkbRpcRunning "${CKB_NODE_1}" && isCkbRpcRunning "${CKB_NODE_2}" && isCkbRpcRunning "${CKB_NODE_3}"; 
+        then
+          echo 'ckb nodes are up, connect them.'
+          make connect-ckb
+          break
+        else
+          echo 'wait until all 3 ckb node rpc are up..'
+        fi
+
+        if [ $i -gt 40 ]; # timout: 120s
+        then
+          echo 'timeout, 120s. exit.';
+          break;
+        fi
+    done
+}
+
+watch_ckb_reorg(){
+    local i=0;
+    while true; do
+        i=$((i+1));
+        sleep 3;
+
+        if isCkbRpcRunning "${CKB_NODE_1}"; 
+        then
+          echo 'ckb rpc is up, start watch reorg..'
+          make watch-reorg
+          break
+        else
+          echo 'wait until ckb rpc is up..'
+        fi
+
+        if [ $i -gt 40 ]; # timout: 120s
+        then
+          echo 'timeout, 120s. still not seeing ckb rpc up. exit.';
+          break;
+        fi
+    done
 }
