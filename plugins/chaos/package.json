@@ -7,7 +7,8 @@
     "watch": "node reorg-watch.js",
     "connect": "node connect.js",
     "account": "node prepare-accounts.js",
-    "jam": "node jam.js"
+    "jam": "node jam.js",
+    "start": "node index.js"
   },
   "dependencies": {
     "@open-rpc/client-js": "^1.7.0",

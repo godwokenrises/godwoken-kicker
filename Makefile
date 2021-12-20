@@ -9,7 +9,7 @@ export $(shell sed 's/=.*//' $(BUILD_MODE_ENV_FILE))
 #endif
 
 
-.PHONY: ckb ckb2 ckb3 connect-ckb
+.PHONY: ckb ckb2 ckb3 connect-ckb chaos
 ###### command list ########
 
 ### 1. utils
@@ -395,4 +395,6 @@ delay-ckb:
 	pumba -v && echo "ready to delay ckb network..." || echo "you need to install Pumba, https://github.com/alexei-led/pumba";
 	pumba netem --duration 50s --tc-image gaiadocker/iproute2 delay --time 3000 docker_ckb3_1 & pumba netem --duration 50s --tc-image gaiadocker/iproute2 delay --time 3000 docker_ckb2_1
 
+chaos:
+	source gw_util.sh && start_chaos > chaos.log 2>&1 
 

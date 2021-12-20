@@ -883,3 +883,7 @@ watch_ckb_reorg(){
         fi
     done
 }
+
+start_chaos(){
+    cd plugins/chaos && yarn start
+}
