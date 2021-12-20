@@ -1,5 +1,12 @@
 # How to run
 
+## require
+
+- yarn && nodejs
+- [pumba](https://github.com/alexei-led/pumba)
+
+## run
+
 1. set env in `.build.mode.env` to true
 
 ```s
