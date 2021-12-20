@@ -105,7 +105,7 @@ install:
 		cd plugins/chaos && yarn ;\
 	fi
 
-install: SHELL:=/bin/bash
+start: SHELL:=/bin/bash
 start: 
 	if [ "$(ENABLE_MULTI_CKB_NODES)" = true ] ; then \
 		source ./gw_util.sh && wait_to_connect_ckb > connect-ckb.log 2>&1 & \
@@ -395,6 +395,7 @@ delay-ckb:
 	pumba -v && echo "ready to delay ckb network..." || echo "you need to install Pumba, https://github.com/alexei-led/pumba";
 	pumba netem --duration 50s --tc-image gaiadocker/iproute2 delay --time 3000 docker_ckb3_1 & pumba netem --duration 50s --tc-image gaiadocker/iproute2 delay --time 3000 docker_ckb2_1
 
+chaos: SHELL:=/bin/bash
 chaos:
 	source gw_util.sh && start_chaos > chaos.log 2>&1 
 
