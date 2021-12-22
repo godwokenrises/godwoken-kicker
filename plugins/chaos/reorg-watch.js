@@ -17,6 +17,16 @@ async function send(method, param) {
   return result;
 }
 
+const getMinerNameFromBlock = (block) => {
+  if (!block.transactions[0].outputs[0]) {
+    // no outputs in the first couple blocks
+    return getMinerName(undefined);
+  }
+
+  const args = block.transactions[0].outputs[0].lock.args;
+  return getMinerName(args);
+};
+
 const getMinerName = (args) => {
   switch (args) {
     case miner_1:
@@ -38,7 +48,6 @@ let lastTipBlockHash;
 
 const run = async () => {
   const blockNumber = (await send("get_tip_header", [])).number;
-
   lastTip = blockNumber;
   const header = await send("get_header_by_number", [lastTip]);
   const hash = header.hash;
@@ -46,9 +55,7 @@ const run = async () => {
 
   const lastBlock = await send("get_block", [hash]);
 
-  const lastBlockProducer = getMinerName(
-    lastBlock.transactions[0].outputs[0].lock.args
-  );
+  const lastBlockProducer = getMinerNameFromBlock(lastBlock);
 
   console.log(
     `lastTip   : ${parseInt(
@@ -68,9 +75,7 @@ const run = async () => {
         await send("get_header_by_number", [blockNumber2])
       ).hash;
       const block = await send("get_block", [currentBlockHash]);
-      const currentBlockProducer = getMinerName(
-        block.transactions[0].outputs[0].lock.args
-      );
+      const currentBlockProducer = getMinerNameFromBlock(block);
       console.log(
         `currentTip: ${parseInt(
           blockNumber2
