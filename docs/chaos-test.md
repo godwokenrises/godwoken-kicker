@@ -1,4 +1,4 @@
-# How to run
+# How to enable ckb reorgs for chaos test
 
 ## require
 
@@ -14,7 +14,7 @@ ENABLE_MULTI_CKB_NODES=true
 WATCH_CKB_REORG=true
 ```
 
-2. `make init && make star`
+2. `make init && make start`
 
 3. after kicker is up, run `make chaos`
 
