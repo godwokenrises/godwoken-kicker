@@ -7,6 +7,7 @@ one line command to start godwoken-polyjuice chain for devnet.
 - develop branch: for newest development, might be broken. most of time, only support custom-mode.
 ```
 
+test feature: [ckb reorg for chaos test](/docs/chaos-test.md)
 
 ----
 

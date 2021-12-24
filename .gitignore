@@ -29,3 +29,8 @@ workspace/*
 !workspace/.gitkeep
 cache/activity/*
 cache/build/*
+
+plugins/*/node_modules
+plugins/*/*.log
+
+*.log

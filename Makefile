@@ -9,7 +9,7 @@ ifndef VERBOSE
 endif
 
 
-.PHONY: ckb
+.PHONY: ckb ckb2 ckb3 connect-ckb chaos
 ###### command list ########
 
 ### 1. utils
@@ -99,8 +99,20 @@ install:
 		make rebuild-poa-scripts ; \
 	else make copy-poa-scripts-from-docker ;\
 	fi	
+# if multi ckb nodes, install deps for plugins
+# todo: maybe use prebuild image here
+	if [ "$(ENABLE_MULTI_CKB_NODES)" = true ] ; then \
+		cd plugins/chaos && yarn ;\
+	fi
 
+start: SHELL:=/bin/bash
 start: 
+	if [ "$(ENABLE_MULTI_CKB_NODES)" = true ] ; then \
+		source ./gw_util.sh && wait_to_connect_ckb > connect-ckb.log 2>&1 & \
+	fi
+	if [ "$(WATCH_CKB_REORG)" = true ] ; then \
+		source ./gw_util.sh && watch_ckb_reorg > chain-reorg.log 2>&1 & \
+	fi
 	cd docker && FORCE_GODWOKEN_REDEPLOY=false docker-compose --env-file .build.mode.env up -d --build > /dev/null
 	make show_wait_tips
 
@@ -146,6 +158,13 @@ web3:
 # show ckb
 ckb:
 	cd docker && docker-compose logs -f --tail 200 ckb
+# show ckb2
+ckb2:
+	cd docker && docker-compose logs -f --tail 200 ckb2
+
+# show ckb3
+ckb3:
+	cd docker && docker-compose logs -f --tail 200 ckb3
 # show call-polyman
 call-polyman:
 	cd docker && docker-compose logs -f call-polyman
@@ -179,8 +198,20 @@ stop-web3:
 start-ckb:
 	cd docker && docker-compose start ckb
 
+start-ckb2:
+	cd docker && docker-compose start ckb2
+
+start-ckb3:
+	cd docker && docker-compose start ckb3
+
 stop-ckb:
 	cd docker && docker-compose stop ckb
+
+stop-ckb2:
+	cd docker && docker-compose stop ckb2
+
+stop-ckb3:
+	cd docker && docker-compose stop ckb3
 
 start-db:
 	cd docker && docker-compose start postgres
@@ -212,6 +243,12 @@ enter-web3:
 
 enter-ckb:
 	cd docker && docker-compose exec ckb bash
+
+enter-ckb2:
+	cd docker && docker-compose exec ckb2 bash
+
+enter-ckb3:
+	cd docker && docker-compose exec ckb3 bash
 
 enter-db:
 	cd docker && docker-compose exec postgres bash
@@ -324,6 +361,9 @@ install-web3-node-modules-if-empty:
 install-polyman-node-modules-if-empty:
 	cd `pwd`/packages/godwoken-polyman && yarn check --verify-tree && cd .. || yarn install
 
+patch-lumos-indexer-for-polyman:
+	cp `pwd`/patches/lumos-indexer-linux/index.node `pwd`/packages/godwoken-polyman/node_modules/@ckb-lumos/indexer/native/index.node
+
 ### 7. godwoken gen schema helper command
 gen-schema:
 	make clean-schema
@@ -343,3 +383,19 @@ prepare-schema-for-web3:
 	mv ./godwoken-web3/packages/godwoken/godwoken.esm.js ./packages/godwoken-web3/packages/godwoken/schemas/index.esm.js	
 	mv ./godwoken-web3/packages/godwoken/godwoken.js ./packages/godwoken-web3/packages/godwoken/schemas/index.js	
 	mv ./godwoken-web3/packages/godwoken/godwoken.json ./packages/godwoken-web3/packages/godwoken/schemas/index.json
+
+########### helper function #############
+connect-ckb:
+	cd plugins/chaos && yarn connect
+
+watch-reorg:
+	cd plugins/chaos && yarn watch
+
+delay-ckb:
+	pumba -v && echo "ready to delay ckb network..." || echo "you need to install Pumba, https://github.com/alexei-led/pumba";
+	pumba netem --duration 50s --tc-image gaiadocker/iproute2 delay --time 3000 docker_ckb3_1 & pumba netem --duration 50s --tc-image gaiadocker/iproute2 delay --time 3000 docker_ckb2_1
+
+chaos: SHELL:=/bin/bash
+chaos:
+	source gw_util.sh && start_chaos > chaos.log 2>&1 &
+

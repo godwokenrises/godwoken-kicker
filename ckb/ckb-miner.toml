@@ -36,5 +36,6 @@ poll_interval = 1_000_000_000_000
 
 [[miner.workers]]
 worker_type = "Dummy"
-delay_type = "Constant"
-value = 5000
+delay_type = "Uniform"
+low = 3500
+high = 5000

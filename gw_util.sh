@@ -6,6 +6,10 @@ POLYMAN_SERVER_URL=http://localhost:6101
 GODWOKEN_RPC=http://localhost:8119
 WEB3_RPC=http://localhost:8024
 
+CKB_NODE_1=http://localhost:8114
+CKB_NODE_2=http://localhost:8117
+CKB_NODE_3=http://localhost:6117
+
 # 1. Create ProgressBar function
 # 1.1 Input is currentState($1) and totalState($2)
 function ProgressBar {
@@ -307,6 +311,7 @@ isRollupCellExits(){
 }
 
 isCkbRpcRunning(){
+    echo $1;
     if [[ -n $1 ]]; 
     then
         local rpc_url="$1"
@@ -831,4 +836,54 @@ get_creator_id_from_polyjuice(){
         echo "can not get creator_id from polyjuice $url"
         exit 138;
     fi
+}
+
+wait_to_connect_ckb(){
+    local i=0;
+    while true; do
+        i=$((i+1));
+        sleep 3;
+
+        if isCkbRpcRunning "${CKB_NODE_1}" && isCkbRpcRunning "${CKB_NODE_2}" && isCkbRpcRunning "${CKB_NODE_3}"; 
+        then
+          echo 'ckb nodes are up, connect them.'
+          make connect-ckb
+          break
+        else
+          echo 'wait until all 3 ckb node rpc are up..'
+        fi
+
+        if [ $i -gt 40 ]; # timout: 120s
+        then
+          echo 'timeout, 120s. exit.';
+          break;
+        fi
+    done
+}
+
+watch_ckb_reorg(){
+    local i=0;
+    while true; do
+        i=$((i+1));
+        sleep 3;
+
+        if isCkbRpcRunning "${CKB_NODE_1}"; 
+        then
+          echo 'ckb rpc is up, start watch reorg..'
+          make watch-reorg
+          break
+        else
+          echo 'wait until ckb rpc is up..'
+        fi
+
+        if [ $i -gt 40 ]; # timout: 120s
+        then
+          echo 'timeout, 120s. still not seeing ckb rpc up. exit.';
+          break;
+        fi
+    done
+}
+
+start_chaos(){
+    cd plugins/chaos && yarn start
 }
