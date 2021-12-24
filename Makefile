@@ -4,9 +4,9 @@ include $(BUILD_MODE_ENV_FILE)
 export $(shell sed 's/=.*//' $(BUILD_MODE_ENV_FILE))
 
 # hide output for clear log
-#ifndef VERBOSE
-#.SILENT:
-#endif
+ifndef VERBOSE
+.SILENT:
+endif
 
 
 .PHONY: ckb ckb2 ckb3 connect-ckb chaos
