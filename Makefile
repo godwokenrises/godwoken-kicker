@@ -9,10 +9,13 @@ ifndef VERBOSE
 endif
 
 
-.PHONY: ckb ckb2 ckb3 connect-ckb chaos
+.PHONY: ckb ckb2 ckb3 connect-ckb chaos version
 ###### command list ########
 
 ### 1. utils
+version:
+	echo "=== kicker info ===" && cd docker && cat .build.mode.env
+
 manual-image:
 	@read -p "Please Enter New Image Tag: " VERSION ; \
 	cd docker/manual-image && docker build . -t ${DOCKER_MANUAL_BUILD_IMAGE_NAME}:$$VERSION ;\

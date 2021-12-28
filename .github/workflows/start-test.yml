@@ -17,6 +17,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: output kicker version
+        run: make version
+
       - name: start kicker
         run: |
           make init && make start
