@@ -64,6 +64,7 @@ CREATE TABLE logs (
 CREATE INDEX ON logs (transaction_hash);
 CREATE INDEX ON logs (block_hash);
 CREATE INDEX ON logs (address);
+CREATE INDEX ON logs (block_number);
 
 -- Add migration script here
 CREATE TABLE accounts (
