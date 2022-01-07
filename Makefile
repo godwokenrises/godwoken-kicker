@@ -38,14 +38,10 @@ clean-workspace:
 	rm -rf workspace/*
 	echo "remove all files in workspace."
 
-clean-data:
-	make clean-cache
-	make clean-workspace
+clean-data: clean-cache clean-workspac
 	rm -rf quick-mode
 
-clean:
-	make uninstall
-	make clean-data
+clean: uninstall clean-data
 	echo "successful remove packages, workspace and cache activities."
 
 clean-build-cache:
@@ -53,18 +49,18 @@ clean-build-cache:
 	echo "remove build cache."
 
 ### 2. main command
-init:
-	make create-folder
+
+init: create-folder prepare_files install build-image
+
+prepare_files:
 	cp ./config/private_key ./workspace/deploy/private_key
 	sh ./docker/layer2/init_config_json.sh
-	make install
-	make build-image
 
 build-image:
 	cd docker && docker-compose build --no-rm
 
 install: SHELL:=/bin/bash
-install: 
+install:
 # if manual build web3
 	if [ "$(MANUAL_BUILD_WEB3)" = true ] ; then \
 		source ./gw_util.sh && prepare_package godwoken-web3 $$WEB3_GIT_URL $$WEB3_GIT_CHECKOUT > /dev/null; \
@@ -101,7 +97,7 @@ install:
 		source ./gw_util.sh && prepare_package clerkb $$CLERKB_GIT_URL $$CLERKB_GIT_CHECKOUT > /dev/null ; \
 		make rebuild-poa-scripts ; \
 	else make copy-poa-scripts-from-docker ;\
-	fi	
+	fi
 # if multi ckb nodes, install deps for plugins
 # todo: maybe use prebuild image here
 	if [ "$(ENABLE_MULTI_CKB_NODES)" = true ] ; then \
@@ -109,7 +105,7 @@ install:
 	fi
 
 start: SHELL:=/bin/bash
-start: 
+start:
 	if [ "$(ENABLE_MULTI_CKB_NODES)" = true ] ; then \
 		source ./gw_util.sh && wait_to_connect_ckb > connect-ckb.log 2>&1 & \
 	fi
@@ -239,7 +235,7 @@ enter-godwoken:
 	cd docker && docker-compose exec godwoken bash
 
 enter-polyjuice:
-	cd docker && docker-compose exec polyjuice bash	
+	cd docker && docker-compose exec polyjuice bash
 
 enter-web3:
 	cd docker && docker-compose exec web3 bash
@@ -264,26 +260,23 @@ enter-redis:
 
 ########### manual-build-mode #############
 ### rebuild components's scripts and bin all in one
-rebuild-scripts:
-	make rebuild-gw-scripts-and-bin 
-	make rebuild-polyjuice-bin
-	make rebuild-poa-scripts
+rebuild-scripts: rebuild-gw-scripts-and-bin rebuild-polyjuice-bin rebuild-poa-scripts
 
 #### rebuild components's scripts and bin standalone
 rebuild-polyjuice-bin:
 	cd packages/godwoken-polyjuice && make all-via-docker
 	cp packages/godwoken-polyjuice/build/validator_log workspace/scripts/release/polyjuice-validator
 	cp packages/godwoken-polyjuice/build/generator_log workspace/deploy/polyjuice-backend/polyjuice-generator
-	cp packages/godwoken-polyjuice/build/validator_log workspace/deploy/polyjuice-backend/polyjuice-validator	
+	cp packages/godwoken-polyjuice/build/validator_log workspace/deploy/polyjuice-backend/polyjuice-validator
 
 rebuild-gw-scripts-and-bin:
 	cd packages/godwoken-scripts && cd c && make && cd - && capsule build --release --debug-output
 	cp packages/godwoken-scripts/build/release/* workspace/scripts/release/
-	cp packages/godwoken-scripts/c/build/meta-contract-validator workspace/scripts/release/	
+	cp packages/godwoken-scripts/c/build/meta-contract-validator workspace/scripts/release/
 	cp packages/godwoken-scripts/c/build/meta-contract-generator workspace/deploy/backend/meta-contract-generator
-	cp packages/godwoken-scripts/c/build/meta-contract-validator workspace/deploy/backend/meta-contract-validator	
-	cp packages/godwoken-scripts/c/build/sudt-validator workspace/scripts/release/ 
-	cp packages/godwoken-scripts/c/build/sudt-generator workspace/deploy/backend/sudt-generator	
+	cp packages/godwoken-scripts/c/build/meta-contract-validator workspace/deploy/backend/meta-contract-validator
+	cp packages/godwoken-scripts/c/build/sudt-validator workspace/scripts/release/
+	cp packages/godwoken-scripts/c/build/sudt-generator workspace/deploy/backend/sudt-generator
 	cp packages/godwoken-scripts/c/build/sudt-validator workspace/deploy/backend/sudt-validator
 
 rebuild-poa-scripts:
@@ -315,18 +308,18 @@ copy-polyjuice-bin-from-docker:	rm-dummy-docker-if-name-exits
 	cp quick-mode/polyjuice/validator_log workspace/scripts/release/polyjuice-validator
 	cp quick-mode/polyjuice/generator_log workspace/deploy/polyjuice-backend/polyjuice-generator
 	cp quick-mode/polyjuice/validator_log workspace/deploy/polyjuice-backend/polyjuice-validator
-		
+
 copy-gw-scripts-and-bin-from-docker: rm-dummy-docker-if-name-exits
 	mkdir -p `pwd`/quick-mode/godwoken
 	docker run -it -d --name dummy $$DOCKER_PREBUILD_IMAGE_NAME:$$DOCKER_PREBUILD_IMAGE_TAG
 	docker cp dummy:/scripts/godwoken-scripts/. `pwd`/quick-mode/godwoken
 	docker rm -f dummy
-# paste the prebuild bin to workspace dir for use	
+# paste the prebuild bin to workspace dir for use
 	cp quick-mode/godwoken/meta-contract-validator workspace/scripts/release/
 	cp quick-mode/godwoken/meta-contract-generator workspace/deploy/backend/meta-contract-generator
 	cp quick-mode/godwoken/meta-contract-validator workspace/deploy/backend/meta-contract-validator
 	cp quick-mode/godwoken/sudt-validator workspace/scripts/release/
-	cp quick-mode/godwoken/sudt-generator workspace/deploy/backend/sudt-generator	
+	cp quick-mode/godwoken/sudt-generator workspace/deploy/backend/sudt-generator
 	cp quick-mode/godwoken/sudt-validator workspace/deploy/backend/sudt-validator
 # paste the prebuild scripts to workspace dir for use
 	cp quick-mode/godwoken/withdrawal-lock workspace/scripts/release/
@@ -344,7 +337,7 @@ copy-poa-scripts-from-docker: rm-dummy-docker-if-name-exits
 	docker run -it -d --name dummy $$DOCKER_PREBUILD_IMAGE_NAME:$$DOCKER_PREBUILD_IMAGE_TAG
 	docker cp dummy:/scripts/clerkb/. `pwd`/quick-mode/clerkb
 	docker rm -f dummy
-# paste the prebuild scripts to workspace dir for use	
+# paste the prebuild scripts to workspace dir for use
 	cp quick-mode/clerkb/* workspace/scripts/release/
 
 copy-godwoken-binary-from-packages-to-workspace:
@@ -353,10 +346,10 @@ copy-godwoken-binary-from-packages-to-workspace:
 	cp packages/godwoken/target/release/gw-tools workspace/bin/gw-tools
 
 copy-web3-node-modules-if-empty:
-	docker run --rm -v `pwd`/packages/godwoken-web3:/app $$DOCKER_WEB3_PREBUILD_IMAGE_NAME:$$DOCKER_WEB3_PREBUILD_IMAGE_TAG /bin/bash -c "cd app && yarn check --verify-tree && cd .. || ( cd .. && echo 'start copying web3 node_modules from docker to local package..' && cp -r ./godwoken-web3/node_modules ./app/) ;"	
+	docker run --rm -v `pwd`/packages/godwoken-web3:/app $$DOCKER_WEB3_PREBUILD_IMAGE_NAME:$$DOCKER_WEB3_PREBUILD_IMAGE_TAG /bin/bash -c "cd app && yarn check --verify-tree && cd .. || ( cd .. && echo 'start copying web3 node_modules from docker to local package..' && cp -r ./godwoken-web3/node_modules ./app/) ;"
 
 copy-polyman-node-modules-if-empty::
-	docker run --rm -v `pwd`/packages/godwoken-polyman:/app $$DOCKER_POLYMAN_PREBUILD_IMAGE_NAME:$$DOCKER_POLYMAN_PREBUILD_IMAGE_TAG /bin/bash -c "cd app && yarn check --verify-tree && cd .. || ( cd .. && echo 'start copying polyman node_modules from docker to local package..' && cp -r ./godwoken-polyman/node_modules ./app/) ;"	
+	docker run --rm -v `pwd`/packages/godwoken-polyman:/app $$DOCKER_POLYMAN_PREBUILD_IMAGE_NAME:$$DOCKER_POLYMAN_PREBUILD_IMAGE_TAG /bin/bash -c "cd app && yarn check --verify-tree && cd .. || ( cd .. && echo 'start copying polyman node_modules from docker to local package..' && cp -r ./godwoken-polyman/node_modules ./app/) ;"
 
 install-web3-node-modules-if-empty:
 	cd `pwd`/packages/godwoken-web3 && yarn check --verify-tree && cd .. || yarn install
@@ -382,9 +375,9 @@ prepare-schema-for-polyman:
 prepare-schema-for-web3:
 	make gen-schema
 	cp -r ./docker/gen-godwoken-schema/schemas/godwoken.* ./packages/godwoken-web3/packages/godwoken/
-	mv ./godwoken-web3/packages/godwoken/godwoken.d.ts ./packages/godwoken-web3/packages/godwoken/schemas/index.d.ts	
-	mv ./godwoken-web3/packages/godwoken/godwoken.esm.js ./packages/godwoken-web3/packages/godwoken/schemas/index.esm.js	
-	mv ./godwoken-web3/packages/godwoken/godwoken.js ./packages/godwoken-web3/packages/godwoken/schemas/index.js	
+	mv ./godwoken-web3/packages/godwoken/godwoken.d.ts ./packages/godwoken-web3/packages/godwoken/schemas/index.d.ts
+	mv ./godwoken-web3/packages/godwoken/godwoken.esm.js ./packages/godwoken-web3/packages/godwoken/schemas/index.esm.js
+	mv ./godwoken-web3/packages/godwoken/godwoken.js ./packages/godwoken-web3/packages/godwoken/schemas/index.js
 	mv ./godwoken-web3/packages/godwoken/godwoken.json ./packages/godwoken-web3/packages/godwoken/schemas/index.json
 
 ########### helper function #############
