@@ -26,7 +26,7 @@ function runGodwoken(){
       fi
   done
   # running godwoken
-  RUST_LOG=info,gw_block_producer=info,gw_generator=debug,gw_web3_indexer=debug $GODWOKEN_BIN
+  RUST_LOG=info,gw_mem_pool=trace,gw_block_producer=info,gw_generator=debug,gw_web3_indexer=debug $GODWOKEN_BIN
 }
 
 # import some helper function
