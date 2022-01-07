@@ -50,9 +50,9 @@ clean-build-cache:
 
 ### 2. main command
 
-init: create-folder prepare_files install build-image
+init: create-folder prepare-files install build-image
 
-prepare_files:
+prepare-files:
 	cp ./config/private_key ./workspace/deploy/private_key
 	sh ./docker/layer2/init_config_json.sh
 
