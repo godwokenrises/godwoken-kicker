@@ -38,7 +38,7 @@ clean-workspace:
 	rm -rf workspace/*
 	echo "remove all files in workspace."
 
-clean-data: clean-cache clean-workspac
+clean-data: clean-cache clean-workspace
 	rm -rf quick-mode
 
 clean: uninstall clean-data
