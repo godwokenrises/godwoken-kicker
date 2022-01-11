@@ -164,6 +164,7 @@ ckb2:
 # show ckb3
 ckb3:
 	cd docker && docker-compose logs -f --tail 200 ckb3
+
 # show call-polyman
 call-polyman:
 	cd docker && docker-compose logs -f call-polyman
@@ -174,6 +175,14 @@ db:
 # show redis cache
 redis:
 	cd docker && docker-compose logs -f redis
+
+# show zookeeper
+zookeeper:
+	cd docker && docker-compose logs -f --tail 200 zookeeper
+
+# show kafka
+kafka:
+	cd docker && docker-compose logs -f --tail 200 kafka
 
 ### 4. component control command
 start-godwoken:
@@ -230,6 +239,18 @@ start-redis:
 stop-redis:
 	cd docker && docker-compose stop redis
 
+start-zookeeper:
+	cd docker && docker-compose start zookeeper
+
+stop-zookeeper:
+	cd docker && docker-compose stop zookeeper
+
+start-kafka:
+	cd docker && docker-compose start kafka
+
+stop-kafka:
+	cd docker && docker-compose stop kafka
+
 ### 5. component interact command
 enter-godwoken:
 	cd docker && docker-compose exec godwoken bash
@@ -257,6 +278,12 @@ enter-call-polyman:
 
 enter-redis:
 	cd docker && docker-compose exec redis bash
+
+enter-zookeeper:
+	cd docker && docker-compose exec zookeeper bash
+
+enter-kafka:
+	cd docker && docker-compose exec kafka bash
 
 ########### manual-build-mode #############
 ### rebuild components's scripts and bin all in one

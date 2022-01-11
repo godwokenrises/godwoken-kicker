@@ -184,6 +184,31 @@ services:
     depends_on:
         - ckb
   
+  zookeeper:
+    image: "${ZOOKEEPR_PREBUILD_IMAGE_NAME}:${ZOOKEEPR_PREBUILD_IMAGE_TAG}" 
+    restart: always
+    command: tail -F anything
+    environment:
+      ZOO_MY_ID: 1
+    ports:
+      - 2181:2181
+    container_name: zookeeper
+
+  kafka:
+    image: "${KAFKA_PREBUILD_IMAGE_NAME}:${KAFKA_PREBUILD_IMAGE_TAG}" 
+    command: bash /code/docker/kafka/entrypoint.sh 
+    volumes: 
+    - ../:/code # the manual-build resource all stays in /code dir
+    ports:
+      - 9092:9092
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: localhost
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_BROKER_ID: 1
+    container_name: kafka
+
   # gen-godwoken-schema:
   #   image: retricsu/gowoken-build_dev:ubuntu20
   #   profiles: ["cli-only"]
