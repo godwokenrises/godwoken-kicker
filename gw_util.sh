@@ -619,7 +619,11 @@ edit_godwoken_config_toml(){
         echo "readonly mode..."
         set_key_value_in_toml "node_mode" "readonly" $1
         ## 0. mem_pool.subscribe
-        # add an new one with mem_pool.subscribe
+        # first, delete mem_pool.publish
+        sed -i '/\[mem_pool.publish\]/{n;d}' $1 
+        sed -i '/\[mem_pool.publish\]/{n;d}' $1 
+        sed -i '/\[mem_pool.publish\]/d' $1
+        # second, add an new one with mem_pool.subscribe
         sed -i "/restore_path = 'mem_block'/a\[mem_pool.subscribe\]" $1 
         sed -i "/\[mem_pool.subscribe\]/a\hosts = ['kafka:9092']" $1 
         sed -i "/\[mem_pool.subscribe\]/a\topic = 'sync-mem-block'" $1

@@ -25,7 +25,6 @@ create-folder:
 	mkdir -p workspace/deploy/backend
 	mkdir -p workspace/deploy/polyjuice-backend
 	mkdir -p workspace/scripts/release
-	mkdir -p workspace/readonly
 
 uninstall:
 	rm -rf packages/*
