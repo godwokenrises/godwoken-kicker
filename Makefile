@@ -25,6 +25,7 @@ create-folder:
 	mkdir -p workspace/deploy/backend
 	mkdir -p workspace/deploy/polyjuice-backend
 	mkdir -p workspace/scripts/release
+	mkdir -p workspace/readonly
 
 uninstall:
 	rm -rf packages/*
@@ -145,9 +146,15 @@ status:
 # show polyjuice
 sp:
 	cd docker && docker-compose logs -f --tail 200 polyjuice
+polyjuice:
+	cd docker && docker-compose logs -f --tail 200 polyjuice
 # show godwoken
 sg:
 	cd docker && docker-compose logs -f --tail 200 godwoken
+godwoken:
+	cd docker && docker-compose logs -f --tail 200 godwoken
+godwoken-readonly:
+	cd docker && docker-compose logs -f --tail 200 godwoken-readonly
 # show ckb-indexer
 indexer:
 	cd docker && docker-compose logs -f indexer
@@ -190,6 +197,12 @@ start-godwoken:
 
 stop-godwoken:
 	cd docker && docker-compose stop godwoken
+
+start-godwoken-readonly:
+	cd docker && docker-compose start godwoken-readonly
+
+stop-godwoken-readonly:
+	cd docker && docker-compose stop godwoken-readonly
 
 start-polyjuice:
 	cd docker && docker-compose start polyjuice
@@ -254,6 +267,9 @@ stop-kafka:
 ### 5. component interact command
 enter-godwoken:
 	cd docker && docker-compose exec godwoken bash
+
+enter-godwoken-readonly:
+	cd docker && docker-compose exec godwoken-readonly bash
 
 enter-polyjuice:
 	cd docker && docker-compose exec polyjuice bash
