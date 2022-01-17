@@ -5,7 +5,7 @@ set -o errexit
 PROJECT_DIR=/code
 GODWOKEN_RPC_URL="http://godwoken:8119"
 
-export INDEXER_DB=/usr/local/polyman
+INDEXER_DB=/usr/local/polyman
 
 # import some helper function
 source ${PROJECT_DIR}/gw_util.sh

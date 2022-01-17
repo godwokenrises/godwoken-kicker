@@ -597,16 +597,49 @@ edit_godwoken_config_toml(){
         return 0
     fi
     
-    set_key_value_in_toml "node_mode" "fullnode" $1
+    if [[ "$GODWOKEN_MODE" == "fullmode" ]];
+    then 
+        echo "full mode..."
+        set_key_value_in_toml "node_mode" "fullnode" $1
+        ## 0. mem_pool.publish
+        # add with mem_pool.publish
+        sed -i "/restore_path = 'mem_block'/a\[mem_pool.publish\]" $1 
+        sed -i "/\[mem_pool.publish\]/a\hosts = ['kafka:9092']" $1 
+        sed -i "/\[mem_pool.publish\]/a\topic = 'sync-mem-block'" $1
+
+        ## set listen rpc url
+        set_key_value_in_toml "listen" "0.0.0.0:8119" $1
+
+        ## set store path
+        # delete the default path
+        sed -i '/\[store\]/{n;d}' $1
+        # add an new path
+        sed -i "/\[store\]/a\path = '../cache/activity/godwoken-chain-data'" $1
+    else
+        echo "readonly mode..."
+        set_key_value_in_toml "node_mode" "readonly" $1
+        ## 0. mem_pool.subscribe
+        # first, delete mem_pool.publish
+        sed -i '/\[mem_pool.publish\]/{n;d}' $1 
+        sed -i '/\[mem_pool.publish\]/{n;d}' $1 
+        sed -i '/\[mem_pool.publish\]/d' $1
+        # second, add an new one with mem_pool.subscribe
+        sed -i "/restore_path = 'mem_block'/a\[mem_pool.subscribe\]" $1 
+        sed -i "/\[mem_pool.subscribe\]/a\hosts = ['kafka:9092']" $1 
+        sed -i "/\[mem_pool.subscribe\]/a\topic = 'sync-mem-block'" $1
+        sed -i "/\[mem_pool.subscribe\]/a\group = 'sync-mem-block-1'" $1
+
+        ## set listen rpc url
+        set_key_value_in_toml "listen" "0.0.0.0:8219" $1
+
+        ## set store path
+        # delete the default path
+        sed -i '/\[store\]/{n;d}' $1
+        # add an new path
+        sed -i "/\[store\]/a\path = '../cache/activity/godwoken-readonly-chain-data'" $1
+    fi
 
     set_key_value_in_toml "privkey_path" "deploy/private_key" $1
-    set_key_value_in_toml "listen" "0.0.0.0:8119" $1
-
-    ## set store path
-    # delete the default path
-    sed -i '/\[store\]/{n;d}' $1
-    # add an new path
-    sed -i "/\[store\]/a\path = '../cache/activity/godwoken-chain-data'" $1
 
     ## 1. reward lock update
     # delete the default reward lock

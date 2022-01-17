@@ -6,14 +6,13 @@ PROJECT_DIR="/code"
 LUMOS_CONFIG_FILE=${PROJECT_DIR}/workspace/deploy/lumos-config.json
 GODWOKEN_CONFIG_TOML_FILE=${PROJECT_DIR}/workspace/config.toml
 
-export PRIVKEY=deploy/private_key
-export CKB_RPC=http://ckb:8114
-export INDEXER_RPC=http://indexer:8116
-export POLYMAN_RPC=http://call-polyman:6102
-export DATABASE_URL=postgres://user:password@postgres:5432/lumos
-
-export GODWOKEN_BIN=${PROJECT_DIR}/workspace/bin/godwoken
-export GW_TOOLS_BIN=${PROJECT_DIR}/workspace/bin/gw-tools
+PRIVKEY=deploy/private_key
+CKB_RPC=http://ckb:8114
+INDEXER_RPC=http://indexer:8116
+POLYMAN_RPC=http://call-polyman:6102
+DATABASE_URL=postgres://user:password@postgres:5432/lumos
+GODWOKEN_BIN=${PROJECT_DIR}/workspace/bin/godwoken
+GW_TOOLS_BIN=${PROJECT_DIR}/workspace/bin/gw-tools
 
 function runGodwoken(){
   # wait for ckb rpc server to start

@@ -111,6 +111,7 @@ services:
     - ../cache/build/usr-local-cargo:/usr/local/cargo
     - ../cache/activity/ckb-cli-data:/root/.ckb-cli
     environment:
+      GODWOKEN_MODE: fullmode
       FORCE_GODWOKEN_REDEPLOY: ${FORCE_GODWOKEN_REDEPLOY}
     command: bash /code/docker/layer2/entrypoint.sh
     ports:
@@ -119,6 +120,24 @@ services:
       - ckb
       - postgres
       - indexer
+    
+  godwoken-readonly:
+    build: 
+      context: layer2
+      args: 
+        DOCKER_IMAGE: "${DOCKER_MANUAL_BUILD_IMAGE_NAME}:${DOCKER_MANUAL_BUILD_IMAGE_TAG}"
+    volumes:
+    - ../:/code
+    environment:
+      GODWOKEN_MODE: readonly
+    command: bash /code/docker/layer2/readonly/entrypoint.sh
+    ports:
+      - 8219:8219
+    depends_on:
+      - ckb
+      - postgres
+      - indexer
+      - godwoken
       
   polyjuice:
     build:
@@ -184,6 +203,31 @@ services:
     depends_on:
         - ckb
   
+  zookeeper:
+    image: zookeeper 
+    restart: always
+    hostname: zookeeper
+    environment:
+      ZOO_MY_ID: 1
+    ports:
+      - 2181:2181
+    container_name: zookeeper
+
+  kafka:
+    image: "${KAFKA_PREBUILD_IMAGE_NAME}:${KAFKA_PREBUILD_IMAGE_TAG}" 
+    volumes: 
+    - ../:/code
+    ports:
+      - 9092:9092
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: kafka
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_BROKER_ID: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    container_name: kafka
+
   # gen-godwoken-schema:
   #   image: retricsu/gowoken-build_dev:ubuntu20
   #   profiles: ["cli-only"]

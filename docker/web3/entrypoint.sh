@@ -67,6 +67,7 @@ mkdir -p /usr/local/godwoken-web3/address-mapping
 cat > ./packages/api-server/.env <<EOF
 DATABASE_URL=postgres://user:password@postgres:5432/lumos
 GODWOKEN_JSON_RPC=http://godwoken:8119
+GODWOKEN_READONLY_JSON_RPC=http://godwoken-readonly:8219
 ETH_ACCOUNT_LOCK_HASH=$EthAccountLockCodeHash
 ROLLUP_TYPE_HASH=$RollupTypeHash
 PORT=8024
