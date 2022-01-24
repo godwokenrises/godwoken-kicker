@@ -18,12 +18,13 @@ async function send(method, param) {
 }
 
 const getMinerNameFromBlock = (block) => {
-  if (!block.transactions[0].outputs[0]) {
-    // no outputs in the first couple blocks
+  const firstTransaction = block.transactions[0];
+  if (!firstTransaction || !firstTransaction.outputs[0]) {
+    // no transaction / no outputs in the first couple blocks
     return getMinerName(undefined);
   }
 
-  const args = block.transactions[0].outputs[0].lock.args;
+  const args = firstTransaction.outputs[0].lock.args;
   return getMinerName(args);
 };
 
@@ -57,6 +58,8 @@ const run = async () => {
 
   const lastBlockProducer = getMinerNameFromBlock(lastBlock);
 
+  const date = new Date();
+  console.log(`${date.toString()}`);
   console.log(
     `lastTip   : ${parseInt(
       lastTip
