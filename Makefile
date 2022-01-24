@@ -427,7 +427,7 @@ connect-ckb:
 	cd plugins/chaos && yarn connect
 
 watch-reorg:
-	cd plugins/chaos && yarn watch
+	cd plugins/chaos && yarn watch > chain-reorg.log 2>&1 &
 
 delay-ckb:
 	pumba -v && echo "ready to delay ckb network..." || echo "you need to install Pumba, https://github.com/alexei-led/pumba";
@@ -437,3 +437,6 @@ chaos: SHELL:=/bin/bash
 chaos:
 	source gw_util.sh && start_chaos > chaos.log 2>&1 &
 
+show-reorg:
+	cat chain-reorg.log | grep "reorgs!"
+	
