@@ -227,11 +227,4 @@ services:
       KAFKA_BROKER_ID: 1
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     container_name: kafka
-
-  # gen-godwoken-schema:
-  #   image: retricsu/gowoken-build_dev:ubuntu20
-  #   profiles: ["cli-only"]
-  #   volumes: 
-  #     - ../:/code
-  #   command: bash /code/docker/gen-godwoken-schema/entrypoint.sh
  

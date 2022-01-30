@@ -403,12 +403,12 @@ patch-lumos-indexer-for-polyman:
 	cp `pwd`/patches/lumos-indexer-linux/index.node `pwd`/packages/godwoken-polyman/node_modules/@ckb-lumos/indexer/native/index.node
 
 ### 7. godwoken gen schema helper command
-gen-schema:
-	make clean-schema
-	cd docker && docker-compose up gen-godwoken-schema
+SHELL:=/bin/bash
+gen-schema: clean-schema
+	cd plugins/gw-schema && source generate.sh 
 
 clean-schema:
-	cd docker/gen-godwoken-schema && rm -rf schemas/*
+	cd plugins/gw-schema && rm -rf schemas/*
 
 prepare-schema-for-polyman:
 	make gen-schema

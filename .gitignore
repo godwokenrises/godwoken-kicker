@@ -32,5 +32,7 @@ cache/build/*
 
 plugins/*/node_modules
 plugins/*/*.log
+plugins/gw-schema/schemas
+plugins/gw-schema/tmp
 
 *.log
