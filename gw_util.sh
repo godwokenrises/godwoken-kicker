@@ -855,6 +855,40 @@ cargo_build_local_or_docker(){
     fi
 }
 
+cargo_build_web3_indexer_on_local_or_docker(){
+    if [[ "$BUILD_WEB3_INDEXER_ON_LOCAL_OVER_DOCKER" = true ]]; then
+        echo "build web3-indexer on local"
+        cd packages/godwoken-web3 && cargo build --release && cd ../..
+    else
+        echo "build web3-indexer via Docker"
+        ## decide how to pass proxy host to docker 
+        ## according to differen docker version
+        ## see: https://stackoverflow.com/questions/24319662/from-inside-of-a-docker-container-how-do-i-connect-to-the-localhost-of-the-mach
+        if [[ $(docker -v) != *20.10.* ]] && [[ "$OSTYPE" == "linux-gnu"* ]]; then
+            echo 'Docker version not 20.10.0+!'
+            docker run --rm -i --network="host" -v `pwd`/packages/godwoken-web3:/app -v `pwd`/docker/layer2/cargo:/.cargo/ -v `pwd`/cache/build/cargo-registry:/root/.cargo/registry -w=/app "$DOCKER_MANUAL_BUILD_IMAGE_NAME":"$DOCKER_MANUAL_BUILD_IMAGE_TAG" cargo build --release ;
+            return 0;
+        fi
+
+        if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+            echo "linux-gnu"
+            docker run --rm -i --add-host host.docker.internal:host-gateway -v `pwd`/packages/godwoken-web3:/app -v `pwd`/docker/layer2/cargo:/.cargo/ -v `pwd`/cache/build/cargo-registry:/root/.cargo/registry -w=/app "$DOCKER_MANUAL_BUILD_IMAGE_NAME":"$DOCKER_MANUAL_BUILD_IMAGE_TAG" cargo build --release;
+        elif [[ "$OSTYPE" == "darwin"* ]]; then
+            # Mac OSX
+            echo "mac osx"
+            docker run --rm -i -v `pwd`/packages/godwoken-web3:/app -v `pwd`/docker/layer2/cargo:/.cargo/ -v `pwd`/cache/build/cargo-registry:/root/.cargo/registry -w=/app "$DOCKER_MANUAL_BUILD_IMAGE_NAME":"$DOCKER_MANUAL_BUILD_IMAGE_TAG" cargo build --release;
+        elif [[ "$OSTYPE" == "cygwin" ]]; then
+            echo "windows"
+            # POSIX compatibility layer and Linux environment emulation for Windows
+            docker run --rm -i -v `pwd`/packages/godwoken-web3:/app -v `pwd`/docker/layer2/cargo:/.cargo/ -v `pwd`/cache/build/cargo-registry:/root/.cargo/registry -w=/app "$DOCKER_MANUAL_BUILD_IMAGE_NAME":"$DOCKER_MANUAL_BUILD_IMAGE_TAG" cargo build --release;
+        elif [[ "$OSTYPE" == "msys" ]]; then
+            # Lightweight shell and GNU utilities compiled for Windows (part of MinGW)
+            echo "windows"
+            docker run --rm -i -v `pwd`/packages/godwoken-web3:/app -v `pwd`/docker/layer2/cargo:/.cargo/ -v `pwd`/cache/build/cargo-registry:/root/.cargo/registry -w=/app "$DOCKER_MANUAL_BUILD_IMAGE_NAME":"$DOCKER_MANUAL_BUILD_IMAGE_TAG" cargo build --release;
+        fi
+    fi
+}
+
 get_creator_id_from_polyjuice(){
     if [[ -n $1 ]]; 
     then

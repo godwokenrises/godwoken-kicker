@@ -66,6 +66,7 @@ install:
 		source ./gw_util.sh && prepare_package godwoken-web3 $$WEB3_GIT_URL $$WEB3_GIT_CHECKOUT > /dev/null; \
 		"$(INSTALL_JS_NODE_MODULE_NOT_COPY)" && make install-web3-node-modules-if-empty || make copy-web3-node-modules-if-empty ;\
 		docker run --rm -v `pwd`/packages/godwoken-web3:/app -w=/app $$DOCKER_WEB3_PREBUILD_IMAGE_NAME:$$DOCKER_WEB3_PREBUILD_IMAGE_TAG /bin/bash -c "yarn build" ; \
+		source ./gw_util.sh &&  cargo_build_web3_indexer_on_local_or_docker ; \
 		make copy-web3-indexer-binary-from-packages-to-workspace ; \
 	else make copy-web3-indexer-bin-from-docker;\
 	fi
