@@ -609,6 +609,7 @@ edit_godwoken_config_toml(){
 
         ## set listen rpc url
         set_key_value_in_toml "listen" "0.0.0.0:8119" $1
+        sed -i "/\[rpc_server\]/a\err_receipt_ws_listen = '0.0.0.0:8120'" $1
 
         ## set store path
         # delete the default path
@@ -631,6 +632,7 @@ edit_godwoken_config_toml(){
 
         ## set listen rpc url
         set_key_value_in_toml "listen" "0.0.0.0:8219" $1
+        set_key_value_in_toml "err_receipt_ws_listen" "0.0.0.0:8220" $1
 
         ## set store path
         # delete the default path
