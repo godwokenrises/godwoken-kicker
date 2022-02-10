@@ -632,7 +632,6 @@ edit_godwoken_config_toml(){
 
         ## set listen rpc url
         set_key_value_in_toml "listen" "0.0.0.0:8219" $1
-        set_key_value_in_toml "err_receipt_ws_listen" "0.0.0.0:8220" $1
 
         ## set store path
         # delete the default path
@@ -643,6 +642,13 @@ edit_godwoken_config_toml(){
 
     set_key_value_in_toml "privkey_path" "deploy/private_key" $1
 
+    ## 0. delete the outdated web3-indexer config
+    sed -i '/\[web3_indexer\]/{n;d}' $1 
+    sed -i '/\[web3_indexer\]/{n;d}' $1 
+    sed -i '/\[web3_indexer\]/{n;d}' $1
+    sed -i '/\[web3_indexer\]/{n;d}' $1
+    sed -i '/\[web3_indexer\]/d' $1
+    
     ## 1. reward lock update
     # delete the default reward lock
     sed -i '/\[block_producer.challenger_config.rewards_receiver_lock\]/{n;d}' $1 
