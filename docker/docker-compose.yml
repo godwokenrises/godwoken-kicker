@@ -116,6 +116,7 @@ services:
     command: bash /code/docker/layer2/entrypoint.sh
     ports:
       - 8119:8119
+      - 8120:8120
     depends_on:
       - ckb
       - postgres
@@ -191,6 +192,22 @@ services:
       - redis
       - postgres
       - godwoken
+
+  web3-indexer:
+    build:
+      context: web3/indexer
+      args: 
+        DOCKER_PREBUILD_IMAGE: "${DOCKER_WEB3_PREBUILD_IMAGE_NAME}:${DOCKER_WEB3_PREBUILD_IMAGE_TAG}"
+    volumes: 
+    - ../:/code # the manual-build resource all stays in /code dir
+    environment: 
+      MANUAL_BUILD_WEB3: ${MANUAL_BUILD_WEB3}
+    command: bash /code/docker/web3/indexer/entrypoint.sh
+    depends_on: 
+      - redis
+      - postgres
+      - godwoken
+      - web3
   
   indexer:
     image: "${DOCKER_PREBUILD_IMAGE_NAME}:${DOCKER_PREBUILD_IMAGE_TAG}" 
