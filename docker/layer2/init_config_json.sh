@@ -15,8 +15,7 @@ cat << EOF > scripts-deploy.json
     "eth_account_lock": "scripts/release/eth-account-lock",
     "tron_account_lock": "scripts/release/tron-account-lock",
     "polyjuice_validator": "scripts/release/polyjuice-validator",
-    "state_validator_lock": "scripts/release/poa",
-    "poa_state": "scripts/release/state"
+    "eth_addr_reg_validator": "scripts/release/eth_addr_reg_validator"
   },
   "lock": {
     "code_hash": "0x0000000000000000000000000000000000000000000000000000000000000000",
@@ -31,33 +30,16 @@ cat << EOF > scripts-deploy.json
     "meta_contract_validator": "scripts/release/meta-contract-validator",
     "custodian_lock": "scripts/release/custodian-lock",
     "l2_sudt_generator": "deploy/backend/sudt-generator",
-    "state_validator_lock": "scripts/release/poa",
     "challenge_lock": "scripts/release/challenge-lock",
     "meta_contract_generator": "deploy/backend/meta-contract-generator",
     "always_success": "scripts/release/always-success",
     "state_validator": "scripts/release/state-validator",
     "polyjuice_validator": "scripts/release/polyjuice-validator",
-    "poa_state": "scripts/release/state",
     "stake_lock": "scripts/release/stake-lock",
     "withdrawal_lock": "scripts/release/withdrawal-lock",
+    "eth_addr_reg_generator": "deploy/polyjuice-backend/eth_addr_reg_generator",
+    "eth_addr_reg_validator": "deploy/polyjuice-backend/eth_addr_reg_validator",
     "tron_account_lock": "scripts/release/tron-account-lock"
   }
 }
 EOF
-
-cat << EOF > poa-config.json
-{
-  "poa_setup": {
-    "identity_size": 1,
-    "round_interval_uses_seconds": true,
-    "identities": [
-      "0x3bab60cef4af81a87b0386f29bbf1dd0f6fe71c9fe1d84ca37096a6284d3bdaf"
-    ],
-    "aggregator_change_threshold": 1,
-    "round_intervals": 24,
-    "subblocks_per_round": 1
-  }
-}
-EOF
-
-
