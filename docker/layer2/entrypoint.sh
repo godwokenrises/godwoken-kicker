@@ -125,7 +125,7 @@ tronAccountLockTypeHash=$(jq -r ".tron_account_lock.script_type_hash" "deploy/sc
 cat <<< $(jq -r '.allowed_eoa_type_hashes += ["'$tronAccountLockTypeHash'"]' "deploy/rollup-config.json") > "deploy/rollup-config.json" 
 
 # deploy genesis block
-$GW_TOOLS_BIN deploy-genesis --ckb-rpc ${CKB_RPC} --scripts-deployment-path deploy/scripts-deploy-result.json -p deploy/poa-config.json -r deploy/rollup-config.json -o deploy/genesis-deploy-result.json -k ${PRIVKEY}
+$GW_TOOLS_BIN deploy-genesis --ckb-rpc ${CKB_RPC} --scripts-deployment-path deploy/scripts-deploy-result.json -r deploy/rollup-config.json -o deploy/genesis-deploy-result.json -k ${PRIVKEY}
 
 # generate config file
 $GW_TOOLS_BIN generate-config -d ${DATABASE_URL} --ckb-rpc ${CKB_RPC} --ckb-indexer-rpc ${INDEXER_RPC} -g deploy/genesis-deploy-result.json -r deploy/rollup-config.json --scripts-deployment-path deploy/scripts-deploy-result.json -k deploy/private_key -o config.toml -c deploy/scripts-deploy.json

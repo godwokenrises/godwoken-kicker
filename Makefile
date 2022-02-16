@@ -324,6 +324,9 @@ rebuild-polyjuice-bin:
 	cp packages/godwoken-polyjuice/build/validator_log workspace/scripts/release/polyjuice-validator
 	cp packages/godwoken-polyjuice/build/generator_log workspace/deploy/polyjuice-backend/polyjuice-generator
 	cp packages/godwoken-polyjuice/build/validator_log workspace/deploy/polyjuice-backend/polyjuice-validator
+	cp packages/godwoken-polyjuice/build/eth_addr_reg_validator workspace/scripts/release/eth_addr_reg_validator
+	cp packages/godwoken-polyjuice/build/eth_addr_reg_generator workspace/deploy/polyjuice-backend/eth_addr_reg_generator
+	cp packages/godwoken-polyjuice/build/eth_addr_reg_validator workspace/deploy/polyjuice-backend/eth_addr_reg_validator
 
 rebuild-gw-scripts-and-bin:
 	cd packages/godwoken-scripts && cd c && make && cd - && capsule build --release --debug-output
@@ -364,6 +367,9 @@ copy-polyjuice-bin-from-docker:	rm-dummy-docker-if-name-exits
 	cp quick-mode/polyjuice/validator_log workspace/scripts/release/polyjuice-validator
 	cp quick-mode/polyjuice/generator_log workspace/deploy/polyjuice-backend/polyjuice-generator
 	cp quick-mode/polyjuice/validator_log workspace/deploy/polyjuice-backend/polyjuice-validator
+	cp quick-mode/polyjuice/eth_addr_reg_validator workspace/scripts/release/eth_addr_reg_validator
+	cp quick-mode/polyjuice/eth_addr_reg_generator workspace/deploy/polyjuice-backend/eth_addr_reg_generator
+	cp quick-mode/polyjuice/eth_addr_reg_validator workspace/deploy/polyjuice-backend/eth_addr_reg_validator
 
 copy-gw-scripts-and-bin-from-docker: rm-dummy-docker-if-name-exits
 	mkdir -p `pwd`/quick-mode/godwoken
