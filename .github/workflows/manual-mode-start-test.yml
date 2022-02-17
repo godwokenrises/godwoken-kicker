@@ -16,18 +16,19 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-
-      - name: output kicker version
-        run: make version
-
+      
       - name: change .build.mode.env to manual mode 
         run: |
           sh -c "sed -i 's/MANUAL_BUILD_GODWOKEN=false/MANUAL_BUILD_GODWOKEN=true/g' docker/.build.mode.env"
           sh -c "sed -i 's/MANUAL_BUILD_WEB3=false/MANUAL_BUILD_WEB3=true/g' docker/.build.mode.env"
           sh -c "sed -i 's/MANUAL_BUILD_WEB3_INDEXER=false/MANUAL_BUILD_WEB3_INDEXER=true/g' docker/.build.mode.env"
+          sh -c "sed -i 's/MANUAL_BUILD_POLYMAN=false/MANUAL_BUILD_POLYMAN=true/g' docker/.build.mode.env"
           sh -c "sed -i 's/MANUAL_BUILD_SCRIPTS=false/MANUAL_BUILD_SCRIPTS=true/g' docker/.build.mode.env"
-          sh -c "sed -i 's/MANUAL_BUILD_POLYJUICE=false/MANUAL_BUILD_POLYJUICE=true/g' docker/.build.mode.env"
-        
+          sh -c "sed -i 's/MANUAL_BUILD_POLYJUICE=false/MANUAL_BUILD_POLYJUICE=true/g' docker/.build.mode.env"        
+
+      - name: output kicker version
+        run: make version
+      
       - name: start kicker
         run: |
           make init && make start
