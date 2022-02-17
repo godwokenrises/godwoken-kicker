@@ -63,6 +63,10 @@ jobs:
           make init && make start
           docker-compose --file docker/docker-compose.yml logs --tail 6
 
+      - name: set exit process when make start fail to true
+        run: |
+          sh -c "sed -i 's/EXIT_IF_START_FAIL=false/EXIT_IF_START_FAIL=true/g' docker/.build.mode.env"
+
       - name: make sure kicker is starting..
         run: make start
 
