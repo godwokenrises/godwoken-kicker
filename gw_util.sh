@@ -97,17 +97,17 @@ checkLogsToSetProgress() {
         # if one of service from docker-compose is not Up, then throw error.
         if !(check_service_status "godwoken" &> /dev/null); then
             echo "${RED}Godwoken service is not running. please run 'make sg' to check what happend.${NO_COLOR}"
-            break;
+            exit 123;
         fi
 
         if !(check_service_status "polyjuice" &> /dev/null); then
             echo "${RED}polyjuice service is not running. please run 'make sp' to check what happend.${NO_COLOR}"
-            break;
+            exit 123;
         fi
 
         if !(check_service_status "call-polyman" &> /dev/null); then
             echo "${RED}call-polyman(a setup-service) is not running. please run 'make call-polyman' to check what happend.${NO_COLOR}"
-            break;
+            exit 123;
         fi
 
         # monitor Godwoekn service logs to display progress info.
