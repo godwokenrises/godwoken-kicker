@@ -16,7 +16,16 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+
+      - name: install dependents
+        run: |
+          cargo install --version v0.7.2 moleculec 
+          cargo install --version v0.7.0 ckb-capsule 
       
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+
       - name: change .build.mode.env to manual mode 
         run: |
           sh -c "sed -i 's/MANUAL_BUILD_GODWOKEN=false/MANUAL_BUILD_GODWOKEN=true/g' docker/.build.mode.env"
