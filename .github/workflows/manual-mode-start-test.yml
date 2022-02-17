@@ -17,10 +17,30 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: install dependents
+      - name: Rust Cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+            kicker/cache/build
+          key: ${{ runner.os }}-cargo-${{ hashFiles('Cargo.lock') }}
+
+      - name: Install moleculec
         run: |
-          cargo install --version 0.7.2 moleculec 
-          cargo install --version 0.7.0 ckb-capsule 
+          test "$(moleculec --version)" = "Moleculec 0.7.2" \
+          || CARGO_TARGET_DIR=target/ cargo install moleculec --version 0.7.2 --force
+
+      - name: Install Capsule
+        env:
+          CAPSULE_VERSION: v0.7.0
+        run: |
+          test "$(capsule -V)" = "Capsule 0.7.0 56bf934" \
+          || (curl -OL https://github.com/nervosnetwork/capsule/releases/download/${CAPSULE_VERSION}/capsule_${CAPSULE_VERSION}_x86_64-linux.tar.gz \
+          && tar xf capsule_${CAPSULE_VERSION}_x86_64-linux.tar.gz \
+           && mv capsule_${CAPSULE_VERSION}_x86_64-linux/capsule ~/.cargo/bin/)
       
       - uses: actions/setup-node@v2
         with:
