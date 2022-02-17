@@ -1,0 +1,75 @@
+on:
+  push:
+    branches: [develop, master, ci]
+    # Publish semver tags as releases.
+    tags: ["v*.*.*"]
+  pull_request:
+    branches: [master, develop]
+
+jobs:
+  manual-mode-startup-test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Rust Cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+            kicker/cache/build
+          key: ${{ runner.os }}-cargo-${{ hashFiles('Cargo.lock') }}
+
+      - name: Install moleculec
+        run: |
+          test "$(moleculec --version)" = "Moleculec 0.7.2" \
+          || CARGO_TARGET_DIR=target/ cargo install moleculec --version 0.7.2 --force
+
+      - name: Install Capsule
+        env:
+          CAPSULE_VERSION: v0.7.0
+        run: |
+          test "$(capsule -V)" = "Capsule 0.7.0 56bf934" \
+          || (curl -OL https://github.com/nervosnetwork/capsule/releases/download/${CAPSULE_VERSION}/capsule_${CAPSULE_VERSION}_x86_64-linux.tar.gz \
+          && tar xf capsule_${CAPSULE_VERSION}_x86_64-linux.tar.gz \
+           && mv capsule_${CAPSULE_VERSION}_x86_64-linux/capsule ~/.cargo/bin/)
+      
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+
+      - name: change .build.mode.env to manual mode 
+        run: |
+          sh -c "sed -i 's/MANUAL_BUILD_GODWOKEN=false/MANUAL_BUILD_GODWOKEN=true/g' docker/.build.mode.env"
+          sh -c "sed -i 's/MANUAL_BUILD_WEB3=false/MANUAL_BUILD_WEB3=true/g' docker/.build.mode.env"
+          sh -c "sed -i 's/MANUAL_BUILD_WEB3_INDEXER=false/MANUAL_BUILD_WEB3_INDEXER=true/g' docker/.build.mode.env"
+          sh -c "sed -i 's/MANUAL_BUILD_POLYMAN=false/MANUAL_BUILD_POLYMAN=true/g' docker/.build.mode.env"
+          sh -c "sed -i 's/MANUAL_BUILD_SCRIPTS=false/MANUAL_BUILD_SCRIPTS=true/g' docker/.build.mode.env"
+          sh -c "sed -i 's/MANUAL_BUILD_POLYJUICE=false/MANUAL_BUILD_POLYJUICE=true/g' docker/.build.mode.env"        
+
+      - name: output kicker version
+        run: make version
+      
+      - name: start kicker
+        run: |
+          make init && make start
+          docker-compose --file docker/docker-compose.yml logs --tail 6
+
+      - name: make sure kicker is starting..
+        run: make start
+
+      - name: stop kicker
+        run: make down
+
+      - name: Setup tmate session
+        if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3
+        timeout-minutes: 15
