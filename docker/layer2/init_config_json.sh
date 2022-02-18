@@ -25,7 +25,7 @@ cat << EOF > scripts-deploy.json
   "built_scripts": {
     "eth_account_lock": "scripts/release/eth-account-lock",
     "deposit_lock": "scripts/release/deposit-lock",
-    "polyjuice_generator": "deploy/polyjuice-backend/polyjuice-generator",
+    "polyjuice_generator": "deploy/polyjuice-backend/polyjuice-generator.aot",
     "l2_sudt_validator": "scripts/release/sudt-validator",
     "meta_contract_validator": "scripts/release/meta-contract-validator",
     "custodian_lock": "scripts/release/custodian-lock",
