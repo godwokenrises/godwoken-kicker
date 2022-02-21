@@ -448,9 +448,9 @@ gen-schema: clean-schema
 clean-schema:
 	cd plugins/gw-schema && rm -rf schemas/*
 
-prepare-schema-for-polyman:
-	make gen-schema
-	cp -r ./docker/gen-godwoken-schema/schemas ./packages/godwoken-polyman/packages/godwoken/
+prepare-schema-for-polyman: gen-schema
+	cp -r ./plugins/gw-schema/schemas/* ./packages/godwoken-polyman/packages/godwoken/schemas/
+	cd ./packages/godwoken-polyman/packages/godwoken/schemas/ && for filename in index*; do mv "$filename" "${filename//index/godwoken}"; done
 
 prepare-schema-for-web3:
 	make gen-schema
