@@ -54,6 +54,7 @@ init: create-folder prepare-files install build-image
 
 prepare-files:
 	cp ./config/private_key ./workspace/deploy/private_key
+	cp ./config/meta_user_private_key ./workspace/deploy/meta_user_private_key
 	sh ./docker/layer2/init_config_json.sh
 
 build-image:
