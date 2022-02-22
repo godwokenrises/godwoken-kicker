@@ -109,6 +109,7 @@ rollupConfig="
   \"challenge_maturity_blocks\": 100,
   \"finality_blocks\": 100,
   \"reward_burn_rate\": 50,
+   \"compatible_chain_id\": 0,
   \"allowed_eoa_type_hashes\": [],
   \"allowed_contract_type_hashes\": []
 }"

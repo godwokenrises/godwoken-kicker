@@ -72,7 +72,7 @@ GODWOKEN_READONLY_JSON_RPC=http://godwoken-readonly:8219
 ETH_ACCOUNT_LOCK_HASH=$EthAccountLockCodeHash
 ROLLUP_TYPE_HASH=$RollupTypeHash
 PORT=8024
-CHAIN_ID=1024777
+CHAIN_ID=4
 CREATOR_ACCOUNT_ID=$CreatorId
 DEFAULT_FROM_ADDRESS=0x6daf63d8411d6e23552658e3cfb48416a6a2ca78
 POLYJUICE_VALIDATOR_TYPE_HASH=$PolyjuiceValidatorCodeHash
@@ -91,7 +91,7 @@ cd packages/api-server
 #  - production mode in prebuilds
 #  - debug mode in manual-builds
 if [ "$MANUAL_BUILD_WEB3" = true ] ; then 
-  yarn workspace @godwoken-web3/api-server start
+  DEBUG_LOG=true yarn workspace @godwoken-web3/api-server start
 else
   NODE_ENV=production DEBUG=godwoken-web3-api:server pm2 start ./bin/cluster --no-daemon --name gw-web3 --max-memory-restart 1G
   # yarn workspace @godwoken-web3/api-server start:pm2
