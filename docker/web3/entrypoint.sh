@@ -65,10 +65,16 @@ CreatorId=$(get_creator_id_from_polyjuice $POLYMAN_SERVER_RPC_URL)
 # create folder for address mapping store
 mkdir -p /usr/local/godwoken-web3/address-mapping
 
+if [ "$ENABLE_GW_READONLY_NODE" == true ] ; then
+  GODWOKEN_READONLY_JSON_RPC=http://godwoken-readonly:8219
+else
+  GODWOKEN_READONLY_JSON_RPC=http://godwoken:8119
+fi
+
 cat > ./packages/api-server/.env <<EOF
 DATABASE_URL=postgres://user:password@postgres:5432/lumos
 GODWOKEN_JSON_RPC=http://godwoken:8119
-GODWOKEN_READONLY_JSON_RPC=http://godwoken-readonly:8219
+GODWOKEN_READONLY_JSON_RPC=${GODWOKEN_READONLY_JSON_RPC}
 ETH_ACCOUNT_LOCK_HASH=$EthAccountLockCodeHash
 ROLLUP_TYPE_HASH=$RollupTypeHash
 PORT=8024
@@ -79,6 +85,7 @@ POLYJUICE_VALIDATOR_TYPE_HASH=$PolyjuiceValidatorCodeHash
 L2_SUDT_VALIDATOR_SCRIPT_TYPE_HASH=$L2SudtValidatorCodeHash
 TRON_ACCOUNT_LOCK_HASH=$TronAccountLockCodeHash
 REDIS_URL=redis://redis:6379
+CLUSTER_COUNT=1
 EOF
 
 # generate indexer config
