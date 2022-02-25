@@ -587,7 +587,8 @@ prepare_package(){
 
 # usage: pull_code_from_url name url checkout 
 pull_code_from_url(){
-    cd packages && git clone --recursive $2 && cd $1 && git checkout $3 && cd ../../
+    cd packages && git clone --depth=1 --recursive $2 \
+    && cd $1 && git fetch origin $3 && git checkout FETCH_HEAD && cd ../../
 }
 
 get_git_remote_url(){
