@@ -112,8 +112,12 @@ install:
 		cd plugins/chaos && yarn ;\
 	fi
 
+# Missing workspace/bin/godwoken means that init step is required
+workspace/bin/godwoken:
+	make init
+
 start: SHELL:=/bin/bash
-start:
+start: workspace/bin/godwoken
 	if [ "$(ENABLE_MULTI_CKB_NODES)" = true ] ; then \
 		source ./gw_util.sh && wait_to_connect_ckb > connect-ckb.log 2>&1 & \
 	fi
@@ -121,6 +125,7 @@ start:
 		source ./gw_util.sh && watch_ckb_reorg > chain-reorg.log 2>&1 & \
 	fi
 	source ./gw_util.sh && start
+	make show_wait_tips
 
 start-f:
 	cd docker && FORCE_GODWOKEN_REDEPLOY=true docker-compose --env-file .build.mode.env up -d --build > /dev/null
