@@ -604,6 +604,10 @@ remove_dummy_docker_if_exits(){
 }
 
 edit_godwoken_config_toml(){
+    echo PROJECT_DIR=$PROJECT_DIR
+    source $PROJECT_DIR/docker/.build.mode.env
+    echo ENABLE_GW_READONLY_NODE=$ENABLE_GW_READONLY_NODE
+
     if [[ -f $1 ]];
     then echo 'found config.toml file.'
     else
@@ -615,11 +619,14 @@ edit_godwoken_config_toml(){
     then 
         echo "full mode..."
         set_key_value_in_toml "node_mode" "fullnode" $1
+        
         ## 0. mem_pool.publish
-        # add with mem_pool.publish
-        sed -i "/restore_path = 'mem_block'/a\[mem_pool.publish\]" $1 
-        sed -i "/\[mem_pool.publish\]/a\hosts = ['kafka:9092']" $1 
-        sed -i "/\[mem_pool.publish\]/a\topic = 'sync-mem-block'" $1
+        if [[ "$ENABLE_GW_READONLY_NODE" == true ]]; then
+            # add with mem_pool.publish
+            sed -i "/restore_path = 'mem_block'/a\[mem_pool.publish\]" $1 
+            sed -i "/\[mem_pool.publish\]/a\hosts = ['kafka:9092']" $1 
+            sed -i "/\[mem_pool.publish\]/a\topic = 'sync-mem-block'" $1
+        fi
 
         ## set listen rpc url
         set_key_value_in_toml "listen" "0.0.0.0:8119" $1
