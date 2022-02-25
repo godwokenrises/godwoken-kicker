@@ -120,8 +120,7 @@ start:
 	if [ "$(WATCH_CKB_REORG)" = true ] ; then \
 		source ./gw_util.sh && watch_ckb_reorg > chain-reorg.log 2>&1 & \
 	fi
-	cd docker && FORCE_GODWOKEN_REDEPLOY=false docker-compose --env-file .build.mode.env up -d --build > /dev/null
-	make show_wait_tips
+	source ./gw_util.sh && start
 
 start-f:
 	cd docker && FORCE_GODWOKEN_REDEPLOY=true docker-compose --env-file .build.mode.env up -d --build > /dev/null

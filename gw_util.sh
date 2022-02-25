@@ -999,3 +999,22 @@ watch_ckb_reorg(){
 start_chaos(){
     cd plugins/chaos && yarn start
 }
+
+start() {
+    echo NOTE: The docker-compose version should newer than 1.28.0
+
+    source ./docker/.build.mode.env
+    echo ENABLE_MULTI_CKB_NODES=$ENABLE_MULTI_CKB_NODES
+    echo ENABLE_GW_READONLY_NODE=$ENABLE_GW_READONLY_NODE
+    
+    if [ "$ENABLE_MULTI_CKB_NODES" == true ] ; then
+        export COMPOSE_PROFILES=multi_ckb_nodes,
+    fi
+    if [ "$ENABLE_GW_READONLY_NODE" == true ] ; then
+        export COMPOSE_PROFILES=gw_readonly_node,$COMPOSE_PROFILES
+    fi
+
+    cd docker
+    echo COMPOSE_PROFILES=$COMPOSE_PROFILES
+    FORCE_GODWOKEN_REDEPLOY=false docker-compose --env-file .build.mode.env up -d --build > /dev/null
+}
