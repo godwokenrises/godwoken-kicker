@@ -134,4 +134,3 @@ edit_godwoken_config_toml $GODWOKEN_CONFIG_TOML_FILE
 # start godwoken
 cd ${PROJECT_DIR}/workspace
 runGodwoken
-
