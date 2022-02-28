@@ -91,17 +91,6 @@ checkLogsToSetProgress() {
     do
         # if 3 RPCs are up and all set.
         if isWeb3RpcRunning "${WEB3_RPC}" &> /dev/null && isPolymanUIRunning "${POLYMAN_UI_URL}" &> /dev/null && isGodwokenRpcRunning "${GODWOKEN_RPC}" &> /dev/null; then
-
-          # check if we need to register eoa config in config.toml
-          if grep -q "eth_eoa_mapping_config.register_wallet_config" $FULL_NODE_CONFIG_TOML; then
-              echo ""
-              echo "[✓] eth_eoa_mapping_config already initailized. skip.."
-          else
-              docker run -it -v `pwd`:/code --rm $DOCKER_PREBUILD_IMAGE_NAME:$DOCKER_PREBUILD_IMAGE_TAG /bin/bash -c "source /code/gw_util.sh && add_eth_eoa_register_config /code/workspace/config.toml" 
-              # restart godwoken to apply new config
-              make stop-godwoken && make start
-          fi
-
           ProgressBar ${_end} ${_end} "All Jobs Done"
           show_success_finish_info 
           break;
@@ -699,7 +688,7 @@ edit_godwoken_config_toml(){
 
 add_eth_eoa_register_config(){
     echo ""
-    echo "[x] update config.toml with eth_eoa_mapping_config.."
+    echo ">> update config.toml with eth_eoa_mapping_config.."
     if [[ -f $1 ]];
     then echo 'found config.toml file.'
     else
