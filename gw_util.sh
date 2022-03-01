@@ -76,6 +76,7 @@ checkLogsToSetProgress() {
     stage4_name="produce block"
     stage4_info="gw_block_producer::runner"
     stage4_number=75
+
     # polyjuice activity
     stage5_name="create account"
     stage5_info="create deposit account.2"
