@@ -51,6 +51,7 @@ services:
           cpus: '0.5'
 # todo: fix the network issue when connecting two peers
   ckb2:
+    profiles: ["multi_ckb_nodes"]
     build:
       context: layer1/ckb2
       args: 
@@ -77,6 +78,7 @@ services:
 
   # todo: fix the network issue when connecting two peers
   ckb3:
+    profiles: ["multi_ckb_nodes"]
     build:
       context: layer1/ckb3
       args: 
@@ -123,6 +125,7 @@ services:
       - indexer
     
   godwoken-readonly:
+    profiles: ["gw_readonly_node"]
     build: 
       context: layer2
       args: 
@@ -221,6 +224,7 @@ services:
         - ckb
   
   zookeeper:
+    profiles: ["gw_readonly_node"]
     image: zookeeper 
     restart: always
     hostname: zookeeper
@@ -231,6 +235,7 @@ services:
     container_name: zookeeper
 
   kafka:
+    profiles: ["gw_readonly_node"]
     image: "${KAFKA_PREBUILD_IMAGE_NAME}:${KAFKA_PREBUILD_IMAGE_TAG}" 
     volumes: 
     - ../:/code

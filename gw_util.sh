@@ -10,6 +10,8 @@ CKB_NODE_1=http://localhost:8114
 CKB_NODE_2=http://localhost:8117
 CKB_NODE_3=http://localhost:6117
 
+FULL_NODE_CONFIG_TOML=${PWD}/workspace/config.toml
+
 # 1. Create ProgressBar function
 # 1.1 Input is currentState($1) and totalState($2)
 function ProgressBar {
@@ -74,6 +76,7 @@ checkLogsToSetProgress() {
     stage4_name="produce block"
     stage4_info="gw_block_producer::runner"
     stage4_number=75
+
     # polyjuice activity
     stage5_name="create account"
     stage5_info="create deposit account.2"
@@ -326,7 +329,7 @@ isCkbRpcRunning(){
     "params": []
     }' \
     | tr -d '\n' \
-    | curl -s --ipv4 \
+    | curl --noproxy '*' -s --ipv4 \
     -H 'content-type: application/json' -d @- \
     $rpc_url)
 
@@ -359,7 +362,7 @@ isGodwokenRpcRunning(){
     "params": []
     }' \
     | tr -d '\n' \
-    | curl -s --ipv4 --retry 3 --retry-connrefused \
+    | curl --noproxy '*' -s --ipv4 --retry 3 --retry-connrefused \
     -H 'content-type: application/json' -d @- \
     $rpc_url)
 
@@ -385,7 +388,7 @@ isPolymanPrepareRpcRunning(){
     # curl retry on connrefused, considering ECONNREFUSED as a transient error(network issues)
     # connections with ipv6 are not retried because it returns EADDRNOTAVAIL instead of ECONNREFUSED,
     # hence we should use --ipv4
-    result=$(curl -s --ipv4 $rpc_url/ping)
+    result=$(curl --noproxy '*' -s --ipv4 $rpc_url/ping)
 
     if [[ $result =~ "pong" ]]; then
         echo "polyman prepare rpc server is up and running!"
@@ -409,7 +412,7 @@ isPolymanUIRunning(){
     # curl retry on connrefused, considering ECONNREFUSED as a transient error(network issues)
     # connections with ipv6 are not retried because it returns EADDRNOTAVAIL instead of ECONNREFUSED,
     # hence we should use --ipv4
-    result=$(curl -s --ipv4 $rpc_url)
+    result=$(curl --noproxy '*' -s --ipv4 $rpc_url)
 
     if [[ $result =~ "<!doctype html>" ]]; then
         echo "polyman UI is up and running!"
@@ -433,7 +436,7 @@ isPolymanServerRunning(){
     # curl retry on connrefused, considering ECONNREFUSED as a transient error(network issues)
     # connections with ipv6 are not retried because it returns EADDRNOTAVAIL instead of ECONNREFUSED,
     # hence we should use --ipv4
-    result=$(curl -s --ipv4 $rpc_url)
+    result=$(curl --noproxy '*' -s --ipv4 $rpc_url)
 
     if [[ $result =~ '"status":"ok"' ]]; then
         echo "polyman server is up and running!"
@@ -464,7 +467,7 @@ isWeb3RpcRunning(){
     "params": []
     }' \
     | tr -d '\n' \
-    | curl -s --ipv4 --retry 3 --retry-connrefused \
+    | curl --noproxy '*' -s --ipv4 --retry 3 --retry-connrefused \
     -H 'content-type: application/json' -d @- \
     $rpc_url)
 
@@ -574,7 +577,12 @@ prepare_package(){
 
 # usage: pull_code_from_url name url checkout 
 pull_code_from_url(){
-    cd packages && git clone --recursive $2 && cd $1 && git checkout $3 && cd ../../
+    cd packages
+    git clone --depth=1 --recursive $2
+    cd $1
+    git fetch origin $3 && git checkout FETCH_HEAD
+    git checkout -b $3
+    cd ../../
 }
 
 get_git_remote_url(){
@@ -590,6 +598,10 @@ remove_dummy_docker_if_exits(){
 }
 
 edit_godwoken_config_toml(){
+    echo PROJECT_DIR=$PROJECT_DIR
+    source $PROJECT_DIR/docker/.build.mode.env
+    echo ENABLE_GW_READONLY_NODE=$ENABLE_GW_READONLY_NODE
+
     if [[ -f $1 ]];
     then echo 'found config.toml file.'
     else
@@ -601,11 +613,14 @@ edit_godwoken_config_toml(){
     then 
         echo "full mode..."
         set_key_value_in_toml "node_mode" "fullnode" $1
+        
         ## 0. mem_pool.publish
-        # add with mem_pool.publish
-        sed -i "/restore_path = 'mem_block'/a\[mem_pool.publish\]" $1 
-        sed -i "/\[mem_pool.publish\]/a\hosts = ['kafka:9092']" $1 
-        sed -i "/\[mem_pool.publish\]/a\topic = 'sync-mem-block'" $1
+        if [[ "$ENABLE_GW_READONLY_NODE" == true ]]; then
+            # add with mem_pool.publish
+            sed -i "/restore_path = 'mem_block'/a\[mem_pool.publish\]" $1 
+            sed -i "/\[mem_pool.publish\]/a\hosts = ['kafka:9092']" $1 
+            sed -i "/\[mem_pool.publish\]/a\topic = 'sync-mem-block'" $1
+        fi
 
         ## set listen rpc url
         set_key_value_in_toml "listen" "0.0.0.0:8119" $1
@@ -670,6 +685,27 @@ edit_godwoken_config_toml(){
     sed -i "/\[block_producer.wallet_config.lock\]/a\code_hash = '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8'" $1 
     sed -i "/\[block_producer.wallet_config.lock\]/a\hash_type = 'type'" $1
     sed -i "/\[block_producer.wallet_config.lock\]/a\args = '0x43d509d97f26007a285f39241cffcd411157196c'" $1
+}
+
+add_eth_eoa_register_config(){
+    echo ""
+    echo ">> update config.toml with eth_eoa_mapping_config.."
+    if [[ -f $1 ]];
+    then echo 'found config.toml file.'
+    else
+        echo "${1} file not exits, skip this steps."
+        return 0
+    fi
+
+    # add with eth_eoa_mapping_config
+    sed -i "/sudt_proxy_code_hashes/a\[eth_eoa_mapping_config.register_wallet_config\]" $1
+    sed -i "/\[eth_eoa_mapping_config.register_wallet_config\]/a\privkey_path = 'deploy/meta_user_private_key'" $1 
+
+    sed -i "/meta_user_private_key/a\[eth_eoa_mapping_config.register_wallet_config.lock\]" $1
+    sed -i "/\[eth_eoa_mapping_config.register_wallet_config.lock\]/a\args = '0x952809177232d0dba355ba5b6f4eaca39cc57746'" $1 
+    sed -i "/\[eth_eoa_mapping_config.register_wallet_config.lock\]/a\hash_type = 'type'" $1 
+    sed -i "/\[eth_eoa_mapping_config.register_wallet_config.lock\]/a\code_hash = '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8'" $1 
+    echo "done."
 }
 
 # check if polyman prepare rpc is running
@@ -963,4 +999,23 @@ watch_ckb_reorg(){
 
 start_chaos(){
     cd plugins/chaos && yarn start
+}
+
+start() {
+    echo NOTE: The docker-compose version should newer than 1.28.0
+
+    source ./docker/.build.mode.env
+    echo ENABLE_MULTI_CKB_NODES=$ENABLE_MULTI_CKB_NODES
+    echo ENABLE_GW_READONLY_NODE=$ENABLE_GW_READONLY_NODE
+    
+    if [ "$ENABLE_MULTI_CKB_NODES" == true ] ; then
+        export COMPOSE_PROFILES=multi_ckb_nodes,
+    fi
+    if [ "$ENABLE_GW_READONLY_NODE" == true ] ; then
+        export COMPOSE_PROFILES=gw_readonly_node,$COMPOSE_PROFILES
+    fi
+
+    cd docker
+    echo COMPOSE_PROFILES=$COMPOSE_PROFILES
+    FORCE_GODWOKEN_REDEPLOY=false docker-compose --env-file .build.mode.env up -d --build > /dev/null
 }

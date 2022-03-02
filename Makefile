@@ -54,6 +54,7 @@ init: create-folder prepare-files install build-image
 
 prepare-files:
 	cp ./config/private_key ./workspace/deploy/private_key
+	cp ./config/meta_user_private_key ./workspace/deploy/meta_user_private_key
 	sh ./docker/layer2/init_config_json.sh
 
 build-image:
@@ -111,15 +112,19 @@ install:
 		cd plugins/chaos && yarn ;\
 	fi
 
+# Missing workspace/bin/godwoken means that init step is required
+workspace/bin/godwoken:
+	make init
+
 start: SHELL:=/bin/bash
-start:
+start: workspace/bin/godwoken
 	if [ "$(ENABLE_MULTI_CKB_NODES)" = true ] ; then \
 		source ./gw_util.sh && wait_to_connect_ckb > connect-ckb.log 2>&1 & \
 	fi
 	if [ "$(WATCH_CKB_REORG)" = true ] ; then \
 		source ./gw_util.sh && watch_ckb_reorg > chain-reorg.log 2>&1 & \
 	fi
-	cd docker && FORCE_GODWOKEN_REDEPLOY=false docker-compose --env-file .build.mode.env up -d --build > /dev/null
+	source ./gw_util.sh && start
 	make show_wait_tips
 
 start-f:

@@ -25,7 +25,7 @@ function runGodwoken(){
       fi
   done
   # running godwoken
-  RUST_LOG=info,gw_mem_pool=trace,gw_block_producer=info,gw_generator=debug,gw_web3_indexer=debug $GODWOKEN_BIN
+  RUST_LOG=info,gw_mem_pool=debug,gw_block_producer=info,gw_generator=debug,gw_web3_indexer=info $GODWOKEN_BIN
 }
 
 # import some helper function
@@ -131,7 +131,10 @@ $GW_TOOLS_BIN generate-config -d ${DATABASE_URL} --ckb-rpc ${CKB_RPC} --ckb-inde
 # Update block_producer.wallet_config section to your own lock.
 edit_godwoken_config_toml $GODWOKEN_CONFIG_TOML_FILE
 
+# add_eth_eoa_register_config if not exist
+grep -q "eth_eoa_mapping_config.register_wallet_config" workspace/config.toml \
+  || add_eth_eoa_register_config $GODWOKEN_CONFIG_TOML_FILE
+
 # start godwoken
 cd ${PROJECT_DIR}/workspace
 runGodwoken
-
