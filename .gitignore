@@ -38,8 +38,11 @@ plugins/gw-schema/tmp
 
 /docker/ckb-indexer/data
 /docker/layer1/ckb/data/
+/docker/layer2/data
 /docker/layer2/config/scripts-deployment.json
 /docker/layer2/config/rollup-config.json
 /docker/layer2/config/rollup-genesis-deployment.json
 /docker/layer2/config/godwoken-config.toml
-/docker/layer2/data
+/docker/layer2/config/polyjuice-creator-account-id
+/docker/layer2/config/web3-config.env
+/docker/layer2/config/web3-indexer-config.toml
