@@ -1,0 +1,43 @@
+{
+   "built_scripts" : {
+      "always_success" : "/scripts/godwoken-scripts/always-success",
+      "l2_sudt_generator" : "/scripts/godwoken-scripts/sudt-generator",
+      "meta_contract_generator" : "/scripts/godwoken-scripts/meta-contract-generator",
+      "polyjuice_generator" : "/scripts/godwoken-polyjuice/generator",
+
+      "challenge_lock" : "/scripts/godwoken-scripts/challenge-lock",
+      "custodian_lock" : "/scripts/godwoken-scripts/custodian-lock",
+      "deposit_lock" : "/scripts/godwoken-scripts/deposit-lock",
+      "eth_account_lock" : "/scripts/godwoken-scripts/eth-account-lock",
+      "l2_sudt_validator" : "/scripts/godwoken-scripts/sudt-validator",
+      "meta_contract_validator" : "/scripts/godwoken-scripts/meta-contract-validator",
+      "polyjuice_validator" : "/scripts/godwoken-polyjuice/validator",
+      "stake_lock" : "/scripts/godwoken-scripts/stake-lock",
+      "state_validator" : "/scripts/godwoken-scripts/state-validator",
+      "tron_account_lock" : "/scripts/godwoken-scripts/tron-account-lock",
+      "withdrawal_lock" : "/scripts/godwoken-scripts/withdrawal-lock",
+      "eth_addr_reg_validator": "/scripts/godwoken-polyjuice/eth_addr_reg_validator",
+      "eth_addr_reg_generator": "/scripts/godwoken-polyjuice/eth_addr_reg_generator",
+      "omni_lock": "/scripts/godwoken-scripts/omni_lock"
+   },
+   "lock" : {
+      "args" : "0x470dcdc5e44064909650113a274b3b36aecb6dc7",
+      "code_hash" : "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+      "hash_type" : "type"
+   },
+   "programs" : {
+      "challenge_lock" : "/scripts/godwoken-scripts/challenge-lock",
+      "custodian_lock" : "/scripts/godwoken-scripts/custodian-lock",
+      "deposit_lock" : "/scripts/godwoken-scripts/deposit-lock",
+      "eth_account_lock" : "/scripts/godwoken-scripts/eth-account-lock",
+      "l2_sudt_validator" : "/scripts/godwoken-scripts/sudt-validator",
+      "meta_contract_validator" : "/scripts/godwoken-scripts/meta-contract-validator",
+      "polyjuice_validator" : "/scripts/godwoken-polyjuice/validator",
+      "stake_lock" : "/scripts/godwoken-scripts/stake-lock",
+      "state_validator" : "/scripts/godwoken-scripts/state-validator",
+      "tron_account_lock" : "/scripts/godwoken-scripts/tron-account-lock",
+      "withdrawal_lock" : "/scripts/godwoken-scripts/withdrawal-lock",
+      "eth_addr_reg_validator": "/scripts/godwoken-polyjuice/eth_addr_reg_validator",
+      "omni_lock": "/scripts/godwoken-scripts/omni_lock"
+   }
+}
