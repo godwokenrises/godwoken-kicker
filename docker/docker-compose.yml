@@ -44,10 +44,12 @@ services:
   # "nervos/ckb" image have no http clients to do health check for CKB.
   # This short-term service act as a workaround to do health check.
   check-ckb-started-successfully:
-    image: nervos/godwoken-prebuilds:v0.10.2
+    image: ghcr.io/flouse/godwoken-prebuilds:v1.0.x-202203090147
     volumes:
       - ./layer1/ckb:/var/lib/ckb
     entrypoint: /var/lib/ckb/check-ckb-started-successfully.sh
+    depends_on:
+      - ckb
 
   ckb-indexer:
     image: nervos/ckb-indexer:0.3.2
@@ -116,139 +118,105 @@ services:
         limits:
           cpus: '0.5'
 
-  godwoken:
-    build: 
-      context: layer2
-      args: 
-        DOCKER_IMAGE: "${DOCKER_MANUAL_BUILD_IMAGE_NAME}:${DOCKER_MANUAL_BUILD_IMAGE_TAG}"
-    volumes:
-    - ../:/code
-    - ../cache/build/usr-local-cargo:/usr/local/cargo
-    - ../cache/activity/ckb-cli-data:/root/.ckb-cli
+  setup-godwoken:
+    image: ghcr.io/flouse/godwoken-prebuilds:v1.0.x-202203090147
     environment:
-      GODWOKEN_MODE: fullmode
-      FORCE_GODWOKEN_REDEPLOY: ${FORCE_GODWOKEN_REDEPLOY}
-    command: bash /code/docker/layer2/entrypoint.sh
-    ports:
-      - 8119:8119
-      - 8120:8120
-    depends_on:
-      - ckb
-      - postgres
-      - indexer
-    
-  godwoken-readonly:
-    profiles: ["gw_readonly_node"]
-    build: 
-      context: layer2
-      args: 
-        DOCKER_IMAGE: "${DOCKER_MANUAL_BUILD_IMAGE_NAME}:${DOCKER_MANUAL_BUILD_IMAGE_TAG}"
+      POSTGRES_USER: user
+      POSTGRES_DB: lumos
+      POSTGRES_PASSWORD: password
+      GODWOKEN_MODE: fullnode
+      STORE_PATH: /var/lib/layer2/data
+      PRIVATE_KEY_PATH: /private_key
+      META_USER_PRIVATE_KEY_PATH: /meta_user_private_key
     volumes:
-    - ../:/code
-    environment:
-      GODWOKEN_MODE: readonly
-    command: bash /code/docker/layer2/readonly/entrypoint.sh
-    ports:
-      - 8219:8219
+      - ./layer2:/var/lib/layer2
+      - ../config/private_key:/private_key
+      - ../config/meta_user_private_key:/meta_user_private_key
+    command: [ "/var/lib/layer2/setup-godwoken.sh", "all" ]
+    restart: "no"
     depends_on:
-      - ckb
-      - postgres
-      - indexer
-      - godwoken
-      
-  polyjuice:
-    build:
-      context: polyjuice 
-      args: 
-        DOCKER_PREBUILD_IMAGE: "${DOCKER_POLYMAN_PREBUILD_IMAGE_NAME}:${DOCKER_POLYMAN_PREBUILD_IMAGE_TAG}"
-    volumes:
-      - ../:/code
-      - ../cache/activity/polyjuice:/usr/local/polyman
-    environment: 
-      MANUAL_BUILD_POLYMAN: ${MANUAL_BUILD_POLYMAN}
-    command: bash /code/docker/polyjuice/entrypoint.sh 
-    ports:
-      - 6101:6101
-      - 6100:6100
-    depends_on:
-      - ckb
-      - postgres
-    
-  call-polyman:
-    build:
-      context: call-polyman
-      args: 
-        DOCKER_PREBUILD_IMAGE: "${DOCKER_POLYMAN_PREBUILD_IMAGE_NAME}:${DOCKER_POLYMAN_PREBUILD_IMAGE_TAG}"
-    volumes:
-      - ../:/code
-      - ../cache/activity/call-polyman:/usr/local/polyman/call-polyman
-    environment: 
-      MANUAL_BUILD_POLYMAN: ${MANUAL_BUILD_POLYMAN}
-    command: bash /code/docker/call-polyman/entrypoint.sh 
-    ports:
-      - 6102:6102
-    depends_on:
-      - ckb
-      - postgres 
+      ckb:
+        condition: service_started
+      ckb-miner:
+        condition: service_started
+      ckb-indexer:
+        condition: service_started
+      check-ckb-started-successfully:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_started
 
+  godwoken:
+    image: ghcr.io/flouse/godwoken-prebuilds:v1.0.x-202203090147
+    environment:
+      GODWOKEN_MODE: fullnode
+      RUST_BACKTRACE: full
+      PRIVATE_KEY_PATH: /private_key
+      META_USER_PRIVATE_KEY_PATH: /meta_user_private_key
+    volumes:
+      - ./layer2:/var/lib/layer2
+      - ../config/private_key:/private_key
+      - ../config/meta_user_private_key:/meta_user_private_key
+    ports:
+      - 8119:8119 # rpc
+      - 8120:8120 # err_receipt_ws_listen
+    command: [ "godwoken", "run", "-c", "/var/lib/layer2/config/godwoken-config.toml" ]
+    depends_on:
+      setup-godwoken:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_started
+
+  check-godwoken-started-successfully:
+    image: ghcr.io/flouse/godwoken-prebuilds:v1.0.x-202203090147
+    volumes:
+      - ./layer2/:/var/lib/layer2
+    entrypoint: /var/lib/layer2/check-godwoken-started-successfully.sh
+    depends_on:
+      - godwoken
+    
   web3:
-    build:
-      context: web3
-      args: 
-        DOCKER_PREBUILD_IMAGE: "${DOCKER_WEB3_PREBUILD_IMAGE_NAME}:${DOCKER_WEB3_PREBUILD_IMAGE_TAG}"
+    image: ghcr.io/retricsu/godwoken-web3-prebuilds:build-compatibility-breaking-changes-2022-03-07-09-30-32
     volumes: 
-    - ../:/code # the manual-build resource all stays in /code dir
+      - ./layer2/config:/var/lib/layer2/config
+      - ./web3/entrypoint.sh:/var/lib/web3/entrypoint.sh
     environment: 
-      MANUAL_BUILD_WEB3: ${MANUAL_BUILD_WEB3}
-      PORT: 8024
-    command: bash /code/docker/web3/entrypoint.sh
+      CONFIG_DIR: /var/lib/layer2/config
+    entrypoint: /var/lib/web3/entrypoint.sh
     ports:
       - 8024:8024
     depends_on: 
-      - redis
-      - postgres
-      - godwoken
+      ckb:
+        condition: service_started
+      ckb-miner:
+        condition: service_started
+      check-ckb-started-successfully:
+        condition: service_completed_successfully
+      setup-godwoken:
+        condition: service_completed_successfully
+      godwoken:
+        condition: service_started
+      check-godwoken-started-successfully:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_started
+      redis:
+        condition: service_started
 
   web3-indexer:
-    build:
-      context: web3/indexer
-      args: 
-        DOCKER_PREBUILD_IMAGE: "${DOCKER_WEB3_PREBUILD_IMAGE_NAME}:${DOCKER_WEB3_PREBUILD_IMAGE_TAG}"
+    image: ghcr.io/retricsu/godwoken-web3-indexer-prebuilds:build-compatibility-breaking-changes-2022-03-07-09-30-19
     volumes: 
-    - ../:/code # the manual-build resource all stays in /code dir
-    environment: 
-      MANUAL_BUILD_WEB3: ${MANUAL_BUILD_WEB3}
-    command: bash /code/docker/web3/indexer/entrypoint.sh
+      - ./layer2/config/web3-indexer-config.toml:/var/lib/web3-indexer/indexer-config.toml
+    working_dir: /var/lib/web3-indexer
+    command: [ "gw-web3-indexer" ]
     depends_on: 
-      - redis
-      - postgres
-      - godwoken
-      - web3
-  
-  zookeeper:
-    profiles: ["gw_readonly_node"]
-    image: zookeeper 
-    restart: always
-    hostname: zookeeper
-    environment:
-      ZOO_MY_ID: 1
-    ports:
-      - 2181:2181
-    container_name: zookeeper
-
-  kafka:
-    profiles: ["gw_readonly_node"]
-    image: "${KAFKA_PREBUILD_IMAGE_NAME}:${KAFKA_PREBUILD_IMAGE_TAG}" 
-    volumes: 
-    - ../:/code
-    ports:
-      - 9092:9092
-    depends_on:
-      - zookeeper
-    environment:
-      KAFKA_ADVERTISED_HOST_NAME: kafka
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_BROKER_ID: 1
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-    container_name: kafka
- 
+      web3:
+        condition: service_started
+      godwoken:
+        condition: service_started
+      check-godwoken-started-successfully:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_started
+      redis:
+        condition: service_started
