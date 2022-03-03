@@ -123,10 +123,10 @@ echo 'start deploying godwoken scripts, this might takes a little bit of time, p
 deployGodwokenScripts 5 $POLYMAN_RPC "/code/workspace/deploy/scripts-deploy.json" "/code/workspace/deploy/scripts-deploy-result.json" 
 
 # deploy genesis block
-$GW_TOOLS_BIN deploy-genesis --ckb-rpc ${CKB_RPC} --scripts-deployment-path deploy/scripts-deploy-result.json -r deploy/rollup-config.json -o deploy/genesis-deploy-result.json -k ${PRIVKEY}
+$GW_TOOLS_BIN deploy-genesis --ckb-rpc ${CKB_RPC} --scripts-deployment-path deploy/scripts-deploy-result.json -r deploy/rollup-config.json --omni-lock-config-path deploy/scripts-deploy-result.json -o deploy/genesis-deploy-result.json -k ${PRIVKEY}
 
 # generate config file
-$GW_TOOLS_BIN generate-config -d ${DATABASE_URL} --ckb-rpc ${CKB_RPC} --ckb-indexer-rpc ${INDEXER_RPC} -g deploy/genesis-deploy-result.json -r deploy/rollup-config.json --scripts-deployment-path deploy/scripts-deploy-result.json -k deploy/private_key -o config.toml -c deploy/scripts-deploy.json
+$GW_TOOLS_BIN generate-config -d ${DATABASE_URL} --ckb-rpc ${CKB_RPC} --ckb-indexer-rpc ${INDEXER_RPC} -g deploy/genesis-deploy-result.json -r deploy/rollup-config.json --scripts-deployment-path deploy/scripts-deploy-result.json --omni-lock-config-path deploy/scripts-deploy-result.json -k deploy/private_key -o config.toml -c deploy/scripts-deploy.json
 
 # Update block_producer.wallet_config section to your own lock.
 edit_godwoken_config_toml $GODWOKEN_CONFIG_TOML_FILE
