@@ -15,7 +15,8 @@ cat << EOF > scripts-deploy.json
     "eth_account_lock": "scripts/release/eth-account-lock",
     "tron_account_lock": "scripts/release/tron-account-lock",
     "polyjuice_validator": "scripts/release/polyjuice-validator",
-    "eth_addr_reg_validator": "scripts/release/eth_addr_reg_validator"
+    "eth_addr_reg_validator": "scripts/release/eth_addr_reg_validator",
+    "omni_lock": "scripts/release/omni_lock"
   },
   "lock": {
     "code_hash": "0x0000000000000000000000000000000000000000000000000000000000000000",
@@ -39,7 +40,8 @@ cat << EOF > scripts-deploy.json
     "withdrawal_lock": "scripts/release/withdrawal-lock",
     "eth_addr_reg_generator": "deploy/polyjuice-backend/eth_addr_reg_generator",
     "eth_addr_reg_validator": "deploy/polyjuice-backend/eth_addr_reg_validator",
-    "tron_account_lock": "scripts/release/tron-account-lock"
+    "tron_account_lock": "scripts/release/tron-account-lock",
+    "omni_lock": "scripts/release/omni_lock"
   }
 }
 EOF
