@@ -50,7 +50,8 @@ clean-build-cache:
 
 ### 2. main command
 
-init: create-folder prepare-files install build-image
+# init: create-folder prepare-files install build-image
+init: create-folder install build-image
 
 prepare-files:
 	cp ./config/private_key ./workspace/deploy/private_key
@@ -67,6 +68,7 @@ install:
 		source ./gw_util.sh && prepare_package godwoken-web3 $$WEB3_GIT_URL $$WEB3_GIT_CHECKOUT > /dev/null; \
 		"$(INSTALL_JS_NODE_MODULE_NOT_COPY)" && make install-web3-node-modules-if-empty || make copy-web3-node-modules-if-empty ;\
 		docker run --rm -v `pwd`/packages/godwoken-web3:/app -w=/app $$DOCKER_WEB3_PREBUILD_IMAGE_NAME:$$DOCKER_WEB3_PREBUILD_IMAGE_TAG /bin/bash -c "yarn build" ; \
+		make copy-web3-from-packages-to-manual-artifacts; \
 	fi
 	echo "Web3 has been initialized."
 # if manual build web3-indexer
@@ -74,6 +76,7 @@ install:
 		source ./gw_util.sh && prepare_package godwoken-web3 $$WEB3_GIT_URL $$WEB3_GIT_CHECKOUT > /dev/null; \
 		source ./gw_util.sh &&  cargo_build_web3_indexer_on_local_or_docker ; \
 		make copy-web3-indexer-binary-from-packages-to-workspace ; \
+		make copy-web3-indexer-binary-from-packages-to-manual-artifacts ; \
 	else make copy-web3-indexer-bin-from-docker;\
 	fi
 	echo "Web3-indexer has been initialized."
@@ -88,6 +91,7 @@ install:
 		source ./gw_util.sh && prepare_package godwoken $$GODWOKEN_GIT_URL $$GODWOKEN_GIT_CHECKOUT > /dev/null; \
 		source ./gw_util.sh && cargo_build_local_or_docker ; \
 		make copy-godwoken-binary-from-packages-to-workspace ; \
+		make copy-godwoken-binary-from-packages-to-manual-artifacts; \
 	else make copy-godwoken-bin-from-docker ; \
 	fi
 	echo "Godwoken has been initialized."
@@ -132,9 +136,7 @@ start: workspace/bin/godwoken
 		source ./gw_util.sh && watch_ckb_reorg > chain-reorg.log 2>&1 & \
 	fi
 	source ./gw_util.sh && start
-	make show_wait_tips
-# TODO: only deposit for dev accounts one time
-# source ./gw_util.sh && deposit_for_two_dev_accounts
+	# make show_wait_tips
 
 start-f:
 	cd docker && FORCE_GODWOKEN_REDEPLOY=true docker-compose --env-file .build.mode.env up -d --build > /dev/null
@@ -432,9 +434,27 @@ copy-godwoken-binary-from-packages-to-workspace:
 	cp packages/godwoken/target/release/godwoken workspace/bin/godwoken
 	cp packages/godwoken/target/release/gw-tools workspace/bin/gw-tools
 
+copy-godwoken-binary-from-packages-to-manual-artifacts:
+	mkdir -p docker/manual-artifacts/
+	echo 'cp packages/godwoken/target/release/godwoken docker/manual-artifacts/godwoken'
+	echo 'cp packages/godwoken/target/release/gw-tools docker/manual-artifacts/gw-tools'
+	cp packages/godwoken/target/release/godwoken docker/manual-artifacts/godwoken
+	cp packages/godwoken/target/release/gw-tools docker/manual-artifacts/gw-tools
+
 copy-web3-indexer-binary-from-packages-to-workspace:
 	mkdir -p workspace/bin
 	cp packages/godwoken-web3/target/release/gw-web3-indexer workspace/bin/gw-web3-indexer
+
+copy-web3-indexer-binary-from-packages-to-manual-artifacts:
+	mkdir -p docker/manual-artifacts/
+	echo 'cp packages/godwoken-web3/target/release/gw-web3-indexer /docker/manual-artifacts/gw-web3-indexer'
+	cp packages/godwoken-web3/target/release/gw-web3-indexer docker/manual-artifacts/gw-web3-indexer
+
+copy-web3-from-packages-to-manual-artifacts:
+	rm -rf docker/manual-artifacts/godwoken-web3/
+	mkdir -p docker/manual-artifacts/godwoken-web3/
+	echo 'cp -r packages/godwoken-web3/packages/ docker/manual-artifacts/godwoken-web3/'
+	cp -r packages/godwoken-web3/packages/ docker/manual-artifacts/godwoken-web3/
 
 copy-web3-node-modules-if-empty:
 	docker run --rm -v `pwd`/packages/godwoken-web3:/app $$DOCKER_WEB3_PREBUILD_IMAGE_NAME:$$DOCKER_WEB3_PREBUILD_IMAGE_TAG /bin/bash -c "cd app && yarn check --verify-tree && cd .. || ( cd .. && echo 'start copying web3 node_modules from docker to local package..' && cp -r ./godwoken-web3/node_modules ./app/) ;"
