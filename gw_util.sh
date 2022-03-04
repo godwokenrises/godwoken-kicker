@@ -44,13 +44,6 @@ read_docker_logs(){
     echo $_log
 }
 
-exit_or_break_when_fail(){
-    if [ "$(EXIT_IF_START_FAIL)" = true ] ; then
-        exit 123;
-    else break;
-    fi
-}
-
 # usage:
 #   checkLogsToSetProgress
 checkLogsToSetProgress() {
@@ -104,17 +97,26 @@ checkLogsToSetProgress() {
         # if one of service from docker-compose is not Up, then throw error.
         if !(check_service_status "godwoken" &> /dev/null); then
             echo "${RED}Godwoken service is not running. please run 'make sg' to check what happend.${NO_COLOR}"
-            exit_or_break_when_fail
+            if [ "$EXIT_IF_START_FAIL" = true ] ; then
+                exit 123;
+            else break;
+            fi
         fi
 
         if !(check_service_status "polyjuice" &> /dev/null); then
             echo "${RED}polyjuice service is not running. please run 'make sp' to check what happend.${NO_COLOR}"
-            exit_or_break_when_fail
+            if [ "$EXIT_IF_START_FAIL" = true ] ; then
+                exit 123;
+            else break;
+            fi
         fi
 
         if !(check_service_status "call-polyman" &> /dev/null); then
             echo "${RED}call-polyman(a setup-service) is not running. please run 'make call-polyman' to check what happend.${NO_COLOR}"
-            exit_or_break_when_fail
+            if [ "$EXIT_IF_START_FAIL" = true ] ; then
+                exit 123;
+            else break;
+            fi
         fi
 
         # monitor Godwoekn service logs to display progress info.
