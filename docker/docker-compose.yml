@@ -17,7 +17,7 @@ services:
     
   redis:
     image: redis:bullseye
-    user: redis:redis
+    user: root:root
     ports: 
       - 6379:6379
     volumes:
