@@ -45,7 +45,7 @@ read_docker_logs(){
 }
 
 exit_or_break_when_fail(){
-    if [ "$(EXIT_IF_START_FAIL)" = true ] ; then
+    if [ "$EXIT_IF_START_FAIL" = true ] ; then
         exit 123;
     else break;
     fi
