@@ -106,6 +106,12 @@ install:
 		make rebuild-poa-scripts ; \
 	else make copy-poa-scripts-from-docker ;\
 	fi
+# if manual build omni lock
+	if [ "$(MANUAL_BUILD_OMNI_LOCK)" = true ] ; then \
+		source ./gw_util.sh && prepare_package ckb-production-scripts $$OMNI_LOCK_GIT_URL $$OMNI_LOCK_CHECKOUT > /dev/null ; \
+		make rebuild-omni-lock ; \
+	else echo "ensure you have omni_lock binary in scripts dir" ;\
+	fi
 # if multi ckb nodes, install deps for plugins
 # todo: maybe use prebuild image here
 	if [ "$(ENABLE_MULTI_CKB_NODES)" = true ] ; then \
@@ -352,6 +358,10 @@ rebuild-poa-scripts:
 	cd packages/clerkb && yarn && make all-via-docker
 	cp packages/clerkb/build/debug/poa workspace/scripts/release/
 	cp packages/clerkb/build/debug/state workspace/scripts/release/
+
+rebuild-omni-lock:
+	cd packages/ckb-production-scripts && git submodule update --init && make all-via-docker
+	cp packages/ckb-production-scripts/build/omni_lock workspace/scripts/release/
 
 ########## prebuild-quick-mode #############
 rm-dummy-docker-if-name-exits: SHELL:=/bin/bash
