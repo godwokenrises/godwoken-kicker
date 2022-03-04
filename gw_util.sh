@@ -10,6 +10,8 @@ CKB_NODE_1=http://localhost:8114
 CKB_NODE_2=http://localhost:8117
 CKB_NODE_3=http://localhost:6117
 
+BUILD_MODE_ENV_FILE=docker/.build.mode.env
+
 # 1. Create ProgressBar function
 # 1.1 Input is currentState($1) and totalState($2)
 function ProgressBar {
@@ -92,6 +94,9 @@ checkLogsToSetProgress() {
 
     polyjuice_wait_to_start_info="godwoken rpc server is down."
 
+    # we need the EXIT_IF_START_FAIL env variable
+    set -o allexport; source $BUILD_MODE_ENV_FILE; set +o allexport;
+    
     while true
     do
         # if 3 RPCs are up and all set.
