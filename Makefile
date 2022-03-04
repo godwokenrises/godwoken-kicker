@@ -32,6 +32,7 @@ uninstall:
 
 clean-cache:
 	rm -rf cache/activity/*
+	[ -d packages/godwoken-polyman/packages/runner/db ] && rm -rf packages/godwoken-polyman/packages/runner/db || echo "local polyman db not exist."
 	echo "remove all cache activities data."
 
 clean-workspace:
