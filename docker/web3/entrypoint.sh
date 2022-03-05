@@ -71,6 +71,7 @@ else
   GODWOKEN_READONLY_JSON_RPC=http://godwoken:8119
 fi
 
+# TODO: get ETH_ADDRESS_REGISTRY_ACCOUNT_ID from the args of creator_script.args
 cat > ./packages/api-server/.env <<EOF
 DATABASE_URL=postgres://user:password@postgres:5432/lumos
 GODWOKEN_JSON_RPC=http://godwoken:8119
