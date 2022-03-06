@@ -1,0 +1,64 @@
+# Start 3 ckb nodes by `docker-compose -f docker/chaos.compose.yml up -d`
+#
+# Run together with services defined in "docker/docker-compose.yml" by
+# `docker-compose -f docker/docker-compose.yml -f docker/chaos.compose.yml up -d`
+#
+# More about appending/overriding compose.yml services:
+# https://github.com/compose-spec/compose-spec/blob/master/spec.md#compose-file
+
+version: '3.8'
+
+services:
+  ckb:
+    image: nervos/ckb:v0.101.4
+    user: root
+    ports:
+      - 8114:8114   # rpc
+      - 8115:8115   # p2p network
+    volumes:
+      - ./layer1/ckb:/var/lib/ckb
+    command: [ "run", "-C", "/var/lib/ckb" ]
+
+  ckb2:
+    image: nervos/ckb:v0.101.4
+    user: root
+    ports:
+      - 8116:8114     # rpc
+      - 8117:8117     # p2p network
+    volumes:
+      - ./layer1/ckb2:/var/lib/ckb
+    command: [ "run", "-C", "/var/lib/ckb" ]
+
+  ckb3:
+    image: nervos/ckb:v0.101.4
+    user: root
+    ports:
+      - 8118:8114     # rpc
+      - 8119:8119     # p2p network
+    volumes:
+      - ./layer1/ckb3:/var/lib/ckb
+    command: [ "run", "-C", "/var/lib/ckb" ]
+
+  ckb-miner:
+    image: nervos/ckb:v0.101.4
+    user: root
+    volumes:
+      - ./layer1/ckb:/var/lib/ckb
+    command: [ "miner", "-C", "/var/lib/ckb" ]
+    depends_on: [ ckb ]
+
+  ckb2-miner:
+    user: root
+    image: nervos/ckb:v0.101.4
+    volumes:
+      - ./layer1/ckb2:/var/lib/ckb
+    command: [ "miner", "-C", "/var/lib/ckb" ]
+    depends_on: [ ckb2 ]
+
+  ckb3-miner:
+    user: root
+    image: nervos/ckb:v0.101.4
+    volumes:
+      - ./layer1/ckb3:/var/lib/ckb
+    command: [ "miner", "-C", "/var/lib/ckb" ]
+    depends_on: [ ckb3 ]
