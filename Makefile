@@ -68,6 +68,7 @@ install:
 		"$(INSTALL_JS_NODE_MODULE_NOT_COPY)" && make install-web3-node-modules-if-empty || make copy-web3-node-modules-if-empty ;\
 		docker run --rm -v `pwd`/packages/godwoken-web3:/app -w=/app $$DOCKER_WEB3_PREBUILD_IMAGE_NAME:$$DOCKER_WEB3_PREBUILD_IMAGE_TAG /bin/bash -c "yarn build" ; \
 	fi
+	echo "Web3 has been initialized."
 # if manual build web3-indexer
 	if [ "$(MANUAL_BUILD_WEB3_INDEXER)" = true ] ; then \
 		source ./gw_util.sh && prepare_package godwoken-web3 $$WEB3_GIT_URL $$WEB3_GIT_CHECKOUT > /dev/null; \
@@ -75,11 +76,13 @@ install:
 		make copy-web3-indexer-binary-from-packages-to-workspace ; \
 	else make copy-web3-indexer-bin-from-docker;\
 	fi
+	echo "Web3-indexer has been initialized."
 # if manual build polyman
 	if [ "$(MANUAL_BUILD_POLYMAN)" = true ] ; then \
 		source ./gw_util.sh && prepare_package godwoken-polyman $$POLYMAN_GIT_URL $$POLYMAN_GIT_CHECKOUT > /dev/null; \
 		"$(INSTALL_JS_NODE_MODULE_NOT_COPY)" && make install-polyman-node-modules-if-empty || make copy-polyman-node-modules-if-empty ;\
 	fi
+	echo "Polyman has been initialized."
 # if manual build godwoken
 	if [ "$(MANUAL_BUILD_GODWOKEN)" = true ] ; then \
 		source ./gw_util.sh && prepare_package godwoken $$GODWOKEN_GIT_URL $$GODWOKEN_GIT_CHECKOUT > /dev/null; \
@@ -87,6 +90,7 @@ install:
 		make copy-godwoken-binary-from-packages-to-workspace ; \
 	else make copy-godwoken-bin-from-docker ; \
 	fi
+	echo "Godwoken has been initialized."
 # if manual build godwoken-polyjuice
 	if [ "$(MANUAL_BUILD_POLYJUICE)" = true ] ; then \
 		source ./gw_util.sh && prepare_package godwoken-polyjuice $$POLYJUICE_GIT_URL $$POLYJUICE_GIT_CHECKOUT > /dev/null ; \
@@ -94,18 +98,21 @@ install:
 		make rebuild-polyjuice-bin ; \
 	else make copy-polyjuice-bin-from-docker ; \
 	fi
+	echo "Godwoken-Polyjuice has been initialized."
 # if manual build godwoken-scripts
 	if [ "$(MANUAL_BUILD_SCRIPTS)" = true ] ; then \
 		source ./gw_util.sh && prepare_package godwoken-scripts $$SCRIPTS_GIT_URL $$SCRIPTS_GIT_CHECKOUT > /dev/null ; \
 		make rebuild-gw-scripts-and-bin ; \
 	else make copy-gw-scripts-and-bin-from-docker ; \
 	fi
+	echo "Godwoken-scripts has been initialized."
 # if manual build omni lock
 	if [ "$(MANUAL_BUILD_OMNI_LOCK)" = true ] ; then \
 		source ./gw_util.sh && prepare_package ckb-production-scripts $$OMNI_LOCK_GIT_URL $$OMNI_LOCK_CHECKOUT > /dev/null ; \
 		make rebuild-omni-lock ; \
-	else make copy-omni-lock-from-docker ; \	
+	else make copy-omni-lock-from-docker ; \
 	fi
+	echo "Omni-lock has been initialized."
 # if multi ckb nodes, install deps for plugins
 # todo: maybe use prebuild image here
 	if [ "$(ENABLE_MULTI_CKB_NODES)" = true ] ; then \
