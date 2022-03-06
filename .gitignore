@@ -40,7 +40,9 @@ plugins/gw-schema/tmp
 /docker/redis/data/
 /docker/ckb-indexer/data/
 /docker/layer1/ckb/data/
-/docker/layer2/data
+/docker/layer1/ckb2/data/
+/docker/layer1/ckb3/data/
+/docker/layer2/data/
 /docker/layer2/config/scripts-deployment.json
 /docker/layer2/config/rollup-config.json
 /docker/layer2/config/rollup-genesis-deployment.json
