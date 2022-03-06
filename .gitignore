@@ -18,7 +18,6 @@ quick-mode/
 
 config/scripts/release/*
 
-!config/scripts/release/state
 
 config/*generator
 config/*validator
