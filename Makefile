@@ -325,7 +325,7 @@ enter-kafka:
 
 ########### manual-build-mode #############
 ### rebuild components's scripts and bin all in one
-rebuild-scripts: rebuild-gw-scripts-and-bin rebuild-polyjuice-bin
+rebuild-scripts: rebuild-gw-scripts-and-bin rebuild-polyjuice-bin rebuild-omni-lock
 
 #### rebuild components's scripts and bin standalone
 rebuild-polyjuice-bin:
