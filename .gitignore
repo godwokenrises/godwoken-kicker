@@ -17,8 +17,7 @@ cargo-cache-data/
 quick-mode/
 
 config/scripts/release/*
-!config/scripts/release/poa
-!config/scripts/release/state
+
 
 config/*generator
 config/*validator

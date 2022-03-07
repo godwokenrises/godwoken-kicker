@@ -68,6 +68,7 @@ install:
 		"$(INSTALL_JS_NODE_MODULE_NOT_COPY)" && make install-web3-node-modules-if-empty || make copy-web3-node-modules-if-empty ;\
 		docker run --rm -v `pwd`/packages/godwoken-web3:/app -w=/app $$DOCKER_WEB3_PREBUILD_IMAGE_NAME:$$DOCKER_WEB3_PREBUILD_IMAGE_TAG /bin/bash -c "yarn build" ; \
 	fi
+	echo "Web3 has been initialized."
 # if manual build web3-indexer
 	if [ "$(MANUAL_BUILD_WEB3_INDEXER)" = true ] ; then \
 		source ./gw_util.sh && prepare_package godwoken-web3 $$WEB3_GIT_URL $$WEB3_GIT_CHECKOUT > /dev/null; \
@@ -75,11 +76,13 @@ install:
 		make copy-web3-indexer-binary-from-packages-to-workspace ; \
 	else make copy-web3-indexer-bin-from-docker;\
 	fi
+	echo "Web3-indexer has been initialized."
 # if manual build polyman
 	if [ "$(MANUAL_BUILD_POLYMAN)" = true ] ; then \
 		source ./gw_util.sh && prepare_package godwoken-polyman $$POLYMAN_GIT_URL $$POLYMAN_GIT_CHECKOUT > /dev/null; \
 		"$(INSTALL_JS_NODE_MODULE_NOT_COPY)" && make install-polyman-node-modules-if-empty || make copy-polyman-node-modules-if-empty ;\
 	fi
+	echo "Polyman has been initialized."
 # if manual build godwoken
 	if [ "$(MANUAL_BUILD_GODWOKEN)" = true ] ; then \
 		source ./gw_util.sh && prepare_package godwoken $$GODWOKEN_GIT_URL $$GODWOKEN_GIT_CHECKOUT > /dev/null; \
@@ -87,6 +90,7 @@ install:
 		make copy-godwoken-binary-from-packages-to-workspace ; \
 	else make copy-godwoken-bin-from-docker ; \
 	fi
+	echo "Godwoken has been initialized."
 # if manual build godwoken-polyjuice
 	if [ "$(MANUAL_BUILD_POLYJUICE)" = true ] ; then \
 		source ./gw_util.sh && prepare_package godwoken-polyjuice $$POLYJUICE_GIT_URL $$POLYJUICE_GIT_CHECKOUT > /dev/null ; \
@@ -94,18 +98,21 @@ install:
 		make rebuild-polyjuice-bin ; \
 	else make copy-polyjuice-bin-from-docker ; \
 	fi
+	echo "Godwoken-Polyjuice has been initialized."
 # if manual build godwoken-scripts
 	if [ "$(MANUAL_BUILD_SCRIPTS)" = true ] ; then \
 		source ./gw_util.sh && prepare_package godwoken-scripts $$SCRIPTS_GIT_URL $$SCRIPTS_GIT_CHECKOUT > /dev/null ; \
 		make rebuild-gw-scripts-and-bin ; \
 	else make copy-gw-scripts-and-bin-from-docker ; \
 	fi
-# if manual build clerkb for POA
-	if [ "$(MANUAL_BUILD_CLERKB)" = true ] ; then \
-		source ./gw_util.sh && prepare_package clerkb $$CLERKB_GIT_URL $$CLERKB_GIT_CHECKOUT > /dev/null ; \
-		make rebuild-poa-scripts ; \
-	else make copy-poa-scripts-from-docker ;\
+	echo "Godwoken-scripts has been initialized."
+# if manual build omni lock
+	if [ "$(MANUAL_BUILD_OMNI_LOCK)" = true ] ; then \
+		source ./gw_util.sh && prepare_package ckb-production-scripts $$OMNI_LOCK_GIT_URL $$OMNI_LOCK_CHECKOUT > /dev/null ; \
+		make rebuild-omni-lock ; \
+	else make copy-omni-lock-from-docker ; \
 	fi
+	echo "Omni-lock has been initialized."
 # if multi ckb nodes, install deps for plugins
 # todo: maybe use prebuild image here
 	if [ "$(ENABLE_MULTI_CKB_NODES)" = true ] ; then \
@@ -325,7 +332,7 @@ enter-kafka:
 
 ########### manual-build-mode #############
 ### rebuild components's scripts and bin all in one
-rebuild-scripts: rebuild-gw-scripts-and-bin rebuild-polyjuice-bin rebuild-poa-scripts
+rebuild-scripts: rebuild-gw-scripts-and-bin rebuild-polyjuice-bin rebuild-omni-lock
 
 #### rebuild components's scripts and bin standalone
 rebuild-polyjuice-bin:
@@ -348,10 +355,9 @@ rebuild-gw-scripts-and-bin:
 	cp packages/godwoken-scripts/c/build/sudt-generator workspace/deploy/backend/sudt-generator
 	cp packages/godwoken-scripts/c/build/sudt-validator workspace/deploy/backend/sudt-validator
 
-rebuild-poa-scripts:
-	cd packages/clerkb && yarn && make all-via-docker
-	cp packages/clerkb/build/debug/poa workspace/scripts/release/
-	cp packages/clerkb/build/debug/state workspace/scripts/release/
+rebuild-omni-lock:
+	cd packages/ckb-production-scripts && git submodule update --init --recursive --depth=1 && make all-via-docker
+	cp packages/ckb-production-scripts/build/omni_lock workspace/scripts/release/
 
 ########## prebuild-quick-mode #############
 rm-dummy-docker-if-name-exits: SHELL:=/bin/bash
@@ -405,13 +411,11 @@ copy-gw-scripts-and-bin-from-docker: rm-dummy-docker-if-name-exits
 	cp quick-mode/godwoken/deposit-lock workspace/scripts/release/
 	cp quick-mode/godwoken/always-success workspace/scripts/release/
 
-copy-poa-scripts-from-docker: rm-dummy-docker-if-name-exits
-	mkdir -p `pwd`/quick-mode/clerkb
-	docker run -it -d --name dummy $$DOCKER_PREBUILD_IMAGE_NAME:$$DOCKER_PREBUILD_IMAGE_TAG
-	docker cp dummy:/scripts/clerkb/. `pwd`/quick-mode/clerkb
-	docker rm -f dummy
-# paste the prebuild scripts to workspace dir for use
-	cp quick-mode/clerkb/* workspace/scripts/release/
+copy-omni-lock-from-docker:
+	mkdir -p workspace/scripts/release/
+	docker run --rm -v`pwd`/workspace/scripts/release/:/target-dir/ \
+	  $$DOCKER_PREBUILD_IMAGE_NAME:$$DOCKER_PREBUILD_IMAGE_TAG \
+  	  cp /scripts/godwoken-scripts/omni_lock /target-dir/
 
 copy-web3-indexer-bin-from-docker: rm-dummy-docker-if-name-exits
 	mkdir -p `pwd`/quick-mode/web3

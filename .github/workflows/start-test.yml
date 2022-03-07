@@ -4,7 +4,7 @@ on:
     # Publish semver tags as releases.
     tags: ["v*.*.*"]
   pull_request:
-    branches: [master, develop]
+    branches: [master, develop, compatibility-changes]
 
 jobs:
   startup-test:
@@ -21,17 +21,19 @@ jobs:
         run: make version
 
       - name: start kicker
+        timeout-minutes: 15
         run: |
           make init && make start
           docker-compose --file docker/docker-compose.yml logs --tail 6
 
       - name: make sure kicker is starting..
+        timeout-minutes: 15
         run: make start
 
       - name: stop kicker
         run: make down
 
-      - name: Setup tmate session
-        if: ${{ failure() }}
-        uses: mxschmitt/action-tmate@v3
-        timeout-minutes: 15
+      # - name: Setup tmate session
+      #   if: ${{ failure() }}
+      #   uses: mxschmitt/action-tmate@v3
+      #   timeout-minutes: 15

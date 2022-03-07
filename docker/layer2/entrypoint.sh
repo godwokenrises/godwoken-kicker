@@ -117,22 +117,38 @@ rollupConfig="
 echo 'Generate deploy/rollup-config.json'
 echo $rollupConfig > "deploy/rollup-config.json"
 
-# deploy scripts
+# TODO: using capsule to deploy scripts
 echo 'start deploying godwoken scripts, this might takes a little bit of time, please wait...'
 #$GW_TOOLS_BIN deploy-scripts -r ${CKB_RPC} -i deploy/scripts-deploy.json -o deploy/scripts-deploy-result.json -k ${PRIVKEY}
 deployGodwokenScripts 5 $POLYMAN_RPC "/code/workspace/deploy/scripts-deploy.json" "/code/workspace/deploy/scripts-deploy-result.json" 
 
 # deploy genesis block
-$GW_TOOLS_BIN deploy-genesis --ckb-rpc ${CKB_RPC} --scripts-deployment-path deploy/scripts-deploy-result.json -r deploy/rollup-config.json -o deploy/genesis-deploy-result.json -k ${PRIVKEY}
+$GW_TOOLS_BIN deploy-genesis \
+  --ckb-rpc ${CKB_RPC} \
+  --scripts-deployment-path deploy/scripts-deploy-result.json \
+  -r deploy/rollup-config.json \
+  --omni-lock-config-path deploy/scripts-deploy-result.json \
+  -k ${PRIVKEY} \
+  -o deploy/genesis-deploy-result.json
 
 # generate config file
-$GW_TOOLS_BIN generate-config -d ${DATABASE_URL} --ckb-rpc ${CKB_RPC} --ckb-indexer-rpc ${INDEXER_RPC} -g deploy/genesis-deploy-result.json -r deploy/rollup-config.json --scripts-deployment-path deploy/scripts-deploy-result.json -k deploy/private_key -o config.toml -c deploy/scripts-deploy.json
+$GW_TOOLS_BIN generate-config \
+  -d ${DATABASE_URL} \
+  --ckb-rpc ${CKB_RPC} \
+  --ckb-indexer-rpc ${INDEXER_RPC} \
+  -g deploy/genesis-deploy-result.json \
+  -r deploy/rollup-config.json \
+  --scripts-deployment-path deploy/scripts-deploy-result.json \
+  --omni-lock-config-path deploy/scripts-deploy-result.json \
+  -k ${PRIVKEY} \
+  -c deploy/scripts-deploy.json \
+  -o config.toml
 
 # Update block_producer.wallet_config section to your own lock.
 edit_godwoken_config_toml $GODWOKEN_CONFIG_TOML_FILE
 
 # add_eth_eoa_register_config if not exist
-grep -q "eth_eoa_mapping_config.register_wallet_config" workspace/config.toml \
+grep -q "eth_eoa_mapping_config.register_wallet_config" $GODWOKEN_CONFIG_TOML_FILE \
   || add_eth_eoa_register_config $GODWOKEN_CONFIG_TOML_FILE
 
 # start godwoken
