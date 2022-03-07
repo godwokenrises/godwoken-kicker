@@ -36,7 +36,9 @@ plugins/gw-schema/tmp
 
 *.log
 
-/docker/ckb-indexer/data
+/docker/postgres/data/
+/docker/redis/data/
+/docker/ckb-indexer/data/
 /docker/layer1/ckb/data/
 /docker/layer2/data
 /docker/layer2/config/scripts-deployment.json
