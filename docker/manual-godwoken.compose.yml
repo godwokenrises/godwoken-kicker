@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  # Replace the prebuild godwoken and gw-tools with manual-build.
+  #
+  # 1. First you have to build godwoken manually and copy the result
+  # artifacts to `docker/manual-artifacts/`:
+  #
+  #   ```
+  #   make init MANUAL_BUILD_GODWOKEN=true
+  #   ```
+  #
+  # 2. Then start docker-compose service:
+  #
+  #   ```
+  #   docker-compose -f docker/docker-compose.yml -f docker/manual-godwoken.compose.yml up -d godwoken
+  #   ```
+  godwoken:
+    volumes:
+      - ./manual-artifacts/godwoken:/usr/bin/godwoken
+      - ./manual-artifacts/gw-tools:/usr/bin/gw-tools
+  setup-godwoken:
+    volumes:
+      - ./manual-artifacts/godwoken:/usr/bin/godwoken
+      - ./manual-artifacts/gw-tools:/usr/bin/gw-tools
