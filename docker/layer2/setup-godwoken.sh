@@ -156,15 +156,7 @@ function deposit-and-create-polyjuice-creator-account() {
         fi
     done
 
-    RUST_BACKTRACE=full gw-tools deposit-ckb \
-        --privkey-path $PRIVATE_KEY_PATH \
-        --godwoken-rpc-url http://127.0.0.1:8119 \
-        --ckb-rpc http://ckb:8114 \
-        --scripts-deployment-path $CONFIG_DIR/scripts-deployment.json \
-        --config-path $CONFIG_DIR/godwoken-config.toml \
-        --capacity 1000
-
-    # This deposit is for godwoken-test in CI
+    # Deposit and create account for $META_USER_PRIVATE_KEY_PATH
     RUST_BACKTRACE=full gw-tools deposit-ckb \
         --privkey-path $META_USER_PRIVATE_KEY_PATH \
         --godwoken-rpc-url http://127.0.0.1:8119 \
@@ -172,7 +164,21 @@ function deposit-and-create-polyjuice-creator-account() {
         --scripts-deployment-path $CONFIG_DIR/scripts-deployment.json \
         --config-path $CONFIG_DIR/godwoken-config.toml \
         --capacity 1000
+    RUST_BACKTRACE=full gw-tools create-creator-account \
+        --privkey-path $META_USER_PRIVATE_KEY_PATH \
+        --godwoken-rpc-url http://127.0.0.1:8119 \
+        --scripts-deployment-path $CONFIG_DIR/scripts-deployment.json \
+        --config-path $CONFIG_DIR/godwoken-config.toml \
+        --sudt-id 1
 
+    # Deposit and create account for $PRIVATE_KEY_PATH
+    RUST_BACKTRACE=full gw-tools deposit-ckb \
+        --privkey-path $PRIVATE_KEY_PATH \
+        --godwoken-rpc-url http://127.0.0.1:8119 \
+        --ckb-rpc http://ckb:8114 \
+        --scripts-deployment-path $CONFIG_DIR/scripts-deployment.json \
+        --config-path $CONFIG_DIR/godwoken-config.toml \
+        --capacity 1000
     RUST_BACKTRACE=full gw-tools create-creator-account \
         --privkey-path $PRIVATE_KEY_PATH \
         --godwoken-rpc-url http://127.0.0.1:8119 \
