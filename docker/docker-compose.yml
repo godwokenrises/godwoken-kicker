@@ -23,6 +23,7 @@ services:
 
   ckb:
     image: nervos/ckb:v0.101.4
+    user: root
     ports:
       - 8114:8114   # rpc
       - 8115:8115   # p2p network
@@ -32,6 +33,7 @@ services:
 
   ckb-miner:
     image: nervos/ckb:v0.101.4
+    user: root
     volumes:
       - ./layer1/ckb:/var/lib/ckb
     command: [ "miner", "-C", "/var/lib/ckb" ]
