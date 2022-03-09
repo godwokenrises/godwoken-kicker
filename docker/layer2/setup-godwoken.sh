@@ -130,6 +130,7 @@ function generate-godwoken-config() {
         -o $CONFIG_DIR/godwoken-config.toml \
         --rpc-server-url 0.0.0.0:8119
 
+    # some dirty modification
     if [ ! -z "$GODWOKEN_MODE" ]; then
         sed -i 's#^node_mode = .*$#node_mode = '"'$GODWOKEN_MODE'"'#' $CONFIG_DIR/godwoken-config.toml
     fi
@@ -137,6 +138,14 @@ function generate-godwoken-config() {
         sed -i 's#^path = .*$#path = '"'$STORE_PATH'"'#' $CONFIG_DIR/godwoken-config.toml
     fi
     sed -i 's#enable_methods = \[\]#err_receipt_ws_listen = '"'0.0.0.0:8120'"'#' $CONFIG_DIR/godwoken-config.toml
+    echo ""                                                                                 >> $CONFIG_DIR/godwoken-config.toml
+    echo "[eth_eoa_mapping_config.register_wallet_config]"                                  >> $CONFIG_DIR/godwoken-config.toml
+    echo "privkey_path = 'deploy/meta_user_private_key'"                                    >> $CONFIG_DIR/godwoken-config.toml
+    echo "[eth_eoa_mapping_config.register_wallet_config.lock]"                             >> $CONFIG_DIR/godwoken-config.toml
+    echo "## The private key is config/meta_user_private_key"                               >> $CONFIG_DIR/godwoken-config.toml
+    echo "args = '0x952809177232d0dba355ba5b6f4eaca39cc57746'"                              >> $CONFIG_DIR/godwoken-config.toml
+    echo "hash_type = 'type'"                                                               >> $CONFIG_DIR/godwoken-config.toml
+    echo "code_hash = '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8'" >> $CONFIG_DIR/godwoken-config.toml
 
     log "Generate file \"$CONFIG_DIR/godwoken-config.toml\""
 }
