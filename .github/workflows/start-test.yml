@@ -21,13 +21,13 @@ jobs:
         run: make version
 
       - name: start kicker
-        timeout-minutes: 15
+        timeout-minutes: 20
         run: |
           make init && make start
           docker-compose --file docker/docker-compose.yml logs --tail 6
 
       - name: make sure kicker is starting..
-        timeout-minutes: 15
+        timeout-minutes: 20
         run: make start
 
       - name: stop kicker
