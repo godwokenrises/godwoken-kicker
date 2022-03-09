@@ -134,7 +134,7 @@ start: workspace/bin/godwoken
 	source ./gw_util.sh && start
 	make show_wait_tips
 # TODO: only deposit for dev accounts one time
-# source ./gw_util.sh && deposit_for_two_dev_accounts
+	source ./gw_util.sh && deposit_for_two_dev_accounts
 
 start-f:
 	cd docker && FORCE_GODWOKEN_REDEPLOY=true docker-compose --env-file .build.mode.env up -d --build > /dev/null
