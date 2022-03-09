@@ -137,7 +137,7 @@ start: workspace/bin/godwoken
 	fi
 	source ./gw_util.sh && start
 # TODO: only deposit for dev accounts one time
-	source ./gw_util.sh && deposit_for_two_dev_accounts
+	# source ./gw_util.sh && deposit_for_two_dev_accounts
 	# make show_wait_tips
 
 start-f:
