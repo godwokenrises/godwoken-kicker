@@ -1,6 +1,8 @@
 #!/bin/bash
 
 while true; do
+    sleep 1
+
     echo '{
         "id": 2,
         "jsonrpc": "2.0",

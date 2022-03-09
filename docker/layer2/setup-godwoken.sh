@@ -7,7 +7,7 @@ CONFIG_DIR="$WORKSPACE/config"
 
 function start-ckb-miner-at-background() {
     log "start"
-    ckb -C $CONFIG_DIR miner &> $CONFIG_DIR/ckb-miner.log & # &> /dev/null &
+    ckb -C $CONFIG_DIR miner &> /dev/null &
 }
 
 # The scripts-config.json file records the names and locations of all scripts
