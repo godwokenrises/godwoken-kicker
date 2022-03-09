@@ -5,6 +5,11 @@ set -o errexit
 WORKSPACE="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 CONFIG_DIR="$WORKSPACE/config"
 
+function start-ckb-miner-at-background() {
+    log "start"
+    ckb -C $CONFIG_DIR miner &> $CONFIG_DIR/ckb-miner.log & # &> /dev/null &
+}
+
 # The scripts-config.json file records the names and locations of all scripts
 # that have been compiled in docker image. These compiled scripts will be
 # deployed, and the deployment result will be stored into scripts-deployment.json.
@@ -274,6 +279,7 @@ function main() {
     command=$1
     case $command in
         "all")
+            start-ckb-miner-at-background
             deploy-scripts
             generate-rollup-config
             deploy-rollup-genesis

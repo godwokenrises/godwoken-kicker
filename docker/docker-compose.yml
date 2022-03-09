@@ -54,10 +54,9 @@ services:
       CKB_RPC: http://ckb:8114
     ports:
       - "8116:8116"
-    ### It is not a good idea to volume ckb-index data when test.
-    # volumes:
-    #   - ./ckb-indexer:/var/lib/ckb-indexer
-    command: [ "-c", "http://ckb:8114", "-l", "0.0.0.0:8116", "-s", "/var/lib/ckb-indexer/" ]
+    volumes:
+      - ./ckb-indexer:/var/lib/ckb-indexer
+    command: [ "-c", "http://ckb:8114", "-l", "0.0.0.0:8116", "-s", "/var/lib/ckb-indexer/data" ]
     depends_on:
       check-ckb-started-successfully:
         condition: service_completed_successfully
