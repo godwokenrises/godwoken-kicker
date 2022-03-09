@@ -135,6 +135,7 @@ start: workspace/bin/godwoken
 	if [ "$(WATCH_CKB_REORG)" = true ] ; then \
 		source ./gw_util.sh && watch_ckb_reorg > chain-reorg.log 2>&1 & \
 	fi
+	mkdir -p cache/build
 	source ./gw_util.sh && start
 # TODO: only deposit for dev accounts one time
 	# source ./gw_util.sh && deposit_for_two_dev_accounts
