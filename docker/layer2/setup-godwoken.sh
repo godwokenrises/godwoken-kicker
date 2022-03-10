@@ -10,6 +10,17 @@ function start-ckb-miner-at-background() {
     ckb -C $CONFIG_DIR miner &> /dev/null &
 }
 
+function start-godwoken-at-background() {
+    godwoken run -c $CONFIG_DIR/godwoken-config.toml & # &> /dev/null &
+    while true; do
+        sleep 1
+        result=$(curl http://127.0.0.1:8119 &> /dev/null || echo "godwoken not started")
+        if [ "$result" != "godwoken not started" ]; then
+            break
+        fi
+    done
+}
+
 # The scripts-config.json file records the names and locations of all scripts
 # that have been compiled in docker image. These compiled scripts will be
 # deployed, and the deployment result will be stored into scripts-deployment.json.
@@ -25,6 +36,8 @@ function deploy-scripts() {
         return 0
     fi
     
+    start-ckb-miner-at-background
+
     RUST_BACKTRACE=full gw-tools deploy-scripts \
         --ckb-rpc http://ckb:8114 \
         -i $CONFIG_DIR/scripts-config.json \
@@ -140,9 +153,9 @@ function generate-godwoken-config() {
     sed -i 's#enable_methods = \[\]#err_receipt_ws_listen = '"'0.0.0.0:8120'"'#' $CONFIG_DIR/godwoken-config.toml
     echo ""                                                                                 >> $CONFIG_DIR/godwoken-config.toml
     echo "[eth_eoa_mapping_config.register_wallet_config]"                                  >> $CONFIG_DIR/godwoken-config.toml
-    echo "privkey_path = 'deploy/meta_user_private_key'"                                    >> $CONFIG_DIR/godwoken-config.toml
+    echo "privkey_path = '$META_USER_PRIVATE_KEY_PATH'"                                     >> $CONFIG_DIR/godwoken-config.toml
     echo "[eth_eoa_mapping_config.register_wallet_config.lock]"                             >> $CONFIG_DIR/godwoken-config.toml
-    echo "## The private key is config/meta_user_private_key"                               >> $CONFIG_DIR/godwoken-config.toml
+    echo "## The private key is godwoken-kicker/config/meta_user_private_key"               >> $CONFIG_DIR/godwoken-config.toml
     echo "args = '0x952809177232d0dba355ba5b6f4eaca39cc57746'"                              >> $CONFIG_DIR/godwoken-config.toml
     echo "hash_type = 'type'"                                                               >> $CONFIG_DIR/godwoken-config.toml
     echo "code_hash = '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8'" >> $CONFIG_DIR/godwoken-config.toml
@@ -157,18 +170,10 @@ function deposit-and-create-polyjuice-creator-account() {
         return 0
     fi
 
-
     # To complete the rest steps, we have to start a temporary godwoken
     # process in background. This temporary process will dead as "setup-godwoken"
     # docker-compose service exit.
-    godwoken run -c $CONFIG_DIR/godwoken-config.toml & # &> /dev/null &
-    while true; do
-        sleep 1
-        result=$(curl http://127.0.0.1:8119 &> /dev/null || echo "not started")
-        if [ "$result" != "not started" ]; then
-            break
-        fi
-    done
+    start-godwoken-at-background
 
     # Deposit and create account for $META_USER_PRIVATE_KEY_PATH
     RUST_BACKTRACE=full gw-tools deposit-ckb \
@@ -198,7 +203,7 @@ function deposit-and-create-polyjuice-creator-account() {
         --godwoken-rpc-url http://127.0.0.1:8119 \
         --scripts-deployment-path $CONFIG_DIR/scripts-deployment.json \
         --config-path $CONFIG_DIR/godwoken-config.toml \
-        --sudt-id 1 > $CONFIG_DIR/polyjuice-creator-account-id \
+        --sudt-id 1 \
     > /var/tmp/gw-tools.log 2>&1
     cat /var/tmp/gw-tools.log
     tail -n 1 /var/tmp/gw-tools.log | grep -oE '[0-9]+$' > $CONFIG_DIR/polyjuice-creator-account-id
@@ -288,7 +293,6 @@ function main() {
     command=$1
     case $command in
         "all")
-            start-ckb-miner-at-background
             deploy-scripts
             generate-rollup-config
             deploy-rollup-genesis

@@ -456,8 +456,10 @@ copy-web3-indexer-binary-from-packages-to-manual-artifacts:
 copy-web3-from-packages-to-manual-artifacts:
 	rm -rf docker/manual-artifacts/godwoken-web3/
 	mkdir -p docker/manual-artifacts/godwoken-web3/
-	echo 'cp -r packages/godwoken-web3/packages/ docker/manual-artifacts/godwoken-web3/'
-	cp -r packages/godwoken-web3/packages/ docker/manual-artifacts/godwoken-web3/
+	echo 'cp -r packages/godwoken-web3/packages/ 	 docker/manual-artifacts/godwoken-web3/'
+	echo 'cp -r packages/godwoken-web3/node_modules/ docker/manual-artifacts/godwoken-web3/'
+	cp -r packages/godwoken-web3/packages/ 		docker/manual-artifacts/godwoken-web3/
+	cp -r packages/godwoken-web3/node_modules/ 	docker/manual-artifacts/godwoken-web3/
 
 copy-web3-node-modules-if-empty:
 	docker run --rm -v `pwd`/packages/godwoken-web3:/app $$DOCKER_WEB3_PREBUILD_IMAGE_NAME:$$DOCKER_WEB3_PREBUILD_IMAGE_TAG /bin/bash -c "cd app && yarn check --verify-tree && cd .. || ( cd .. && echo 'start copying web3 node_modules from docker to local package..' && cp -r ./godwoken-web3/node_modules ./app/) ;"
