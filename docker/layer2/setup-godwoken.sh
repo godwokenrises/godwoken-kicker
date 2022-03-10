@@ -224,7 +224,6 @@ function generate-web3-config() {
 
     # TODO: get ETH_ADDRESS_REGISTRY_ACCOUNT_ID from the args of creator_script.args
     cat <<EOF > $CONFIG_DIR/web3-config.env
-CREATOR_ACCOUNT_ID=$(cat $CONFIG_DIR/polyjuice-creator-account-id)
 ROLLUP_TYPE_HASH=$(jq -r '.rollup_type_hash' $CONFIG_DIR/rollup-genesis-deployment.json)
 ETH_ACCOUNT_LOCK_HASH=$(jq -r '.eth_account_lock.script_type_hash' $CONFIG_DIR/scripts-deployment.json)
 POLYJUICE_VALIDATOR_TYPE_HASH=$(jq -r '.polyjuice_validator.script_type_hash' $CONFIG_DIR/scripts-deployment.json)
@@ -237,11 +236,13 @@ GODWOKEN_JSON_RPC=http://godwoken:8119
 GODWOKEN_WS_RPC_URL=ws://godwoken:8120
 PORT=8024
 
-# eth_chain_id = rollup_config.compatible_chain_id::u32 | creator_account_id::u32
-#
-# More: https://github.com/nervosnetwork/godwoken/pull/561
+# eth_chain_id = [0; 24] | rollup_config.compatible_chain_id::u32 | creator_account_id::u32
+# 
+# More:
+# * https://github.com/nervosnetwork/godwoken/pull/561
+# * https://eips.ethereum.org/EIPS/eip-1344#specification
+CREATOR_ACCOUNT_ID=$(cat $CONFIG_DIR/polyjuice-creator-account-id)
 COMPATIBLE_CHAIN_ID=1984
-CHAIN_ID=8521215115268
 
 # When requests "executeTransaction" RPC interface, the RawL2Transaction's
 # signature can be omit. Therefore we fill the RawL2Transaction.from_id
