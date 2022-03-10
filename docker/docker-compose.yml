@@ -119,7 +119,7 @@ services:
       - godwoken
     
   web3:
-    image: ghcr.io/retricsu/godwoken-web3-prebuilds:build-compatibility-breaking-changes-2022-03-05-04-13-32
+    image: ghcr.io/retricsu/godwoken-web3-prebuilds:build-compatibility-breaking-changes-2022-03-07-09-30-32
     volumes: 
       - ./layer2/config:/var/lib/layer2/config
       - ./web3/entrypoint.sh:/var/lib/web3/entrypoint.sh
@@ -147,7 +147,7 @@ services:
         condition: service_started
 
   web3-indexer:
-    image: ghcr.io/retricsu/godwoken-web3-indexer-prebuilds:build-compatibility-breaking-changes-2022-03-05-04-13-32
+    image: ghcr.io/retricsu/godwoken-web3-indexer-prebuilds:build-compatibility-breaking-changes-2022-03-07-09-30-19
     volumes: 
       - ./layer2/config/web3-indexer-config.toml:/var/lib/web3-indexer/indexer-config.toml
     working_dir: /var/lib/web3-indexer

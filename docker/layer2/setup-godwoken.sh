@@ -218,6 +218,13 @@ function generate-web3-config() {
         return 0
     fi
 
+    creator_account_id=$(cat $CONFIG_DIR/polyjuice-creator-account-id)
+    if [ $creator_account_id != "4" ]; then
+        log "cat $CONFIG_DIR/polyjuice-creator-account-id ==> $creator_account_id"
+        log "Error: The polyjuice-creator-account-id is expected to be 4, but got $creator_account_id"
+        exit 1
+    fi
+
     if ! command -v jq &> /dev/null; then
         apt-get install -y jq &>/dev/null
     fi
@@ -236,13 +243,20 @@ GODWOKEN_JSON_RPC=http://godwoken:8119
 GODWOKEN_WS_RPC_URL=ws://godwoken:8120
 PORT=8024
 
+# The `CREATOR_ACCOUNT_ID` is always be `4` as the first polyjuice account;
+# the `COMPATIBLE_CHAIN_ID` is a random number;
+# then we can calculate the `CHAIN_ID` by:
+#
+# ```
 # eth_chain_id = [0; 24] | rollup_config.compatible_chain_id::u32 | creator_account_id::u32
-# 
-# More:
+# ```
+#
+# More about chain id:
 # * https://github.com/nervosnetwork/godwoken/pull/561
 # * https://eips.ethereum.org/EIPS/eip-1344#specification
-CREATOR_ACCOUNT_ID=$(cat $CONFIG_DIR/polyjuice-creator-account-id)
+CREATOR_ACCOUNT_ID=4
 COMPATIBLE_CHAIN_ID=1984
+CHAIN_ID=8521215115268
 
 # When requests "executeTransaction" RPC interface, the RawL2Transaction's
 # signature can be omit. Therefore we fill the RawL2Transaction.from_id
