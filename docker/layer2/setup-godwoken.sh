@@ -11,6 +11,7 @@ function start-ckb-miner-at-background() {
 }
 
 function start-godwoken-at-background() {
+    log "start"
     godwoken run -c $CONFIG_DIR/godwoken-config.toml & # &> /dev/null &
     while true; do
         sleep 1
@@ -175,16 +176,24 @@ function deposit-and-create-polyjuice-creator-account() {
     # docker-compose service exit.
     start-godwoken-at-background
 
-    # Deposit and create account for $PRIVATE_KEY_PATH
+    # IMPORTANT:
+    # Orders for deposits are important.
+    #
+    # Since we use `$CONFIG_DIR/meta_user_private_key` as
+    # `eth_eoa_mapping_config.register_wallet_config` (inside function
+    # `generate-godwoken-config`), then `$CONFIG_DIR/meta_user_private_key`
+    # MUST be the first one to deposit!
+
+    # Deposit for $META_USER_PRIVATE_KEY_PATH
     RUST_BACKTRACE=full gw-tools deposit-ckb \
-        --privkey-path $PRIVATE_KEY_PATH \
+        --privkey-path $META_USER_PRIVATE_KEY_PATH \
         --godwoken-rpc-url http://127.0.0.1:8119 \
         --ckb-rpc http://ckb:8114 \
         --scripts-deployment-path $CONFIG_DIR/scripts-deployment.json \
         --config-path $CONFIG_DIR/godwoken-config.toml \
-        --capacity 1000
+        --capacity 2000
     RUST_BACKTRACE=full gw-tools create-creator-account \
-        --privkey-path $PRIVATE_KEY_PATH \
+        --privkey-path $META_USER_PRIVATE_KEY_PATH \
         --godwoken-rpc-url http://127.0.0.1:8119 \
         --scripts-deployment-path $CONFIG_DIR/scripts-deployment.json \
         --config-path $CONFIG_DIR/godwoken-config.toml \
@@ -193,20 +202,14 @@ function deposit-and-create-polyjuice-creator-account() {
     cat /var/tmp/gw-tools.log
     tail -n 1 /var/tmp/gw-tools.log | grep -oE '[0-9]+$' > $CONFIG_DIR/polyjuice-creator-account-id
 
-    # Deposit and create account for $META_USER_PRIVATE_KEY_PATH
+    # Deposit and create account for $PRIVATE_KEY_PATH
     RUST_BACKTRACE=full gw-tools deposit-ckb \
-        --privkey-path $META_USER_PRIVATE_KEY_PATH \
+        --privkey-path $PRIVATE_KEY_PATH \
         --godwoken-rpc-url http://127.0.0.1:8119 \
         --ckb-rpc http://ckb:8114 \
         --scripts-deployment-path $CONFIG_DIR/scripts-deployment.json \
         --config-path $CONFIG_DIR/godwoken-config.toml \
-        --capacity 1000
-    RUST_BACKTRACE=full gw-tools create-creator-account \
-        --privkey-path $META_USER_PRIVATE_KEY_PATH \
-        --godwoken-rpc-url http://127.0.0.1:8119 \
-        --scripts-deployment-path $CONFIG_DIR/scripts-deployment.json \
-        --config-path $CONFIG_DIR/godwoken-config.toml \
-        --sudt-id 1
+        --capacity 2000
 
     log "Generate file \"$CONFIG_DIR/polyjuice-creator-account-id\""
 }
@@ -243,13 +246,11 @@ GODWOKEN_JSON_RPC=http://godwoken:8119
 GODWOKEN_WS_RPC_URL=ws://godwoken:8120
 PORT=8024
 
-# The `CREATOR_ACCOUNT_ID` is always be `4` as the first polyjuice account;
-# the `COMPATIBLE_CHAIN_ID` is a random number;
-# then we can calculate the `CHAIN_ID` by:
+# The CREATOR_ACCOUNT_ID is always be 4 as the first polyjuice account;
+# the COMPATIBLE_CHAIN_ID is the identifier of our godwoken devnet;
+# then we can calculate the CHAIN_ID by:
 #
-# ```
 # eth_chain_id = [0; 24] | rollup_config.compatible_chain_id::u32 | creator_account_id::u32
-# ```
 #
 # More about chain id:
 # * https://github.com/nervosnetwork/godwoken/pull/561
@@ -279,6 +280,7 @@ function generate-web3-indexer-config() {
 
     source $CONFIG_DIR/web3-config.env
     cat <<EOF > $CONFIG_DIR/web3-indexer-config.toml
+compatible_chain_id=1984
 l2_sudt_type_script_hash="$L2_SUDT_VALIDATOR_SCRIPT_TYPE_HASH"
 polyjuice_type_script_hash="$POLYJUICE_VALIDATOR_TYPE_HASH"
 rollup_type_hash="$ROLLUP_TYPE_HASH"

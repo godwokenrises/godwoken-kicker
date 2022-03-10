@@ -41,7 +41,7 @@ services:
   # "nervos/ckb" image have no http clients to do health check for CKB.
   # This short-term service act as a workaround to do health check.
   check-ckb-started-successfully:
-    image: ghcr.io/flouse/godwoken-prebuilds:v1.0.x-202203090147
+    image: ghcr.io/flouse/godwoken-prebuilds:v1.0.x-202203101259
     volumes:
       - ./layer1/ckb:/var/lib/ckb
     entrypoint: /var/lib/ckb/check-ckb-started-successfully.sh
@@ -62,7 +62,7 @@ services:
         condition: service_completed_successfully
 
   setup-godwoken:
-    image: ghcr.io/flouse/godwoken-prebuilds:v1.0.x-202203090147
+    image: ghcr.io/flouse/godwoken-prebuilds:v1.0.x-202203101259
     environment:
       POSTGRES_USER: user
       POSTGRES_DB: lumos
@@ -71,6 +71,7 @@ services:
       STORE_PATH: /var/lib/layer2/data
       PRIVATE_KEY_PATH: /private_key
       META_USER_PRIVATE_KEY_PATH: /meta_user_private_key
+      GITHUB_RUN_ID: $GITHUB_RUN_ID
     volumes:
       - ./layer2:/var/lib/layer2
       - ../config/private_key:/private_key
@@ -90,7 +91,7 @@ services:
         condition: service_started
 
   godwoken:
-    image: ghcr.io/flouse/godwoken-prebuilds:v1.0.x-202203090147
+    image: ghcr.io/flouse/godwoken-prebuilds:v1.0.x-202203101259
     environment:
       GODWOKEN_MODE: fullnode
       RUST_BACKTRACE: full
@@ -111,7 +112,7 @@ services:
         condition: service_started
 
   check-godwoken-started-successfully:
-    image: ghcr.io/flouse/godwoken-prebuilds:v1.0.x-202203090147
+    image: ghcr.io/flouse/godwoken-prebuilds:v1.0.x-202203101259
     volumes:
       - ./layer2/:/var/lib/layer2
     entrypoint: /var/lib/layer2/check-godwoken-started-successfully.sh
@@ -119,7 +120,7 @@ services:
       - godwoken
     
   web3:
-    image: ghcr.io/retricsu/godwoken-web3-prebuilds:build-compatibility-breaking-changes-2022-03-07-09-30-32
+    image: ghcr.io/nervosnetwork/godwoken-web3-prebuilds:compatibility-breaking-changes-1a52afb
     volumes: 
       - ./layer2/config:/var/lib/layer2/config
       - ./web3/entrypoint.sh:/var/lib/web3/entrypoint.sh
@@ -147,7 +148,7 @@ services:
         condition: service_started
 
   web3-indexer:
-    image: ghcr.io/retricsu/godwoken-web3-indexer-prebuilds:build-compatibility-breaking-changes-2022-03-07-09-30-19
+    image: ghcr.io/nervosnetwork/godwoken-web3-indexer-prebuilds:compatibility-breaking-changes-1a52afb
     volumes: 
       - ./layer2/config/web3-indexer-config.toml:/var/lib/web3-indexer/indexer-config.toml
     working_dir: /var/lib/web3-indexer

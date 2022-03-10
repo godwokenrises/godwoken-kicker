@@ -10,7 +10,7 @@ data_dir = "data"
 spec = { file = "specs/dev.toml" }
 
 [logger]
-filter = "debug"
+filter = "info"
 color = true
 log_to_file = true
 log_to_stdout = true
