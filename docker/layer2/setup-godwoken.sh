@@ -4,15 +4,27 @@ set -o errexit
 
 WORKSPACE="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 CONFIG_DIR="$WORKSPACE/config"
+CKB_MINER_PID=""
+GODWOKEN_PID=""
 
 function start-ckb-miner-at-background() {
     log "start"
     ckb -C $CONFIG_DIR miner &> /dev/null &
+    CKB_MINER_PID=$!
+}
+
+function stop-ckb-miner() {
+    log "start"
+    if [ ! -z "$CKB_MINER_PID" ]; then
+        kill $CKB_MINER_PID
+        CKB_MINER_PID=""
+    fi
 }
 
 function start-godwoken-at-background() {
     log "start"
     godwoken run -c $CONFIG_DIR/godwoken-config.toml & # &> /dev/null &
+    GODWOKEN_PID=$!
     while true; do
         sleep 1
         result=$(curl http://127.0.0.1:8119 &> /dev/null || echo "godwoken not started")
@@ -20,6 +32,14 @@ function start-godwoken-at-background() {
             break
         fi
     done
+}
+
+function stop-godwoken() {
+    log "start"
+    if [ ! -z "$GODWOKEN_PID" ]; then
+        kill $GODWOKEN_PID
+        GODWOKEN_PID=""
+    fi
 }
 
 # The scripts-config.json file records the names and locations of all scripts
@@ -38,12 +58,13 @@ function deploy-scripts() {
     fi
     
     start-ckb-miner-at-background
-
     RUST_BACKTRACE=full gw-tools deploy-scripts \
         --ckb-rpc http://ckb:8114 \
         -i $CONFIG_DIR/scripts-config.json \
         -o $CONFIG_DIR/scripts-deployment.json \
         -k $PRIVATE_KEY_PATH
+    stop-ckb-miner
+
     log "Generate file \"$CONFIG_DIR/scripts-deployment.json\""
 }
 
@@ -104,6 +125,9 @@ function generate-rollup-config() {
         | sed "s/L1_SUDT_CELL_DEP_OUT_POINT_TX_HASH/$l1_sudt_cell_dep_out_point_tx_hash/g" \
         | sed "s/L1_SUDT_CELL_DEP_OUT_POINT_INDEX/$l1_sudt_cell_dep_out_point_index/g" \
         > $CONFIG_DIR/rollup-config.json
+    if [ "$GITHUB_RUN_ID" != "" ] ; then
+        sed -i 's/"finality_blocks": .$/"finality_blocks": 3/' $CONFIG_DIR/rollup-config.json
+    fi
     log "Generate file \"$CONFIG_DIR/rollup-config.json\""
 }
 
@@ -114,6 +138,7 @@ function deploy-rollup-genesis() {
         return 0
     fi
 
+    start-ckb-miner-at-background
     RUST_BACKTRACE=full gw-tools deploy-genesis \
         --ckb-rpc http://ckb:8114 \
         --scripts-deployment-path $CONFIG_DIR/scripts-deployment.json \
@@ -121,6 +146,7 @@ function deploy-rollup-genesis() {
         --rollup-config $CONFIG_DIR/rollup-config.json \
         -o $CONFIG_DIR/rollup-genesis-deployment.json \
         -k $PRIVATE_KEY_PATH
+    stop-ckb-miner
     log "Generate file \"$CONFIG_DIR/rollup-genesis-deployment.json\""
 }
 
@@ -152,14 +178,6 @@ function generate-godwoken-config() {
         sed -i 's#^path = .*$#path = '"'$STORE_PATH'"'#' $CONFIG_DIR/godwoken-config.toml
     fi
     sed -i 's#enable_methods = \[\]#err_receipt_ws_listen = '"'0.0.0.0:8120'"'#' $CONFIG_DIR/godwoken-config.toml
-    echo ""                                                                                 >> $CONFIG_DIR/godwoken-config.toml
-    echo "[eth_eoa_mapping_config.register_wallet_config]"                                  >> $CONFIG_DIR/godwoken-config.toml
-    echo "privkey_path = '$META_USER_PRIVATE_KEY_PATH'"                                     >> $CONFIG_DIR/godwoken-config.toml
-    echo "[eth_eoa_mapping_config.register_wallet_config.lock]"                             >> $CONFIG_DIR/godwoken-config.toml
-    echo "## The private key is godwoken-kicker/config/meta_user_private_key"               >> $CONFIG_DIR/godwoken-config.toml
-    echo "args = '0x952809177232d0dba355ba5b6f4eaca39cc57746'"                              >> $CONFIG_DIR/godwoken-config.toml
-    echo "hash_type = 'type'"                                                               >> $CONFIG_DIR/godwoken-config.toml
-    echo "code_hash = '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8'" >> $CONFIG_DIR/godwoken-config.toml
 
     log "Generate file \"$CONFIG_DIR/godwoken-config.toml\""
 }
@@ -176,32 +194,6 @@ function deposit-and-create-polyjuice-creator-account() {
     # docker-compose service exit.
     start-godwoken-at-background
 
-    # IMPORTANT:
-    # Orders for deposits are important.
-    #
-    # Since we use `$CONFIG_DIR/meta_user_private_key` as
-    # `eth_eoa_mapping_config.register_wallet_config` (inside function
-    # `generate-godwoken-config`), then `$CONFIG_DIR/meta_user_private_key`
-    # MUST be the first one to deposit!
-
-    # Deposit for $META_USER_PRIVATE_KEY_PATH
-    RUST_BACKTRACE=full gw-tools deposit-ckb \
-        --privkey-path $META_USER_PRIVATE_KEY_PATH \
-        --godwoken-rpc-url http://127.0.0.1:8119 \
-        --ckb-rpc http://ckb:8114 \
-        --scripts-deployment-path $CONFIG_DIR/scripts-deployment.json \
-        --config-path $CONFIG_DIR/godwoken-config.toml \
-        --capacity 2000
-    RUST_BACKTRACE=full gw-tools create-creator-account \
-        --privkey-path $META_USER_PRIVATE_KEY_PATH \
-        --godwoken-rpc-url http://127.0.0.1:8119 \
-        --scripts-deployment-path $CONFIG_DIR/scripts-deployment.json \
-        --config-path $CONFIG_DIR/godwoken-config.toml \
-        --sudt-id 1 \
-    > /var/tmp/gw-tools.log 2>&1
-    cat /var/tmp/gw-tools.log
-    tail -n 1 /var/tmp/gw-tools.log | grep -oE '[0-9]+$' > $CONFIG_DIR/polyjuice-creator-account-id
-
     # Deposit and create account for $PRIVATE_KEY_PATH
     RUST_BACKTRACE=full gw-tools deposit-ckb \
         --privkey-path $PRIVATE_KEY_PATH \
@@ -210,6 +202,49 @@ function deposit-and-create-polyjuice-creator-account() {
         --scripts-deployment-path $CONFIG_DIR/scripts-deployment.json \
         --config-path $CONFIG_DIR/godwoken-config.toml \
         --capacity 2000
+    RUST_BACKTRACE=full gw-tools create-creator-account \
+        --privkey-path $PRIVATE_KEY_PATH \
+        --godwoken-rpc-url http://127.0.0.1:8119 \
+        --scripts-deployment-path $CONFIG_DIR/scripts-deployment.json \
+        --config-path $CONFIG_DIR/godwoken-config.toml \
+        --sudt-id 1 \
+    > /var/tmp/gw-tools.log 2>&1
+    stop-godwoken
+
+    cat /var/tmp/gw-tools.log
+    tail -n 1 /var/tmp/gw-tools.log | grep -oE '[0-9]+$' > $CONFIG_DIR/polyjuice-creator-account-id
+
+    creator_account_id=$(cat $CONFIG_DIR/polyjuice-creator-account-id)
+    if [ $creator_account_id != "4" ]; then
+        log "cat $CONFIG_DIR/polyjuice-creator-account-id ==> $creator_account_id"
+        log "Error: The polyjuice-creator-account-id is expected to be 4, but got $creator_account_id"
+        exit 1
+    fi
+
+    # Fill the first deposit account into the configuration `[eth_eoa_mapping_config]`
+    result=$(grep -q eth_eoa_mapping_config $CONFIG_DIR/godwoken-config.toml || echo "not found")
+    if [ "$result" = "not found" ]; then
+        echo ""                                                                                 >> $CONFIG_DIR/godwoken-config.toml
+        echo "[eth_eoa_mapping_config.register_wallet_config]"                                  >> $CONFIG_DIR/godwoken-config.toml
+        echo "privkey_path = '$PRIVATE_KEY_PATH'"                                               >> $CONFIG_DIR/godwoken-config.toml
+        echo "[eth_eoa_mapping_config.register_wallet_config.lock]"                             >> $CONFIG_DIR/godwoken-config.toml
+        echo "args = '0x43d509d97f26007a285f39241cffcd411157196c'"                              >> $CONFIG_DIR/godwoken-config.toml
+        echo "hash_type = 'type'"                                                               >> $CONFIG_DIR/godwoken-config.toml
+        echo "code_hash = '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8'" >> $CONFIG_DIR/godwoken-config.toml
+    fi
+
+    # Deposit a testing account for integration tests.
+    #
+    # Note that godwoken MUST restart after configing eth_eoa_mapping_config.
+    start-godwoken-at-background
+    RUST_BACKTRACE=full gw-tools deposit-ckb \
+        --privkey-path $META_USER_PRIVATE_KEY_PATH \
+        --godwoken-rpc-url http://127.0.0.1:8119 \
+        --ckb-rpc http://ckb:8114 \
+        --scripts-deployment-path $CONFIG_DIR/scripts-deployment.json \
+        --config-path $CONFIG_DIR/godwoken-config.toml \
+        --capacity 2000
+    stop-godwoken
 
     log "Generate file \"$CONFIG_DIR/polyjuice-creator-account-id\""
 }
@@ -308,40 +343,13 @@ function log() {
 }
 
 function main() {
-    command=$1
-    case $command in
-        "all")
-            deploy-scripts
-            generate-rollup-config
-            deploy-rollup-genesis
-            generate-godwoken-config
-            deposit-and-create-polyjuice-creator-account
-            generate-web3-config
-            generate-web3-indexer-config
-            ;;
-        "reset")
-            rm -f $CONFIG_DIR/scripts-deployment.json
-            rm -f $CONFIG_DIR/rollup-config.json
-            rm -f $CONFIG_DIR/rollup-genesis-deployment.json
-            rm -f $CONFIG_DIR/godwoken-config.toml
-            rm -f $CONFIG_DIR/polyjuice-creator-account-id
-            rm -f $CONFIG_DIR/web3-config.env
-            rm -f $CONFIG_DIR/web3-indexer-config.toml
-            rm -rf $WORKSPACE/data
-            log "rm -f $CONFIG_DIR/scripts-deployment.json"
-            log "rm -f $CONFIG_DIR/rollup-config.json"
-            log "rm -f $CONFIG_DIR/rollup-genesis-deployment.json"
-            log "rm -f $CONFIG_DIR/godwoken-config.toml"
-            log "rm -f $CONFIG_DIR/polyjuice-creator-account-id"
-            log "rm -f $CONFIG_DIR/web3-config.env"
-            log "rm -f $CONFIG_DIR/web3-indexer-config.toml"
-            log "rm -rf $WORKSPACE/data"
-            ;;
-        *)
-            log "ERROR: unknown command"
-            exit 1
-            ;;
-    esac
+    deploy-scripts
+    generate-rollup-config
+    deploy-rollup-genesis
+    generate-godwoken-config
+    deposit-and-create-polyjuice-creator-account
+    generate-web3-config
+    generate-web3-indexer-config
 }
 
-main "$1"
+main "$@"

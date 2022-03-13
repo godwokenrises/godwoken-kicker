@@ -76,7 +76,7 @@ services:
       - ./layer2:/var/lib/layer2
       - ../config/private_key:/private_key
       - ../config/meta_user_private_key:/meta_user_private_key
-    command: [ "/var/lib/layer2/setup-godwoken.sh", "all" ]
+    entrypoint: "/var/lib/layer2/setup-godwoken.sh"
     restart: "no"
     depends_on:
       ckb:
