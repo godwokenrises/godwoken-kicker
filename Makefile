@@ -32,10 +32,25 @@ uninstall:
 
 clean-cache:
 	rm -rf cache/activity/*
+	rm -rf docker/layer2/data/
+	rm -f  docker/layer2/config/scripts-deployment.json
+	rm -f  docker/layer2/config/rollup-config.json
+	rm -f  docker/layer2/config/rollup-genesis-deployment.json
+	rm -f  docker/layer2/config/godwoken-config.toml
+	rm -f  docker/layer2/config/polyjuice-creator-account-id
+	rm -f  docker/layer2/config/web3-config.env
+	rm -f  docker/layer2/config/web3-indexer-config.toml
+	rm -rf docker/ckb-indexer/
+	rm -rf docker/layer1/ckb/data/
+	rm -rf docker/layer1/ckb2/data/
+	rm -rf docker/layer1/ckb3/data/
+	rm -rf docker/postgres/data
+	rm -rf docker/redis/data
 	echo "remove all cache activities data."
 
 clean-workspace:
 	rm -rf workspace/*
+	rm -rf docker/manual-artifacts/*
 	echo "remove all files in workspace."
 
 clean-data: clean-cache clean-workspace
@@ -180,7 +195,7 @@ godwoken-readonly:
 	cd docker && docker-compose logs -f --tail 200 godwoken-readonly
 # show ckb-indexer
 indexer:
-	cd docker && docker-compose logs -f indexer
+	cd docker && docker-compose logs -f ckb-indexer
 # show web3
 web3:
 	cd docker && docker-compose logs -f --tail 200 web3

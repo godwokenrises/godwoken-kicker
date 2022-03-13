@@ -32,6 +32,9 @@ jobs:
       - name: stop kicker
         run: make down
 
+      - name: restart kicker
+        run: make start
+
   integration-test:
     uses: nervosnetwork/godwoken-tests/.github/workflows/reusable-integration-test-v1.yml@develop
     with:
