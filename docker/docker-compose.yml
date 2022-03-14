@@ -93,6 +93,7 @@ services:
   godwoken:
     image: ghcr.io/flouse/godwoken-prebuilds:v1.0.x-202203101259
     environment:
+      RUST_LOG: info,gw_generator=debug
       GODWOKEN_MODE: fullnode
       RUST_BACKTRACE: full
       PRIVATE_KEY_PATH: /private_key
