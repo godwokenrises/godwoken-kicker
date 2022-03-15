@@ -1015,32 +1015,47 @@ start() {
         export COMPOSE_PROFILES=gw_readonly_node,$COMPOSE_PROFILES
     fi
 
-    cd docker
-    echo COMPOSE_PROFILES=$COMPOSE_PROFILES
-    FORCE_GODWOKEN_REDEPLOY=false docker-compose --env-file .build.mode.env up -d --build > /dev/null
+    options=""
+    if [ $ENABLE_MULTI_CKB_NODES == "true" ]; then
+        options="$options -f docker/chaos.compose.yml"
+    fi
+    if [ $MANUAL_BUILD_GODWOKEN = "true" ]; then
+        options="$options -f docker/manual-godwoken.compose.yml"
+    fi
+    if [ $MANUAL_BUILD_WEB3 = "true" ]; then
+        options="$options -f docker/manual-web3.compose.yml"
+    fi
+    if [ $MANUAL_BUILD_WEB3_INDEXER = "true" ]; then
+        options="$options -f docker/manual-web3-indexer.compose.yml"
+    fi
+
+    echo "FORCE_GODWOKEN_REDEPLOY=false docker-compose --env-file docker/.build.mode.env $options up -d --build > /dev/null"
+    FORCE_GODWOKEN_REDEPLOY=false docker-compose -f docker/docker-compose.yml $options --env-file docker/.build.mode.env up -d --build > /dev/null
 }
 
 # dev accounts:
 # 1. deposit for block_producer
 # 2. deposit for meta_user as the eth_address_registor
 deposit_for_two_dev_accounts() {    
-    echo ">>> Use gw-tools to deposit for 2 dev accounts in ckb/specs/dev.toml"
+    # this function will be removed later
+    echo "pass"
+    # echo ">>> Use gw-tools to deposit for 2 dev accounts in ckb/specs/dev.toml"
 
-    cd docker
-    docker-compose --env-file .build.mode.env exec -T -w/code/workspace godwoken bash -c "
-        bin/gw-tools deposit-ckb \
-        --privkey-path deploy/private_key \
-        --ckb-rpc http://ckb:8114 \
-        --scripts-deployment-path deploy/scripts-deploy-result.json \
-        --godwoken-rpc-url http://localhost:8119 \
-        --config-path config.toml \
-        --capacity 10000 &
-        bin/gw-tools deposit-ckb \
-        --privkey-path deploy/meta_user_private_key \
-        --ckb-rpc http://ckb:8114 \
-        --scripts-deployment-path deploy/scripts-deploy-result.json \
-        --godwoken-rpc-url http://localhost:8119 \
-        --config-path config.toml \
-        --capacity 10000
-    "
+    # cd docker
+    # docker-compose --env-file .build.mode.env exec -T -w/code/workspace godwoken bash -c "
+    #     bin/gw-tools deposit-ckb \
+    #     --privkey-path deploy/private_key \
+    #     --ckb-rpc http://ckb:8114 \
+    #     --scripts-deployment-path deploy/scripts-deploy-result.json \
+    #     --godwoken-rpc-url http://localhost:8119 \
+    #     --config-path config.toml \
+    #     --capacity 10000 &
+    #     bin/gw-tools deposit-ckb \
+    #     --privkey-path deploy/meta_user_private_key \
+    #     --ckb-rpc http://ckb:8114 \
+    #     --scripts-deployment-path deploy/scripts-deploy-result.json \
+    #     --godwoken-rpc-url http://localhost:8119 \
+    #     --config-path config.toml \
+    #     --capacity 10000
+    # "
 }
