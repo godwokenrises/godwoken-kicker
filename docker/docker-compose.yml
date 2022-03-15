@@ -71,7 +71,7 @@ services:
       STORE_PATH: /var/lib/layer2/data
       PRIVATE_KEY_PATH: /private_key
       META_USER_PRIVATE_KEY_PATH: /meta_user_private_key
-      GITHUB_RUN_ID: $GITHUB_RUN_ID
+      GITHUB_RUN_ID: ${GITHUB_RUN_ID:-""}
     volumes:
       - ./layer2:/var/lib/layer2
       - ../config/private_key:/private_key
