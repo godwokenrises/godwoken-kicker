@@ -3,7 +3,7 @@
 ## Requirement
 
 - [docker](https://www.docker.com/)
-- [docker-compose >= 1.28.0](https://docs.docker.com/compose/)
+- [docker-compose >= 1.29.0](https://docs.docker.com/compose/)
 
 ---
 
