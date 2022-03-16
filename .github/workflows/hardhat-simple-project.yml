@@ -23,7 +23,7 @@ jobs:
       - run: ./kicker -- top
       - run: ./kicker -- exec -i ckb ls -l
       - run: ./kicker -- help
-      - run: ./kicker deposit config/private_key 1000
+      - run: ./kicker deposit 0xCD1d13450cFA630728D0390C99957C6948BF7d19 1000
 
       - run: echo "Part 2. Deploy A Simple Contract Using Hardhat"
       - run: git clone --depth=1 https://github.com/NomicFoundation/hardhat
@@ -31,7 +31,7 @@ jobs:
         working-directory: hardhat/packages/hardhat-core/sample-projects/basic/
       - name: Adapt hardhat.config.js to our local network of Godwoken
         run: |
-          sed -i 's#solidity:#    networks: { gw_devnet_v1: { url: `http://localhost:8024`, accounts: [`0x6cd5e7be2f6504aa5ae7c0c04178d8f47b7cfc63b71d95d9e6282f5b090431bf`, `0xdd50cac37ec6dd12539a968c1a2cbedda75bd8724f7bcad486548eaabb87fc8b`], } }, solidity:#g' hardhat.config.js
+          sed -i 's#solidity:#    networks: { gw_devnet_v1: { url: `http://127.0.0.1:8024`, accounts: [`0x9d5bc55413c14cf4ce360a6051eacdc0e580100a0d3f7f2f48f63623f6b05361`], } }, solidity:#g' hardhat.config.js
           cat hardhat.config.js
         working-directory: hardhat/packages/hardhat-core/sample-projects/basic/
       - run: npx hardhat accounts --network gw_devnet_v1

@@ -30,14 +30,17 @@ module.exports = {
 
   networks: {
     gw_devnet_v1: {
-      url: `http://localhost:8024`,
-      accounts: [`0x6cd5e7be2f6504aa5ae7c0c04178d8f47b7cfc63b71d95d9e6282f5b090431bf`, `0xdd50cac37ec6dd12539a968c1a2cbedda75bd8724f7bcad486548eaabb87fc8b`],
+      url: `http://127.0.0.1:8024`,
+      accounts: [`0x9d5bc55413c14cf4ce360a6051eacdc0e580100a0d3f7f2f48f63623f6b05361`],
     }
   },
 
   ...
 }
 ```
+
+* `http://127.0.0.1:8024` is the Godwoken Web3 URL, which should be deployed at [deploy-a-local-network-of-godwoken-using-godwoken-kicker](./kicker-start.md#deploy-a-local-network-of-godwoken-using-godwoken-kicker)
+* `0x9d5bc55413c14cf4ce360a6051eacdc0e580100a0d3f7f2f48f63623f6b05361` is the private key of account we used at [deposit-some-ckb-to-layer2-account](./kicker-start.md#deposit-some-ckb-to-layer2-account). You can replace it with your testing keys.
 
 ### Run hardhat on our local network of Godwoken by `--network gw_devnet_v1`
 
