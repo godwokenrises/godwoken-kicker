@@ -4,6 +4,8 @@
 
 **Please make sure you have [deployed the local network of Godwoken](./kicker-start.md) before trying this document.**
 
+[`.github/workflows/hardhat-simple-project.yml`](../.github/workflows/hardhat-simple-project.yml) is a GitHub Actions workflow that completes all tasks associated with this document.
+
 ### Prepare a simple hardhat project
 
 ```sh
