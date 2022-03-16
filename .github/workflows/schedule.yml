@@ -5,12 +5,12 @@ on:
 
 jobs:
   scheduled-tests:
-    uses: nervosnetwork/godwoken-tests/.github/workflows/reusable-integration-test-v1.yml@kicker-make-init
+    uses: nervosnetwork/godwoken-tests/.github/workflows/reusable-integration-test-v1.yml@develop
     with:
       kicker_ref: "compatibility-changes"
 
   scheduled-manual-build-tests:
-    uses: nervosnetwork/godwoken-tests/.github/workflows/reusable-integration-test-v1.yml@kicker-make-init
+    uses: nervosnetwork/godwoken-tests/.github/workflows/reusable-integration-test-v1.yml@develop
     with:
       kicker_ref:     "compatibility-changes"
       godwoken_ref:   "compatibility-breaking-changes"
