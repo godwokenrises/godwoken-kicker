@@ -4,7 +4,6 @@ on:
     # Publish semver tags as releases.
     tags: ["v*.*.*"]
   pull_request:
-    branches: [master, develop, compatibility-changes]
 
 jobs:
   startup-test:
@@ -17,27 +16,39 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: output kicker version
+      - name: output kicker environment variables
         run: make version
 
-      - name: start kicker
-        run: |
-          make init && make start
-          docker-compose --file docker/docker-compose.yml logs --tail 6
+      - name: make init
+        run: make init
 
-      - name: make sure kicker is starting..
-        timeout-minutes: 15
+      - name: make start
+        timeout-minutes: 20
         run: make start
 
-      - name: stop kicker
+      - name: make sure kicker is starting..
+        timeout-minutes: 2
+        run: make start
+
+      - name: make down
         run: make down
 
       - name: restart kicker
         run: make start
 
-  integration-test:
-    uses: nervosnetwork/godwoken-tests/.github/workflows/reusable-integration-test-v1.yml@develop
-    with:
-      # github.head_ref: The head_ref or source branch of the pull request in a workflow run. This property is only available when the event that triggers a workflow run is either pull_request or pull_request_target.
-      # github.ref: The branch or tag ref that triggered the workflow run. For branches this is the format refs/heads/<branch_name>, and for tags it is refs/tags/<tag_name>.
-      kicker_ref: ${{ github.head_ref || github.ref }}
+      - name: print kicker logs
+        if: ${{ always() }}
+        run: docker-compose --file docker/docker-compose.yml logs
+
+      - name: make stop
+        run: make stop
+
+      - name: make clean
+        run: sudo make clean
+
+      - name: re-deploy after clean
+        run: make start
+
+      - name: print kicker logs
+        if: ${{ always() }}
+        run: docker-compose --file docker/docker-compose.yml logs

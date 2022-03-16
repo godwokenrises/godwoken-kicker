@@ -1,0 +1,19 @@
+on:
+  schedule:
+    # Trigger every 6 hours. https://crontab.guru/every-6-hours
+    - cron: '0 */6 * * *'
+
+jobs:
+  scheduled-tests:
+    uses: nervosnetwork/godwoken-tests/.github/workflows/reusable-integration-test-v1.yml@kicker-make-init
+    with:
+      kicker_ref: "compatibility-changes"
+
+  scheduled-manual-build-tests:
+    uses: nervosnetwork/godwoken-tests/.github/workflows/reusable-integration-test-v1.yml@kicker-make-init
+    with:
+      kicker_ref:     "compatibility-changes"
+      godwoken_ref:   "compatibility-breaking-changes"
+      gw_scripts_ref: "compatibility-breaking-changes"
+      polyjuice_ref:  "compatibility-breaking-changes"
+      web3_ref:       "compatibility-breaking-changes"
