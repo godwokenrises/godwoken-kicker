@@ -3,6 +3,8 @@ on:
     # Trigger every 6 hours. https://crontab.guru/every-6-hours
     - cron: '0 */6 * * *'
 
+  pull_request:
+
 jobs:
   scheduled-tests:
     uses: nervosnetwork/godwoken-tests/.github/workflows/reusable-integration-test-v1.yml@develop
