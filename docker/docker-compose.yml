@@ -41,7 +41,7 @@ services:
   # "nervos/ckb" image have no http clients to do health check for CKB.
   # This short-term service act as a workaround to do health check.
   check-ckb-started-successfully:
-    image: ghcr.io/flouse/godwoken-prebuilds:v1.0.x-202203101259
+    image: ghcr.io/flouse/godwoken-prebuilds:v1.0.x-202203160423
     volumes:
       - ./layer1/ckb:/var/lib/ckb
     entrypoint: /var/lib/ckb/check-ckb-started-successfully.sh
@@ -62,7 +62,7 @@ services:
         condition: service_completed_successfully
 
   setup-godwoken:
-    image: ghcr.io/flouse/godwoken-prebuilds:v1.0.x-202203101259
+    image: ghcr.io/flouse/godwoken-prebuilds:v1.0.x-202203160423
     environment:
       POSTGRES_USER: user
       POSTGRES_DB: lumos
@@ -91,7 +91,7 @@ services:
         condition: service_started
 
   godwoken:
-    image: ghcr.io/flouse/godwoken-prebuilds:v1.0.x-202203101259
+    image: ghcr.io/flouse/godwoken-prebuilds:v1.0.x-202203160423
     environment:
       RUST_LOG: info,gw_generator=debug
       GODWOKEN_MODE: fullnode
@@ -113,7 +113,7 @@ services:
         condition: service_started
 
   check-godwoken-started-successfully:
-    image: ghcr.io/flouse/godwoken-prebuilds:v1.0.x-202203101259
+    image: ghcr.io/flouse/godwoken-prebuilds:v1.0.x-202203160423
     volumes:
       - ./layer2/:/var/lib/layer2
     entrypoint: /var/lib/layer2/check-godwoken-started-successfully.sh
