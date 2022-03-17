@@ -211,6 +211,9 @@ function deposit-and-create-polyjuice-creator-account() {
     > /var/tmp/gw-tools.log 2>&1
     stop-godwoken
 
+    # update block_producer.account_id
+    sed -i 's#^account_id = .*$#account_id = 2#' $CONFIG_DIR/godwoken-config.toml
+
     cat /var/tmp/gw-tools.log
     tail -n 1 /var/tmp/gw-tools.log | grep -oE '[0-9]+$' > $CONFIG_DIR/polyjuice-creator-account-id
 
