@@ -28,7 +28,8 @@ function usage() {
     echo "  logs [service]          Tail target service's logs"
     echo "  enter <service>         Enter target service's container"
     echo "  manual-build            Manually build services artifacts"
-    echo "  deposit <privkey-path> <capacity>   Deposit from layer1(CKB network) to layer2 Godwoken network"
+    echo "  deposit <eth-address> <amount>  Deposit CKB to layer2"
+    echo "  get-balance <eth-address>       Get layer2 balance"
     echo
     echo "EXAMPLES:"
     echo "  * Deploy the local network and print service info"
@@ -38,7 +39,8 @@ function usage() {
     echo
     echo "  * Deposit 1000CKB from layer1 to layer2"
     echo
-    echo "    $ $EXECUTABLE deposit config/private_key 1000"
+    echo "    $ $EXECUTABLE deposit 0x618cc3C660cEBFDbA8570CA739b1744AE3E2553a 1000"
+    echo "    $ $EXECUTABLE get-balance 0x618cc3C660cEBFDbA8570CA739b1744AE3E2553a"
     echo
     echo "  * Redeploy the local network"
     echo
@@ -111,17 +113,7 @@ function stop() {
 }
 
 function info_() {
-    if [ "$(cat $WORKSPACE/config/private_key)" != "0xdd50cac37ec6dd12539a968c1a2cbedda75bd8724f7bcad486548eaabb87fc8b" ]; then
-        error "\"$EXECUTABLE info\" cannot work now"
-        exit 1
-    fi
-    
     echo "Web3 RPC URL: http://127.0.0.1:8024"
-    echo "Accounts:"
-    echo "  - Private Key: 0xdd50cac37ec6dd12539a968c1a2cbedda75bd8724f7bcad486548eaabb87fc8b"
-    echo "    ETH Address: 0x0C1EfCCa2Bcb65A532274f3eF24c044EF4ab6D73"
-    echo "  - Private Key: 0x6cd5e7be2f6504aa5ae7c0c04178d8f47b7cfc63b71d95d9e6282f5b090431bf"
-    echo "    ETH Address: 0x6DaF63D8411D6E23552658E3cFb48416A6A2CA78"
 }
 
 function clean() {
@@ -175,28 +167,70 @@ function enter() {
     compose exec "$service" /bin/bash
 }
 
+# @example deposit "0x0C1EfCCa2Bcb65A532274f3eF24c044EF4ab6D73" 1000
 function deposit() {
-    pkpath=${1:?"\"$EXECUTABLE deposit\" requires privkey path as 1st argument"}
-    capacity=${2:?"\"$EXECUTABLE deposit\" requires capacity as 2nd argument"}
+    ethaddr=${1:?"\"$EXECUTABLE deposit\" requires eth address as 1st argument"}
+    amount=${2:?"\"$EXECUTABLE deposit\" requires amount as 2nd argument"}
 
+    pkpath=${PRIVATE_KEY_PATH:-"$WORKSPACE/config/private_key"}
     if [ ! -f $pkpath ]; then
         error "$pkpath: No such file or directory"
         exit 1
     fi
 
     abspkpath="$( cd -- "$(dirname "$pkpath")" >/dev/null 2>&1 ; pwd -P )/$(basename $pkpath)"
-    compose run --no-deps \
+    docker-compose -f docker/docker-compose.yml run \
+        --no-deps \
         --use-aliases \
         --volume=$WORKSPACE/docker/layer2/config:/config \
         --volume=$abspkpath:/privkey-path \
-        --entrypoint "\"gw-tools deposit-ckb \
+        --entrypoint "gw-tools deposit-ckb \
                 --godwoken-rpc-url http://godwoken:8119 \
                 --ckb-rpc http://ckb:8114 \
                 --scripts-deployment-path /config/scripts-deployment.json \
                 --config-path /config/godwoken-config.toml \
                 --privkey-path /privkey-path \
-                --capacity $capacity\"" \
+                --eth-address $ethaddr \
+                --capacity $amount" \
         godwoken
+}
+
+# Note that this function MUST be in tty mode.
+# @example get-balance "0x0C1EfCCa2Bcb65A532274f3eF24c044EF4ab6D73"
+function get-balance() {
+    ethaddr=${1:?"\"$EXECUTABLE deposit\" requires eth address as 1st argument"}
+    pkpath=$WORKSPACE/config/private_key
+    if [ ! -f $pkpath ]; then
+        error "$pkpath: No such file or directory"
+        exit 1
+    fi
+
+    abspkpath="$( cd -- "$(dirname "$pkpath")" >/dev/null 2>&1 ; pwd -P )/$(basename $pkpath)"
+    short_script_hash=$(to-short-script-hash "$ethaddr")
+    docker-compose -f docker/docker-compose.yml run \
+        --no-deps \
+        --use-aliases \
+        --volume=$WORKSPACE/docker/layer2/config:/config \
+        --volume=$abspkpath:/privkey-path \
+        --entrypoint "gw-tools get-balance \
+            --godwoken-rpc-url http://godwoken:8119 \
+            --account $short_script_hash" \
+        godwoken
+}
+
+# @to-short-script-hash "0x0C1EfCCa2Bcb65A532274f3eF24c044EF4ab6D73"
+function to-short-script-hash() {
+    ethaddr=${1:?"\"$EXECUTABLE deposit\" requires eth address as 1st argument"}
+    output=$(docker-compose -f docker/docker-compose.yml run \
+        --no-deps \
+        --use-aliases \
+        --volume=$WORKSPACE/docker/layer2/config:/config \
+        --entrypoint "gw-tools to-short-script-hash \
+            --config-path /config/godwoken-config.toml \
+            --scripts-deployment-path /config/scripts-deployment.json \
+            --eth-address $ethaddr" \
+            godwoken)
+    echo "$output" | grep -oE '0x.*'
 }
 
 # @example MANUAL_BUILD_WEB3=true \
@@ -363,6 +397,9 @@ function main() {
             ;;
         "deposit")
             deposit "$@"
+            ;;
+        "get-balance")
+            get-balance "$@"
             ;;
         "manual-build")
             manual-build

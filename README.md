@@ -11,7 +11,7 @@ One line command to start a local network of [Godwoken](https://github.com/nervo
 
 ## Getting Started
 
-1. [Deploy local network of Godwoken using Godwoken-Kicker](./docs/kicker-start.md)
+1. [Deploy local network of Godwoken](./docs/kicker-start.md)
 
 2. [Deploy a simple contract using Hardhat](./docs/hardhat-simple-project.md)
 
