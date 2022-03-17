@@ -1,4 +1,7 @@
 FROM ubuntu:20.04
+
+LABEL description="An all-in-one builder image for compiling Godwoken components"
+
 USER root
 ENV DEBIAN_FRONTEND=noninteractive
 
