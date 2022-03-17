@@ -1,0 +1,33 @@
+{
+   "allowed_contract_type_hashes" : [],
+   "allowed_eoa_type_hashes" : [],
+   "burn_lock" : {
+      "args" : "0x",
+      "code_hash" : "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "hash_type" : "data"
+   },
+   "cells_lock" : {
+      "args" : "0x0000000000000000000000000000000000000000",
+      "code_hash" : "0x1111111111111111111111111111111111111111111111111111111111111111",
+      "hash_type" : "type"
+   },
+   "challenge_maturity_blocks" : 100,
+   "compatible_chain_id" : 1984,
+   "finality_blocks" : 100,
+   "l1_sudt_cell_dep" : {
+      "dep_type" : "code",
+      "out_point" : {
+         "index" : "0x5",
+         "tx_hash" : "0xd95e83a9d7d477d6d87b8033591247d91eebf2e780bc4c6367ba1cbb4db21d5e"
+      }
+   },
+   "l1_sudt_script_type_hash" : "0x6283a479a3cf5d4276cd93594de9f1827ab9b55c7b05b3d28e4c2e0a696cfefd",
+   "required_staking_capacity" : 10000000000,
+   "reward_burn_rate" : 50,
+   "reward_lock" : {
+      "args" : "0x74e5c89172c5d447819f1629743ef2221df083be",
+      "code_hash" : "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
+      "hash_type" : "type"
+   }
+}
+

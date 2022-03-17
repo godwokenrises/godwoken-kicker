@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# NOTE: In `config/rollup-config.json`, `l1_sudt_cell_dep` identifies the l1_sudt cell located at the genesis block of CKB. Please type `ckb -C docker/layer1/ckb list-hash` for more information.
+
 set -o errexit
 
 WORKSPACE="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
@@ -66,69 +68,6 @@ function deploy-scripts() {
     stop-ckb-miner
 
     log "Generate file \"$CONFIG_DIR/scripts-deployment.json\""
-}
-
-function generate-rollup-config() {
-    log "start"
-    rollup_config='{
-        "l1_sudt_script_type_hash": "L1_SUDT_SCRIPT_TYPE_HASH",
-        "l1_sudt_cell_dep": {
-            "dep_type": "code",
-            "out_point": {
-            "tx_hash": "L1_SUDT_CELL_DEP_OUT_POINT_TX_HASH",
-            "index": "L1_SUDT_CELL_DEP_OUT_POINT_INDEX"
-            }
-        },
-        "cells_lock": {
-            "code_hash": "0x1111111111111111111111111111111111111111111111111111111111111111",
-            "hash_type": "type",
-            "args": "0x0000000000000000000000000000000000000000"
-        },
-        "reward_lock": {
-            "code_hash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
-            "hash_type": "type",
-            "args": "0x74e5c89172c5d447819f1629743ef2221df083be"
-        },
-        "burn_lock": {
-            "code_hash": "0x0000000000000000000000000000000000000000000000000000000000000000",
-            "hash_type": "data",
-            "args": "0x"
-        },
-        "required_staking_capacity": 10000000000,
-        "challenge_maturity_blocks": 100,
-        "finality_blocks": 100,
-        "reward_burn_rate": 50,
-        "compatible_chain_id": 1984,
-        "allowed_eoa_type_hashes": [],
-        "allowed_contract_type_hashes": []
-    }'
-
-    if [ -s "$CONFIG_DIR/rollup-config.json" ]; then
-        log "$CONFIG_DIR/rollup-config.json already exists, skip"
-        return 0
-    fi
-    if [ ! -s "$CONFIG_DIR/scripts-deployment.json" ]; then
-        log "$CONFIG_DIR/scripts-deployment.json does not exist"
-        return 1
-    fi
-
-    l1_sudt_script_type_hash=$(get_value2 "$CONFIG_DIR/scripts-deployment.json" "l2_sudt_validator" "script_type_hash")
-    l1_sudt_cell_dep_out_point_tx_hash=$(get_value2 "$CONFIG_DIR/scripts-deployment.json" "l2_sudt_validator" "tx_hash")
-    l1_sudt_cell_dep_out_point_index=$(get_value2 "$CONFIG_DIR/scripts-deployment.json" "l2_sudt_validator" "index")
-    if [ -z "$l1_sudt_script_type_hash" ]; then
-        log "Can not find l2_sudt_validator.script_type_hash from $CONFIG_DIR/scripts-deployment.json"
-        return 1
-    fi
-
-    echo "$rollup_config" \
-        | sed "s/L1_SUDT_SCRIPT_TYPE_HASH/$l1_sudt_script_type_hash/g" \
-        | sed "s/L1_SUDT_CELL_DEP_OUT_POINT_TX_HASH/$l1_sudt_cell_dep_out_point_tx_hash/g" \
-        | sed "s/L1_SUDT_CELL_DEP_OUT_POINT_INDEX/$l1_sudt_cell_dep_out_point_index/g" \
-        > $CONFIG_DIR/rollup-config.json
-    if [ "$GITHUB_RUN_ID" != "" ] ; then
-        sed -i 's/"finality_blocks": .$/"finality_blocks": 3/' $CONFIG_DIR/rollup-config.json
-    fi
-    log "Generate file \"$CONFIG_DIR/rollup-config.json\""
 }
 
 function deploy-rollup-genesis() {
@@ -347,7 +286,6 @@ function log() {
 
 function main() {
     deploy-scripts
-    generate-rollup-config
     deploy-rollup-genesis
     generate-godwoken-config
     deposit-and-create-polyjuice-creator-account
