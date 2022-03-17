@@ -44,7 +44,6 @@ plugins/gw-schema/tmp
 /docker/layer1/ckb3/data/
 /docker/layer2/data/
 /docker/layer2/config/scripts-deployment.json
-/docker/layer2/config/rollup-config.json
 /docker/layer2/config/rollup-genesis-deployment.json
 /docker/layer2/config/godwoken-config.toml
 /docker/layer2/config/polyjuice-creator-account-id

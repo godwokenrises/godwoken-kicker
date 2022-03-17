@@ -126,7 +126,6 @@ function clean() {
 
 	echo "rm -rf docker/layer2/data/"
 	echo "rm -f  docker/layer2/config/scripts-deployment.json"
-	echo "rm -f  docker/layer2/config/rollup-config.json"
 	echo "rm -f  docker/layer2/config/rollup-genesis-deployment.json"
 	echo "rm -f  docker/layer2/config/godwoken-config.toml"
 	echo "rm -f  docker/layer2/config/polyjuice-creator-account-id"
@@ -140,7 +139,6 @@ function clean() {
 	echo "rm -rf docker/redis/data"
 	rm -rf docker/layer2/data/
 	rm -f  docker/layer2/config/scripts-deployment.json
-	rm -f  docker/layer2/config/rollup-config.json
 	rm -f  docker/layer2/config/rollup-genesis-deployment.json
 	rm -f  docker/layer2/config/godwoken-config.toml
 	rm -f  docker/layer2/config/polyjuice-creator-account-id
