@@ -117,8 +117,8 @@ function info_() {
 }
 
 function clean() {
-    n_alive=$(compose ps --quiet | grep -oE '[0-9a-z]{64}' | wc -l)
-    if [ "$n_alive" != "0" ]; then
+    n_alive=$(compose ps --quiet | grep -oE '[0-9a-z]{64}' | wc -l | tr -d " ")
+    if [ $n_alive != 0 ]; then
         error "Ensure container services are down"
         compose ps
         exit 1
