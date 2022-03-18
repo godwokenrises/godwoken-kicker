@@ -99,7 +99,6 @@ function generate-godwoken-config() {
     RUST_BACKTRACE=full gw-tools generate-config \
         --ckb-rpc http://ckb:8114 \
         --ckb-indexer-rpc http://ckb-indexer:8116 \
-        -d postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@postgres:5432/$POSTGRES_DB \
         -c $CONFIG_DIR/scripts-config.json \
         --scripts-deployment-path $CONFIG_DIR/scripts-deployment.json \
         --omni-lock-config-path $CONFIG_DIR/scripts-deployment.json \
