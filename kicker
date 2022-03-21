@@ -128,7 +128,7 @@ function clean() {
 	echo "rm -f  docker/layer2/config/scripts-deployment.json"
 	echo "rm -f  docker/layer2/config/rollup-genesis-deployment.json"
 	echo "rm -f  docker/layer2/config/godwoken-config.toml"
-	echo "rm -f  docker/layer2/config/polyjuice-creator-account-id"
+	echo "rm -f  docker/layer2/config/polyjuice-root-account-id"
 	echo "rm -f  docker/layer2/config/web3-config.env"
 	echo "rm -f  docker/layer2/config/web3-indexer-config.toml"
 	echo "rm -rf docker/ckb-indexer/"
@@ -141,7 +141,7 @@ function clean() {
 	rm -f  docker/layer2/config/scripts-deployment.json
 	rm -f  docker/layer2/config/rollup-genesis-deployment.json
 	rm -f  docker/layer2/config/godwoken-config.toml
-	rm -f  docker/layer2/config/polyjuice-creator-account-id
+	rm -f  docker/layer2/config/polyjuice-root-account-id
 	rm -f  docker/layer2/config/web3-config.env
 	rm -f  docker/layer2/config/web3-indexer-config.toml
 	rm -rf docker/ckb-indexer/
@@ -170,7 +170,7 @@ function deposit() {
     ethaddr=${1:?"\"$EXECUTABLE deposit\" requires eth address as 1st argument"}
     amount=${2:?"\"$EXECUTABLE deposit\" requires amount as 2nd argument"}
 
-    pkpath=${PRIVATE_KEY_PATH:-"$WORKSPACE/config/private_key"}
+    pkpath=${PRIVATE_KEY_PATH:-"$WORKSPACE/accounts/ckb-miner-and-faucet.key"}
     if [ ! -f $pkpath ]; then
         error "$pkpath: No such file or directory"
         exit 1
@@ -196,20 +196,11 @@ function deposit() {
 # Note that this function MUST be in tty mode.
 # @example get-balance "0x0C1EfCCa2Bcb65A532274f3eF24c044EF4ab6D73"
 function get-balance() {
-    ethaddr=${1:?"\"$EXECUTABLE deposit\" requires eth address as 1st argument"}
-    pkpath=$WORKSPACE/config/private_key
-    if [ ! -f $pkpath ]; then
-        error "$pkpath: No such file or directory"
-        exit 1
-    fi
-
-    abspkpath="$( cd -- "$(dirname "$pkpath")" >/dev/null 2>&1 ; pwd -P )/$(basename $pkpath)"
+    ethaddr=${1:?"\"$EXECUTABLE get-balance\" requires eth address as 1st argument"}
     short_script_hash=$(to-short-script-hash "$ethaddr")
     docker-compose -f docker/docker-compose.yml run \
         --no-deps \
         --use-aliases \
-        --volume=$WORKSPACE/docker/layer2/config:/config \
-        --volume=$abspkpath:/privkey-path \
         --entrypoint "gw-tools get-balance \
             --godwoken-rpc-url http://godwoken:8119 \
             --account $short_script_hash" \
@@ -218,7 +209,7 @@ function get-balance() {
 
 # @to-short-script-hash "0x0C1EfCCa2Bcb65A532274f3eF24c044EF4ab6D73"
 function to-short-script-hash() {
-    ethaddr=${1:?"\"$EXECUTABLE deposit\" requires eth address as 1st argument"}
+    ethaddr=${1:?"\"$EXECUTABLE to-short-script-hash\" requires eth address as 1st argument"}
     output=$(docker-compose -f docker/docker-compose.yml run \
         --no-deps \
         --use-aliases \

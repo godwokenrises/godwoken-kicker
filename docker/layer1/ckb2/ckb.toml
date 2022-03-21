@@ -142,6 +142,6 @@ block_uncles_cache_size    = 30
 # secp256k1_blake160_sighash_all example:
 [block_assembler]
 code_hash = "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8"
-args = "0xc48a45e11c66b2c8b5c61f6036486ad4d9d2fd29"
+args = "0xdc04beb375b61f98f94f0d5ea30387e8912aea72"
 hash_type = "type"
 message = "0x"

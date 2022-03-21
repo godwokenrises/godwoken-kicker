@@ -70,18 +70,40 @@ lock.code_hash = "0x000000000000000000000000000000000000000000000000000000000000
 lock.args = "0x62e907b15cbf27d5425399ebf6f0fb50ebb88f18"
 lock.hash_type = "data"
 
-# issue for miner private key: 0xdd50cac37ec6dd12539a968c1a2cbedda75bd8724f7bcad486548eaabb87fc8b
+# ckb miner / ckb faucet
+# private key: 0x650e256211f5e0beee9084596aa2cb84d11eb033cced5e2d5b191593a9f9f1d4
+# private key path: accounts/ckb-miner-and-faucet.key
 [[genesis.issued_cells]]
 capacity = 20_000_000_000_00000000
 lock.code_hash = "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8"
-lock.args = "0x43d509d97f26007a285f39241cffcd411157196c"
+lock.args = "0xa1db2eef3f29f3ef6f86c8d2a0772c705c449f4a"
 lock.hash_type = "type"
 
-# issue for another user pre-defined private key: 0x6cd5e7be2f6504aa5ae7c0c04178d8f47b7cfc63b71d95d9e6282f5b090431bf
+# godwoken block producer
+# private key: 0x182ee410e8d11e7cc7ef4e46999569ffc49060b76b2eecec1865b592bedeb178
+# private key path: accounts/godwoken-block-producer.key
 [[genesis.issued_cells]]
-capacity = 5_198_735_037_00000000
+capacity = 20_000_000_000_00000000
 lock.code_hash = "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8"
-lock.args = "0x952809177232d0dba355ba5b6f4eaca39cc57746"
+lock.args = "0x1d4b2a15f55ba1aa035f64ad6080e0943cc5ec0b"
+lock.hash_type = "type"
+
+# godwoken eoa register
+# private key: 0x751bce00b384d4a6f65034346761c66aa958072163eb5bd1f6f8bd300dc11b9f
+# private key path: accounts/godwoken-eoa-register-and-polyjuice-root-account.key
+[[genesis.issued_cells]]
+capacity = 20_000_000_000_00000000
+lock.code_hash = "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8"
+lock.args = "0x2fb2d69092a6c9206c7f5c2348ebf0a84438bcf2"
+lock.hash_type = "type"
+
+# rollup scripts deployer (will be removed soon)
+# private key: 0x17523ffa1828c009fbcaba19a08ecb57c39c1423932762c55906ff781adb3afa
+# private key path: accounts/rollup-scripts-deployer.key
+[[genesis.issued_cells]]
+capacity = 20_000_000_000_00000000
+lock.code_hash = "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8"
+lock.args = "0x59ae1262575c460cc26f9c91823b2926bea1bfda"
 lock.hash_type = "type"
 
 [params]
