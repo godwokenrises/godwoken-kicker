@@ -4,6 +4,7 @@
 
 - [docker](https://www.docker.com/)
 - [docker-compose >= 1.29.0](https://docs.docker.com/compose/)
+- [jq](https://stedolan.github.io/jq/)
 
 ---
 

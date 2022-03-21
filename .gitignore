@@ -42,6 +42,9 @@ plugins/gw-schema/tmp
 /docker/layer1/ckb/data/
 /docker/layer1/ckb2/data/
 /docker/layer1/ckb3/data/
+/docker/layer1/ckb/specs/scripts/
+/docker/layer1/ckb2/specs/scripts/
+/docker/layer1/ckb3/specs/scripts/
 /docker/layer2/data/
 /docker/layer2/config/scripts-deployment.json
 /docker/layer2/config/rollup-genesis-deployment.json
@@ -49,4 +52,6 @@ plugins/gw-schema/tmp
 /docker/layer2/config/polyjuice-creator-account-id
 /docker/layer2/config/web3-config.env
 /docker/layer2/config/web3-indexer-config.toml
+/docker/layer2/config/rollup-config.json
+/docker/layer2/config/ckb-list-hashes.toml
 /docker/manual-artifacts/

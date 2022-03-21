@@ -17,11 +17,11 @@
    "l1_sudt_cell_dep" : {
       "dep_type" : "code",
       "out_point" : {
-         "index" : "0x5",
-         "tx_hash" : "0xd95e83a9d7d477d6d87b8033591247d91eebf2e780bc4c6367ba1cbb4db21d5e"
+         "index" : "<l1_sudt_index>",
+         "tx_hash" : "<l1_sudt_tx_hash>"
       }
    },
-   "l1_sudt_script_type_hash" : "0x6283a479a3cf5d4276cd93594de9f1827ab9b55c7b05b3d28e4c2e0a696cfefd",
+   "l1_sudt_script_type_hash" : "<l1_sudt_type_hash>",
    "required_staking_capacity" : 10000000000,
    "reward_burn_rate" : 50,
    "reward_lock" : {

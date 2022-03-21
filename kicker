@@ -102,6 +102,7 @@ function start() {
     echo -e "\033[0;33mNOTE: The docker-compose version should be newer than 1.28.0\033[0m"
     echo -e "\033[0;33mNOTE: This might take several minutes on the first run\033[0m"
     echo
+    customize-ckb-chain-spec
     compose up -d --build
     if [ "$?" = "0" ]; then
         info "Services started successfully"
@@ -119,35 +120,45 @@ function info_() {
 function clean() {
     n_alive=$(compose ps --quiet | grep -oE '[0-9a-z]{64}' | wc -l | tr -d " ")
     if [ $n_alive != 0 ]; then
-        error "Ensure container services are down"
+        error "Please make sure that container services are down by \`$EXECUTABLE stop\`"
         compose ps
         exit 1
     fi
 
 	echo "rm -rf docker/layer2/data/"
 	echo "rm -f  docker/layer2/config/scripts-deployment.json"
+	echo "rm -f  docker/layer2/config/rollup-config.json"
 	echo "rm -f  docker/layer2/config/rollup-genesis-deployment.json"
 	echo "rm -f  docker/layer2/config/godwoken-config.toml"
 	echo "rm -f  docker/layer2/config/polyjuice-creator-account-id"
 	echo "rm -f  docker/layer2/config/web3-config.env"
 	echo "rm -f  docker/layer2/config/web3-indexer-config.toml"
+    echo "rm -f docker/layer2/config/ckb-list-hashes.toml"
 	echo "rm -rf docker/ckb-indexer/"
 	echo "rm -rf docker/layer1/ckb/data/"
 	echo "rm -rf docker/layer1/ckb2/data/"
 	echo "rm -rf docker/layer1/ckb3/data/"
+    echo "rm -rf docker/layer1/ckb/specs/scripts"
+    echo "rm -rf docker/layer1/ckb2/specs/scripts"
+    echo "rm -rf docker/layer1/ckb3/specs/scripts"
 	echo "rm -rf docker/postgres/data"
 	echo "rm -rf docker/redis/data"
 	rm -rf docker/layer2/data/
 	rm -f  docker/layer2/config/scripts-deployment.json
+	rm -f  docker/layer2/config/rollup-config.json
 	rm -f  docker/layer2/config/rollup-genesis-deployment.json
 	rm -f  docker/layer2/config/godwoken-config.toml
 	rm -f  docker/layer2/config/polyjuice-creator-account-id
 	rm -f  docker/layer2/config/web3-config.env
 	rm -f  docker/layer2/config/web3-indexer-config.toml
+    rm -f docker/layer2/config/ckb-list-hashes.toml
 	rm -rf docker/ckb-indexer/
 	rm -rf docker/layer1/ckb/data/
 	rm -rf docker/layer1/ckb2/data/
 	rm -rf docker/layer1/ckb3/data/
+    rm -rf docker/layer1/ckb/specs/scripts
+    rm -rf docker/layer1/ckb2/specs/scripts
+    rm -rf docker/layer1/ckb3/specs/scripts
 	rm -rf docker/postgres/data
 	rm -rf docker/redis/data
 }
@@ -353,6 +364,89 @@ function download-repo() {
         erun git clone --depth=1 --recursive $url $dir
         erun git -C $dir fetch origin $checkout
         erun git -C $dir checkout FETCH_HEAD
+    fi
+}
+
+# 1. Copy /scripts directory of Godwoken docker image to
+#    docker/layer1/ckb*/specs/ of host machine.
+#
+# 2. Generate docker/layer2/config/scripts-deployment.json
+function customize-ckb-chain-spec() {
+    list_hashes=$WORKSPACE/docker/layer2/config/ckb-list-hashes.toml
+    scripts_config=$WORKSPACE/docker/layer2/config/scripts-config.json
+    scripts_deployment=$WORKSPACE/docker/layer2/config/scripts-deployment.json
+    rollup_config=$WORKSPACE/docker/layer2/config/rollup-config.json
+
+    if [ ! -s "$WORKSPACE/docker/layer1/ckb/specs/scripts/godwoken-scripts/challenge-lock" ]; then
+        # Copy scripts
+        compose run \
+            --no-deps \
+            --volume=$WORKSPACE/docker/layer1:/layer1 \
+            --entrypoint "\"cp -r /scripts /layer1/ckb/specs/\"" \
+            godwoken
+        compose run \
+            --no-deps \
+            --volume=$WORKSPACE/docker/layer1:/layer1 \
+            --entrypoint "\"cp -r /scripts /layer1/ckb2/specs/\"" \
+            godwoken
+        compose run \
+            --no-deps \
+            --volume=$WORKSPACE/docker/layer1:/layer1 \
+            --entrypoint "\"cp -r /scripts /layer1/ckb3/specs/\"" \
+            godwoken
+    fi
+
+    if [ ! -s "$list_hashes" ]; then
+        compose run \
+            --no-deps \
+            --entrypoint "\"ckb -C /var/lib/ckb list-hashes\"" \
+            ckb > $list_hashes
+    fi
+
+    if [ ! -s "$scripts_deployment" ]; then
+        # Generate scripts-deployment.json
+        if [ ! -s "$scripts_config" ]; then
+            error "$scripts_config: No such file or directory"
+            exit 1
+        fi
+
+        # https://stackoverflow.com/questions/35086391/jq-how-to-iterate-through-keys-of-different-names
+        programs=$(jq -r -c '.programs' $scripts_config)
+        names=$(echo $programs | jq -r -c 'keys[]')
+        for name in $names; do
+            path=$(jq -r ".programs.$name" $scripts_config)
+
+            # tr -d $'\r': https://stackoverflow.com/questions/19406418/remove-m-characters-from-file-using-sed
+            type_hash="$(grep -A 4 "$path" $list_hashes | grep type_hash | awk -F '"' '{print $2}' | tr -d $'\r"')"
+            tx_hash="$(  grep -A 4 "$path" $list_hashes | grep tx_hash   | awk -F '"' '{print $2}' | tr -d $'\r"')"
+            index="$(    grep -A 4 "$path" $list_hashes | grep index     | awk        '{print $3}' | tr -d $'\r"')"
+            index="0x$(printf %x $index)"
+
+            # https://stackoverflow.com/questions/31034746/how-do-i-update-a-single-value-in-a-json-document-using-jq
+            # https://stackoverflow.com/questions/35841309/construct-json-with-a-variable-key-using-jq
+            out_point=$(echo "{}" | \
+                jq -c --arg type_hash "$type_hash" '.script_type_hash = $type_hash' | \
+                jq -c --arg tx_hash   "$tx_hash"   '.cell_dep.out_point.tx_hash = $tx_hash' | \
+                jq -c --arg index     "$index"     '.cell_dep.out_point.index = $index' | \
+                jq -c --arg dep_type  "code"       '.cell_dep.dep_type = $dep_type')
+            programs=$(echo "$programs" | sed "s#"'"'"$path"'"'"#$out_point#g")
+        done
+        echo $programs | jq > $scripts_deployment
+    fi
+
+    if [ ! -s "$rollup_config" ]; then
+        # Generate rollup-config.json
+        type_hash="$(grep -A 4 l1_sudt $list_hashes | grep type_hash | awk -F '"' '{print $2}' | tr -d $'\r"')"
+        tx_hash="$(  grep -A 4 l1_sudt $list_hashes | grep tx_hash   | awk -F '"' '{print $2}' | tr -d $'\r"')"
+        index="$(    grep -A 4 l1_sudt $list_hashes | grep index     | awk        '{print $3}' | tr -d $'\r"')"
+        index="0x$(printf %x $index)"
+
+        cat "$rollup_config".template | \
+            jq -c --arg type_hash "$type_hash" '.l1_sudt_script_type_hash = $type_hash' | \
+            jq -c --arg tx_hash   "$tx_hash"   '.l1_sudt_cell_dep.out_point.tx_hash = $tx_hash' | \
+            jq -c --arg index     "$index"     '.l1_sudt_cell_dep.out_point.index = $index' | \
+            jq -c --arg dep_type  "code"       '.l1_sudt_cell_dep.dep_type = $dep_type' \
+            > $rollup_config
     fi
 }
 
