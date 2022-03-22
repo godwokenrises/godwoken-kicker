@@ -58,6 +58,10 @@ services:
     volumes:
       - ./ckb-indexer:/var/lib/ckb-indexer
     command: [ "-c", "http://ckb:8114", "-l", "0.0.0.0:8116", "-s", "/var/lib/ckb-indexer/data" ]
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 10
     depends_on:
       check-ckb-started-successfully:
         condition: service_completed_successfully
@@ -78,7 +82,10 @@ services:
       - ../config/private_key:/private_key
       - ../config/meta_user_private_key:/meta_user_private_key
     entrypoint: "/var/lib/layer2/setup-godwoken.sh"
-    restart: "no"
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 10
     depends_on:
       ckb:
         condition: service_started
@@ -131,6 +138,10 @@ services:
     entrypoint: /var/lib/web3/entrypoint.sh
     ports:
       - 8024:8024
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 10
     depends_on: 
       ckb:
         condition: service_started
@@ -155,6 +166,10 @@ services:
       - ./layer2/config/web3-indexer-config.toml:/var/lib/web3-indexer/indexer-config.toml
     working_dir: /var/lib/web3-indexer
     command: [ "gw-web3-indexer" ]
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 10
     depends_on: 
       web3:
         condition: service_started
