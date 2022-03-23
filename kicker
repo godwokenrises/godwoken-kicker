@@ -296,7 +296,7 @@ function manual-build() {
         # Copy the built artifacts to `docker/manual-artifacts/godwoken-web3`.
         #
         # More: ./docker/manual-web3.compose.yml
-        # erun rm -rf $dstdir
+        erun rm -rf $dstdir
         erun mkdir -p $dstdir
         erun cp -r $srcdir/packages $srcdir/node_modules $srcdir/package.json $dstdir
     else
@@ -324,6 +324,7 @@ function manual-build() {
         # Copy the built artifacts to `docker/manual-artifacts/gw-web3-indexer`
         #
         # More: ./docker/manual-web3-indexer.compose.yml
+        erun rm -rf $dstdir
         erun mkdir -p $dstdir
         erun cp $srcdir/target/release/gw-web3-indexer $dstdir
     else
@@ -351,6 +352,7 @@ function manual-build() {
         # Copy the built artifacts to `docker/manual-artifacts/gw-web3-indexer`
         #
         # More: ./docker/manual-godwoken.compose.yml
+        erun rm -rf $dstdir
         erun mkdir -p $dstdir
         erun cp $srcdir/target/release/godwoken $dstdir
     else
