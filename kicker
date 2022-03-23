@@ -44,6 +44,7 @@ function usage() {
     echo
     echo "  * Redeploy the local network"
     echo
+    echo "    $ $EXECUTABLE -- kill"
     echo "    $ $EXECUTABLE stop"
     echo "    $ sudo $EXECUTABLE clean"
     echo "    $ $EXECUTABLE start"
@@ -137,6 +138,7 @@ function clean() {
 	echo "rm -rf docker/layer1/ckb3/data/"
 	echo "rm -rf docker/postgres/data"
 	echo "rm -rf docker/redis/data"
+	echo "rm -rf docker/manual-artifacts"
 	rm -rf docker/layer2/data/
 	rm -f  docker/layer2/config/scripts-deployment.json
 	rm -f  docker/layer2/config/rollup-genesis-deployment.json
@@ -150,6 +152,7 @@ function clean() {
 	rm -rf docker/layer1/ckb3/data/
 	rm -rf docker/postgres/data
 	rm -rf docker/redis/data
+	rm -rf docker/manual-artifacts
 }
 
 function ps() {
