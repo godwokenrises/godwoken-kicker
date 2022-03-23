@@ -278,6 +278,8 @@ function manual-build() {
     echo
 
     if [ "$MANUAL_BUILD_WEB3" = "true" ]; then
+        info "Start building godwoken-web3"
+
         srcdir=$WORKSPACE/packages/godwoken-web3
         dstdir=$WORKSPACE/docker/manual-artifacts/godwoken-web3
 
@@ -285,7 +287,11 @@ function manual-build() {
         download-repo godwoken-web3 "$WEB3_GIT_URL" "$WEB3_GIT_CHECKOUT"
 
         # Yarn install via docker (assumes the "web3" docker-compose service installed yarn)
-        compose run \
+
+        # ATTENTION: Do not use `compose run ...`. `compose run` will add
+        # `-f docker/manual-web3.compose.yml`, and it will volume
+        # the `docker/manual-artifacts` directory, it is not what we expect.
+        erun docker-compose -f docker/docker-compose.yml run \
             --rm \
             --no-deps \
             --volume=$WORKSPACE/packages/godwoken-web3:/app \
@@ -304,6 +310,8 @@ function manual-build() {
     fi
 
     if [ "$MANUAL_BUILD_WEB3_INDEXER" = "true" ]; then
+        info "Start building godwoken-web3-indexer"
+
         srcdir=$WORKSPACE/packages/godwoken-web3
         dstdir=$WORKSPACE/docker/manual-artifacts
 
@@ -332,6 +340,8 @@ function manual-build() {
     fi
 
     if [ "$MANUAL_BUILD_GODWOKEN" = "true" ]; then
+        info "Start building godwoken"
+
         srcdir=$WORKSPACE/packages/godwoken
         dstdir=$WORKSPACE/docker/manual-artifacts
 
