@@ -13,7 +13,9 @@ RUN apt update -y && \
 # Install Rust
 RUN curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain 1.54.0 -y
 ENV PATH=/root/.cargo/bin:$PATH
+RUN rustup component add rustfmt
 RUN which cargo
+RUN which rustfmt
 
 # install node 14
 RUN curl -sL https://deb.nodesource.com/setup_14.x  | DEBIAN_FRONTEND=noninteractive bash -
