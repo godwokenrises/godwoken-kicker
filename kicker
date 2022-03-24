@@ -303,15 +303,20 @@ function manual-build() {
 
         # Cargo fetch Rust dependencies (in order to access network via
         # host network). The docker image must have installed cargo and molecule
-        # NOTE: manually add rustfmt, gw-types crate needs this tool.
-        erun "cd $srcdir && CARGO_HOME=$srcdir/.cargo cargo check --locked && cd -"
         erun docker run \
             --rm \
             --env CARGO_HOME=/app/.cargo \
             --volume $srcdir:/app \
             --volume $WORKSPACE/packages/.rustup:/root/.rustup \
             --workdir /app \
-            retricsu/godwoken-manual-build:ckb2021 bash -c "rustup component add rustfmt && which rustfmt && cargo build --locked --release"
+            retricsu/godwoken-manual-build:ckb2021 cargo check --locked
+        erun docker run \
+            --rm \
+            --env CARGO_HOME=/app/.cargo \
+            --volume $srcdir:/app \
+            --volume $WORKSPACE/packages/.rustup:/root/.rustup \
+            --workdir /app \
+            retricsu/godwoken-manual-build:ckb2021 cargo build --locked --release
 
         # Copy the built artifacts to `docker/manual-artifacts/gw-web3-indexer`
         #
