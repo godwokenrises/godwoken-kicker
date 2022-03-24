@@ -74,13 +74,11 @@ services:
       POSTGRES_PASSWORD: password
       GODWOKEN_MODE: fullnode
       STORE_PATH: /var/lib/layer2/data
-      PRIVATE_KEY_PATH: /private_key
-      META_USER_PRIVATE_KEY_PATH: /meta_user_private_key
+      ACCOUNTS_DIR: /accounts
       GITHUB_RUN_ID: ${GITHUB_RUN_ID:-""}
     volumes:
       - ./layer2:/var/lib/layer2
-      - ../config/private_key:/private_key
-      - ../config/meta_user_private_key:/meta_user_private_key
+      - ../accounts:/accounts
     entrypoint: "/var/lib/layer2/setup-godwoken.sh"
     deploy:
       restart_policy:
@@ -104,12 +102,10 @@ services:
       RUST_LOG: info,gw_generator=debug
       GODWOKEN_MODE: fullnode
       RUST_BACKTRACE: full
-      PRIVATE_KEY_PATH: /private_key
-      META_USER_PRIVATE_KEY_PATH: /meta_user_private_key
+      ACCOUNTS_DIR: /accounts
     volumes:
       - ./layer2:/var/lib/layer2
-      - ../config/private_key:/private_key
-      - ../config/meta_user_private_key:/meta_user_private_key
+      - ../accounts:/accounts
     ports:
       - 8119:8119 # rpc
       - 8120:8120 # err_receipt_ws_listen

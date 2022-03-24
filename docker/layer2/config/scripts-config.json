@@ -21,7 +21,7 @@
       "omni_lock": "/scripts/godwoken-scripts/omni_lock"
    },
    "lock" : {
-      "args" : "0x470dcdc5e44064909650113a274b3b36aecb6dc7",
+      "args" : "0x59ae1262575c460cc26f9c91823b2926bea1bfda",
       "code_hash" : "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
       "hash_type" : "type"
    },

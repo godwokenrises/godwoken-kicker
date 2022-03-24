@@ -13,4 +13,5 @@ mkdir -p /usr/local/godwoken-web3/address-mapping
 
 # start web3 server
 cd $WORKSPACE/packages/api-server 
-NODE_ENV=production DEBUG=godwoken-web3-api:server pm2 start ./bin/cluster --no-daemon --name gw-web3 --max-memory-restart 1G
+yarn start
+# NODE_ENV=production DEBUG=godwoken-web3-api:server pm2 start ./bin/cluster --no-daemon --name gw-web3 --max-memory-restart 1G
