@@ -42,10 +42,14 @@ services:
   # "nervos/ckb" image have no http clients to do health check for CKB.
   # This short-term service act as a workaround to do health check.
   check-ckb-started-successfully:
-    image: ghcr.io/flouse/godwoken-prebuilds:v1.0.x-202203160423
+    image: curlimages/curl
     volumes:
       - ./layer1/ckb:/var/lib/ckb
-    entrypoint: /var/lib/ckb/check-ckb-started-successfully.sh
+    command: [ 'http://ckb:8114', '-H', 'content-type: application/json', '-d', '{ "id": 2, "jsonrpc": "2.0", "method": "get_tip_block_number", "params": [] }' ]
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 1000
     depends_on:
       - ckb
 
@@ -66,25 +70,37 @@ services:
       check-ckb-started-successfully:
         condition: service_completed_successfully
 
-  setup-godwoken:
+  godwoken:
     image: ghcr.io/flouse/godwoken-prebuilds:v1.0.x-202203160423
+    healthcheck:
+      test: grep -q eth_eoa_mapping_config /var/lib/layer2/config/godwoken-config.toml && curl http://127.0.0.1:8119 || exit 1
+      interval: 5s
+      timeout: 10s
+      retries: 70
     environment:
+      RUST_LOG: info,gw_generator=debug
+      GODWOKEN_MODE: fullnode
+      RUST_BACKTRACE: full
+      STORE_PATH: /var/lib/layer2/data
+      ACCOUNTS_DIR: /accounts
       POSTGRES_USER: user
       POSTGRES_DB: lumos
       POSTGRES_PASSWORD: password
-      GODWOKEN_MODE: fullnode
-      STORE_PATH: /var/lib/layer2/data
-      ACCOUNTS_DIR: /accounts
       GITHUB_RUN_ID: ${GITHUB_RUN_ID:-""}
     volumes:
       - ./layer2:/var/lib/layer2
       - ../accounts:/accounts
-    entrypoint: "/var/lib/layer2/setup-godwoken.sh"
+    ports:
+      - 8119:8119 # rpc
+      - 8120:8120 # err_receipt_ws_listen
+    entrypoint: "/var/lib/layer2/entrypoint.sh"
     deploy:
       restart_policy:
         condition: on-failure
-        max_attempts: 10
+        max_attempts: 3
     depends_on:
+      postgres:
+        condition: service_started
       ckb:
         condition: service_started
       ckb-miner:
@@ -93,37 +109,7 @@ services:
         condition: service_started
       check-ckb-started-successfully:
         condition: service_completed_successfully
-      postgres:
-        condition: service_started
 
-  godwoken:
-    image: ghcr.io/flouse/godwoken-prebuilds:v1.0.x-202203160423
-    environment:
-      RUST_LOG: info,gw_generator=debug
-      GODWOKEN_MODE: fullnode
-      RUST_BACKTRACE: full
-      ACCOUNTS_DIR: /accounts
-    volumes:
-      - ./layer2:/var/lib/layer2
-      - ../accounts:/accounts
-    ports:
-      - 8119:8119 # rpc
-      - 8120:8120 # err_receipt_ws_listen
-    command: [ "godwoken", "run", "-c", "/var/lib/layer2/config/godwoken-config.toml" ]
-    depends_on:
-      setup-godwoken:
-        condition: service_completed_successfully
-      postgres:
-        condition: service_started
-
-  check-godwoken-started-successfully:
-    image: ghcr.io/flouse/godwoken-prebuilds:v1.0.x-202203160423
-    volumes:
-      - ./layer2/:/var/lib/layer2
-    entrypoint: /var/lib/layer2/check-godwoken-started-successfully.sh
-    depends_on:
-      - godwoken
-    
   web3:
     image: ghcr.io/nervosnetwork/godwoken-web3-prebuilds:compatibility-breaking-changes-1a52afb
     volumes: 
@@ -145,12 +131,8 @@ services:
         condition: service_started
       check-ckb-started-successfully:
         condition: service_completed_successfully
-      setup-godwoken:
-        condition: service_completed_successfully
       godwoken:
-        condition: service_started
-      check-godwoken-started-successfully:
-        condition: service_completed_successfully
+        condition: service_healthy
       postgres:
         condition: service_started
       redis:
@@ -170,9 +152,7 @@ services:
       web3:
         condition: service_started
       godwoken:
-        condition: service_started
-      check-godwoken-started-successfully:
-        condition: service_completed_successfully
+        condition: service_healthy
       postgres:
         condition: service_started
       redis:
