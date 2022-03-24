@@ -275,7 +275,8 @@ function manual-build() {
         download-repo godwoken-web3 "$WEB3_GIT_URL" "$WEB3_GIT_CHECKOUT"
 
         # Cargo fetch Rust dependencies (in order to access network via
-        # host network). The docker image must have installed cargo and molecule
+        # host network). The docker image must have installed cargo, molecule
+        # and rustfmt.
         erun "cd $srcdir && CARGO_HOME=$srcdir/.cargo cargo fetch --locked && cd -"
         erun docker run \
             --rm \
