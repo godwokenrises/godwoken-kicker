@@ -90,7 +90,7 @@ function compose() {
 }
 
 function init() {
-    echo -e "\033[0;33mNOTE: The docker-compose version should be newer than 1.28.0\033[0m"
+    echo -e "\033[0;33mNOTE: The docker-compose version should be newer than 1.29.0\033[0m"
     echo
     erun docker-compose -f docker/docker-compose.yml build --no-rm
 
@@ -99,7 +99,7 @@ function init() {
 }
 
 function start() {
-    echo -e "\033[0;33mNOTE: The docker-compose version should be newer than 1.28.0\033[0m"
+    echo -e "\033[0;33mNOTE: The docker-compose version should be newer than 1.29.0\033[0m"
     echo -e "\033[0;33mNOTE: This might take several minutes on the first run\033[0m"
     echo
     compose up -d --build
