@@ -163,6 +163,9 @@ function create-polyjuice-root-account() {
 
 function config-godwoken-eoa-register() {
     log "start"
+
+    # Without `eth_eoa_mapping_config` configuration, godwoken can runs, but
+    # everything you want to interact with godwoken will be failed.
     configured_eoa_register=$(grep -q eth_eoa_mapping_config $CONFIG_DIR/godwoken-config.toml || echo "not found")
     if [ ! "$configured_eoa_register" = "not found" ]; then
         log "eth_eoa_mapping_config configuration already exists, skip"
@@ -175,7 +178,7 @@ function config-godwoken-eoa-register() {
     # eoa register and polyjuice root account use the same key `accounts/godwoken-eoa-register-and-polyjuice-root-account.key`
     # and it has beed deposited before.
     #
-    # If you re-deposit it, it will fail. Why?
+    # If re-deposit it, it will fail. Why?
 
     # Make sure godwoken is stopped before appending `eth_eoa_mapping_config`,
     # because we do health-check in docker-compose.yml:
@@ -184,6 +187,12 @@ function config-godwoken-eoa-register() {
     #   healthcheck:
     #     test: grep -q eth_eoa_mapping_config /var/lib/layer2/config/godwoken-config.toml && curl http://127.0.0.1:8119 || exit 1
     # ```
+    #
+    # And meanwhile, it needs godwoken restart to make eoa register works. You
+    # should not configured eth_eoa_mapping_config before depositing. You should:
+    #   1. start godwoken
+    #   2. deposit eoa register
+    #   3. restart godwoken
     stop-godwoken
 
     # Then we are allowed to configured it as EOA register.
@@ -288,7 +297,9 @@ function main() {
     generate-web3-config
     generate-web3-indexer-config
 
+    ### It will fail when restarting services
     sed -i 's#enable_methods = \[\]#err_receipt_ws_listen = '"'0.0.0.0:8120'"'#' $CONFIG_DIR/godwoken-config.toml
+
     stop-godwoken
     godwoken run -c $CONFIG_DIR/godwoken-config.toml
 }
