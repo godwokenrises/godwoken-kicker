@@ -317,6 +317,7 @@ function manual-build() {
         # More: ./docker/manual-godwoken.compose.yml
         erun mkdir -p $dstdir
         erun cp $srcdir/target/release/godwoken $dstdir
+        erun cp $srcdir/target/release/gw-tools $dstdir
     else
         info "skip building godwoken"
     fi
