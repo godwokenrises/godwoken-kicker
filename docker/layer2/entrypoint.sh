@@ -2,6 +2,7 @@
 
 # NOTE: In `config/rollup-config.json`, `l1_sudt_cell_dep` identifies the l1_sudt cell located at the genesis block of CKB. Please type `ckb -C docker/layer1/ckb list-hash` for more information.
 # NOTE: The first run of Godwoken MUST be `eth_eoa_mapping_config = null`, then deposit, finaly restart with `eth_eoa_mapping_config = <deposited user>`
+# NOTE: After `gw-tools create-creator-account`, restart godwoken, then the create-creator-account tx will be rejected.
 
 set -o errexit
 
@@ -118,7 +119,6 @@ function generate-godwoken-config() {
     if [ ! -z "$STORE_PATH" ]; then
         sed -i 's#^path = .*$#path = '"'$STORE_PATH'"'#' $CONFIG_DIR/godwoken-config.toml
     fi
-    sed -i 's#enable_methods = \[\]#err_receipt_ws_listen = '"'0.0.0.0:8120'"'#' $CONFIG_DIR/godwoken-config.toml
 
     log "Generate file \"$CONFIG_DIR/godwoken-config.toml\""
 }
@@ -130,8 +130,13 @@ function create-polyjuice-root-account() {
         return 0
     fi
 
+    # Deposit and create Polyjuice root account
+    #
+    # ```
+    # $ ethereum_private_key_to_address $(cat accounts/godwoken-eoa-register-and-polyjuice-root-account.key)
+    # 0x5Afa08022F00A540FBB0F743c63d835c08056E89
+    # ```
     start-ckb-miner-at-background
-    start-godwoken-at-background
     RUST_BACKTRACE=full gw-tools deposit-ckb \
         --privkey-path $ACCOUNTS_DIR/godwoken-eoa-register-and-polyjuice-root-account.key \
         --godwoken-rpc-url http://127.0.0.1:8119 \
@@ -146,7 +151,6 @@ function create-polyjuice-root-account() {
         --config-path $CONFIG_DIR/godwoken-config.toml \
         --sudt-id 1 \
     > /var/tmp/gw-tools.log 2>&1
-    stop-godwoken
     stop-ckb-miner
 
     # update block_producer.account_id
@@ -166,17 +170,21 @@ function config-godwoken-eoa-register() {
     fi
 
     # Deposit for Godwoken EOA register
-    start-ckb-miner-at-background
-    start-godwoken-at-background
-    RUST_BACKTRACE=full gw-tools deposit-ckb \
-        --privkey-path $ACCOUNTS_DIR/godwoken-eoa-register-and-polyjuice-root-account.key \
-        --godwoken-rpc-url http://127.0.0.1:8119 \
-        --ckb-rpc http://ckb:8114 \
-        --scripts-deployment-path $CONFIG_DIR/scripts-deployment.json \
-        --config-path $CONFIG_DIR/godwoken-config.toml \
-        --capacity 2000
+    #
+    # Wait, we don't need to deposit for godwoken eoa register since godwoken
+    # eoa register and polyjuice root account use the same key `accounts/godwoken-eoa-register-and-polyjuice-root-account.key`
+    # and it has beed deposited before.
+    #
+    # If you re-deposit it, it will fail. Why?
+
+    # Make sure godwoken is stopped before appending `eth_eoa_mapping_config`,
+    # because we do health-check in docker-compose.yml:
+    # ```
+    # godwoken:
+    #   healthcheck:
+    #     test: grep -q eth_eoa_mapping_config /var/lib/layer2/config/godwoken-config.toml && curl http://127.0.0.1:8119 || exit 1
+    # ```
     stop-godwoken
-    stop-ckb-miner
 
     # Then we are allowed to configured it as EOA register.
     # Remember, Godwoken is required to restart to make EOA register works.
@@ -273,11 +281,14 @@ function main() {
     deploy-scripts
     deploy-rollup-genesis
     generate-godwoken-config
+
+    start-godwoken-at-background
     create-polyjuice-root-account
     config-godwoken-eoa-register
     generate-web3-config
     generate-web3-indexer-config
 
+    sed -i 's#enable_methods = \[\]#err_receipt_ws_listen = '"'0.0.0.0:8120'"'#' $CONFIG_DIR/godwoken-config.toml
     stop-godwoken
     godwoken run -c $CONFIG_DIR/godwoken-config.toml
 }
