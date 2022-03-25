@@ -71,7 +71,7 @@ services:
         condition: service_completed_successfully
 
   godwoken:
-    image: ghcr.io/flouse/godwoken-prebuilds:v1.0.x-202203160423
+    image: ghcr.io/nervosnetwork/godwoken-prebuilds:v1.0.0-rc1-202203231045
     healthcheck:
       test: grep -q eth_eoa_mapping_config /var/lib/layer2/config/godwoken-config.toml && curl http://127.0.0.1:8119 || exit 1
       # test: telnet 127.0.0.1:8120 && curl http://127.0.0.1:8119 || exit 1

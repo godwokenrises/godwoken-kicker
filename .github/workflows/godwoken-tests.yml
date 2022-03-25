@@ -1,6 +1,6 @@
 on:
   push:
-    branches: [develop, master, ci, v1, compatibility-changes]
+    branches: [develop, master, ci, 'v1*', compatibility-changes]
     # Publish semver tags as releases.
     tags: ["v*.*.*"]
   pull_request:
