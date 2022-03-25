@@ -177,6 +177,8 @@ function deposit() {
     fi
 
     abspkpath="$( cd -- "$(dirname "$pkpath")" >/dev/null 2>&1 ; pwd -P )/$(basename $pkpath)"
+    # FIXME: Deposit CKB error: invalid type: null, expected struct TransactionView
+    # => fix wait_for_tx function in gw-tools
     docker-compose -f docker/docker-compose.yml run \
         --no-deps \
         --use-aliases \
@@ -190,7 +192,8 @@ function deposit() {
                 --privkey-path /privkey-path \
                 --eth-address $ethaddr \
                 --capacity $amount" \
-        godwoken
+        godwoken \
+    || exit 0
 }
 
 # Note that this function MUST be in tty mode.
