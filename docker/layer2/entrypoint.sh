@@ -1,8 +1,6 @@
 #!/bin/bash
 
 # NOTE: In `config/rollup-config.json`, `l1_sudt_cell_dep` identifies the l1_sudt cell located at the genesis block of CKB. Please type `ckb -C docker/layer1/ckb list-hash` for more information.
-# NOTE: The first run of Godwoken MUST be `eth_eoa_mapping_config = null`, then deposit, finaly restart with `eth_eoa_mapping_config = <deposited user>`
-# NOTE: After `gw-tools create-creator-account`, restart godwoken, then the create-creator-account tx will be rejected.
 
 set -o errexit
 
@@ -14,13 +12,13 @@ GODWOKEN_PID=""
 COMPATIBLE_CHAIN_ID=1984
 
 function start-ckb-miner-at-background() {
-    log "start"
     ckb -C $CONFIG_DIR miner &> /dev/null &
     CKB_MINER_PID=$!
+    log "ckb-miner is mining..."
 }
 
 function stop-ckb-miner() {
-    log "start"
+    log "Kill the ckb-miner process"
     if [ ! -z "$CKB_MINER_PID" ]; then
         kill $CKB_MINER_PID
         CKB_MINER_PID=""
@@ -28,24 +26,33 @@ function stop-ckb-miner() {
 }
 
 function start-godwoken-at-background() {
-    log "start"
+    log "Starting"
     godwoken run -c $CONFIG_DIR/godwoken-config.toml & # &> /dev/null &
     GODWOKEN_PID=$!
     while true; do
         sleep 1
-        result=$(curl http://127.0.0.1:8119 &> /dev/null || echo "godwoken not started")
-        if [ "$result" != "godwoken not started" ]; then
+        result=$(curl http://127.0.0.1:8119 &> /dev/null || echo "Godwoken not started")
+        if [ "$result" != "Godwoken not started" ]; then
             break
         fi
     done
+    log "Godwoken started"
 }
 
 function stop-godwoken() {
-    log "start"
+    log "Killing the Godwoken process"
     if [ ! -z "$GODWOKEN_PID" ]; then
         kill $GODWOKEN_PID
         GODWOKEN_PID=""
     fi
+    while true; do
+        log "Wait until Godwoken exitted" && sleep 2
+        result=$(curl http://127.0.0.1:8119 &> /dev/null && echo "Godwoken is running")
+        if [ "$result" != "Godwoken is running" ]; then
+            break
+        fi 
+    done
+    log "Done"
 }
 
 # The scripts-config.json file records the names and locations of all scripts
@@ -57,7 +64,7 @@ function stop-godwoken() {
 #
 # More info: https://github.com/nervosnetwork/godwoken-docker-prebuilds/blob/97729b15093af6e5f002b46a74c549fcc8c28394/Dockerfile#L42-L54
 function deploy-scripts() {
-    log "start"
+    log "Start"
     if [ -s "$CONFIG_DIR/scripts-deployment.json" ]; then
         log "$CONFIG_DIR/scripts-deployment.json already exists, skip"
         return 0
@@ -72,6 +79,7 @@ function deploy-scripts() {
     stop-ckb-miner
 
     log "Generate file \"$CONFIG_DIR/scripts-deployment.json\""
+    log "Finished"
 }
 
 function deploy-rollup-genesis() {
@@ -119,6 +127,8 @@ function generate-godwoken-config() {
     if [ ! -z "$STORE_PATH" ]; then
         sed -i 's#^path = .*$#path = '"'$STORE_PATH'"'#' $CONFIG_DIR/godwoken-config.toml
     fi
+    sed -i 's#enable_methods = \[\]#err_receipt_ws_listen = '"'0.0.0.0:8120'"'#' $CONFIG_DIR/godwoken-config.toml
+    config-godwoken-eoa-register
 
     log "Generate file \"$CONFIG_DIR/godwoken-config.toml\""
 }
@@ -130,31 +140,29 @@ function create-polyjuice-root-account() {
         return 0
     fi
 
-    # Deposit and create Polyjuice root account
-    #
-    # ```
-    # $ ethereum_private_key_to_address $(cat accounts/godwoken-eoa-register-and-polyjuice-root-account.key)
-    # 0x5Afa08022F00A540FBB0F743c63d835c08056E89
-    # ```
     start-ckb-miner-at-background
+
+    # Deposit for block_producer
     RUST_BACKTRACE=full gw-tools deposit-ckb \
-        --privkey-path $ACCOUNTS_DIR/godwoken-eoa-register-and-polyjuice-root-account.key \
+        --privkey-path $ACCOUNTS_DIR/godwoken-block-producer.key \
         --godwoken-rpc-url http://127.0.0.1:8119 \
         --ckb-rpc http://ckb:8114 \
         --scripts-deployment-path $CONFIG_DIR/scripts-deployment.json \
         --config-path $CONFIG_DIR/godwoken-config.toml \
         --capacity 2000
+    # update block_producer.account_id to 2, which is the first deposit account
+    sed -i 's#^account_id = .*$#account_id = 2#' $CONFIG_DIR/godwoken-config.toml
+
+    # Create Polyjuice root account (this is a layer2 transaction)
     RUST_BACKTRACE=full gw-tools create-creator-account \
-        --privkey-path $ACCOUNTS_DIR/godwoken-eoa-register-and-polyjuice-root-account.key \
+        --privkey-path $ACCOUNTS_DIR/godwoken-block-producer.key \
         --godwoken-rpc-url http://127.0.0.1:8119 \
         --scripts-deployment-path $CONFIG_DIR/scripts-deployment.json \
         --config-path $CONFIG_DIR/godwoken-config.toml \
         --sudt-id 1 \
     > /var/tmp/gw-tools.log 2>&1
-    stop-ckb-miner
 
-    # update block_producer.account_id
-    sed -i 's#^account_id = .*$#account_id = 2#' $CONFIG_DIR/godwoken-config.toml
+    stop-ckb-miner
 
     cat /var/tmp/gw-tools.log
     tail -n 1 /var/tmp/gw-tools.log | grep -oE '[0-9]+$' > $CONFIG_DIR/polyjuice-root-account-id
@@ -172,36 +180,12 @@ function config-godwoken-eoa-register() {
         return 0
     fi
 
-    # Deposit for Godwoken EOA register
-    #
-    # Wait, we don't need to deposit for godwoken eoa register since godwoken
-    # eoa register and polyjuice root account use the same key `accounts/godwoken-eoa-register-and-polyjuice-root-account.key`
-    # and it has beed deposited before.
-    #
-    # If re-deposit it, it will fail. Why?
-
-    # Make sure godwoken is stopped before appending `eth_eoa_mapping_config`,
-    # because we do health-check in docker-compose.yml:
-    # ```
-    # godwoken:
-    #   healthcheck:
-    #     test: grep -q eth_eoa_mapping_config /var/lib/layer2/config/godwoken-config.toml && curl http://127.0.0.1:8119 || exit 1
-    # ```
-    #
-    # And meanwhile, it needs godwoken restart to make eoa register works. You
-    # should not configured eth_eoa_mapping_config before depositing. You should:
-    #   1. start godwoken
-    #   2. deposit eoa register
-    #   3. restart godwoken
-    stop-godwoken
-
-    # Then we are allowed to configured it as EOA register.
-    # Remember, Godwoken is required to restart to make EOA register works.
+    # User block_producer account as eth_eoa_mapping register
     echo ""                                                                                     >> $CONFIG_DIR/godwoken-config.toml
     echo "[eth_eoa_mapping_config.register_wallet_config]"                                      >> $CONFIG_DIR/godwoken-config.toml
-    echo "privkey_path = '$ACCOUNTS_DIR/godwoken-eoa-register-and-polyjuice-root-account.key'"  >> $CONFIG_DIR/godwoken-config.toml
+    echo "privkey_path = '$ACCOUNTS_DIR/godwoken-block-producer.key'"                           >> $CONFIG_DIR/godwoken-config.toml
     echo "[eth_eoa_mapping_config.register_wallet_config.lock]"                                 >> $CONFIG_DIR/godwoken-config.toml
-    echo "args = '0x2fb2d69092a6c9206c7f5c2348ebf0a84438bcf2'"                                  >> $CONFIG_DIR/godwoken-config.toml
+    echo "args = '0x1d4b2a15f55ba1aa035f64ad6080e0943cc5ec0b'"                                  >> $CONFIG_DIR/godwoken-config.toml
     echo "hash_type = 'type'"                                                                   >> $CONFIG_DIR/godwoken-config.toml
     echo "code_hash = '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8'"     >> $CONFIG_DIR/godwoken-config.toml
 
@@ -209,7 +193,7 @@ function config-godwoken-eoa-register() {
 }
 
 function generate-web3-config() {
-    log "start"
+    log "Start"
     if [ -s "$CONFIG_DIR/web3-config.env" ]; then
         log "$CONFIG_DIR/web3-config.env already exists, skip"
         return 0
@@ -250,17 +234,17 @@ CHAIN_ID=$(($COMPATIBLE_CHAIN_ID << 32 + $creator_account_id))
 # When requests "executeTransaction" RPC interface, the RawL2Transaction's
 # signature can be omit. Therefore we fill the RawL2Transaction.from_id
 # with this DEFAULT_FROM_ID (corresponding to DEFAULT_FROM_ADDRESS).
-DEFAULT_FROM_ADDRESS=0x6daf63d8411d6e23552658e3cfb48416a6a2ca78
 DEFAULT_FROM_ID=2
 
 ETH_ADDRESS_REGISTRY_ACCOUNT_ID=3
 EOF
 
     log "Generate file \"$CONFIG_DIR/web3-config.env\""
+    log "Finished"
 }
 
 function generate-web3-indexer-config() {
-    log "start"
+    log "Start"
     if [ -s "$CONFIG_DIR/web3-indexer-config.toml" ]; then
         log "$CONFIG_DIR/web3-indexer-config.toml already exists, skip"
         return 0
@@ -280,6 +264,30 @@ ws_rpc_url="$GODWOKEN_WS_RPC_URL"
 EOF
 
     log "Generate file \"$CONFIG_DIR/web3-indexer-config.toml\""
+    log "Finished"
+}
+
+# FIXME: gw_tools Deposit CKB error: invalid type: null, expected struct TransactionView
+function deposit-for-test-accounts() {
+    log "Start"
+    gw-tools deposit-ckb \
+        --godwoken-rpc-url http://godwoken:8119 \
+        --ckb-rpc http://ckb:8114 \
+        --scripts-deployment-path $CONFIG_DIR/scripts-deployment.json \
+        --config-path $CONFIG_DIR/godwoken-config.toml \
+        --privkey-path $ACCOUNTS_DIR/ckb-miner-and-faucet.key \
+        --eth-address 0x966b30e576a4d6731996748b48dd67c94ef29067 \
+        --capacity 10000 || echo "FIXME: gw_tools Deposit CKB error: invalid type: null, expected struct TransactionView"
+
+    gw-tools deposit-ckb \
+        --godwoken-rpc-url http://godwoken:8119 \
+        --ckb-rpc http://ckb:8114 \
+        --scripts-deployment-path $CONFIG_DIR/scripts-deployment.json \
+        --config-path $CONFIG_DIR/godwoken-config.toml \
+        --privkey-path $ACCOUNTS_DIR/ckb-miner-and-faucet.key \
+        --eth-address 0x4fef21f1d42e0d23d72100aefe84d555781c31bb \
+        --capacity 10000 || echo "FIXME: gw_tools Deposit CKB error: invalid type: null, expected struct TransactionView"
+    log "Fininshed"
 }
 
 function log() {
@@ -287,21 +295,29 @@ function log() {
 }
 
 function main() {
+    # Setup Godwoken at the first time
     deploy-scripts
     deploy-rollup-genesis
     generate-godwoken-config
 
     start-godwoken-at-background
+
     create-polyjuice-root-account
-    config-godwoken-eoa-register
     generate-web3-config
     generate-web3-indexer-config
 
-    ### It will fail when restarting services
-    sed -i 's#enable_methods = \[\]#err_receipt_ws_listen = '"'0.0.0.0:8120'"'#' $CONFIG_DIR/godwoken-config.toml
+    # Wait until the Polyjuice root account created and the layer2 block is synced
+    # Use this time to deposit for test accounts
+    # deposit-for-test-accounts
 
-    stop-godwoken
-    godwoken run -c $CONFIG_DIR/godwoken-config.toml
+    # Godwoken daemon
+    while true; do
+        result=$(curl http://127.0.0.1:8119 &> /dev/null || echo "wake up")
+        if [ "$result" == "wake up" ]; then
+            godwoken run -c $CONFIG_DIR/godwoken-config.toml || echo "Godwoken exit"
+        fi
+        sleep 30
+    done
 }
 
 main "$@"
