@@ -23,7 +23,7 @@ services:
       - ./redis/data:/data
 
   ckb:
-    image: nervos/ckb:v0.101.4
+    image: nervos/ckb:v0.101.7
     user: root
     ports:
       - 8114:8114   # rpc
@@ -33,7 +33,7 @@ services:
     command: [ "run", "-C", "/var/lib/ckb" ]
 
   ckb-miner:
-    image: nervos/ckb:v0.101.4
+    image: nervos/ckb:v0.101.7
     user: root
     volumes:
       - ./layer1/ckb:/var/lib/ckb
@@ -42,10 +42,14 @@ services:
   # "nervos/ckb" image have no http clients to do health check for CKB.
   # This short-term service act as a workaround to do health check.
   check-ckb-started-successfully:
-    image: ghcr.io/flouse/godwoken-prebuilds:v1.0.x-202203160423
+    image: curlimages/curl
     volumes:
       - ./layer1/ckb:/var/lib/ckb
-    entrypoint: /var/lib/ckb/check-ckb-started-successfully.sh
+    command: [ 'http://ckb:8114', '-H', 'content-type: application/json', '-d', '{ "id": 2, "jsonrpc": "2.0", "method": "get_tip_block_number", "params": [] }' ]
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 1000
     depends_on:
       - ckb
 
@@ -66,25 +70,37 @@ services:
       check-ckb-started-successfully:
         condition: service_completed_successfully
 
-  setup-godwoken:
-    image: ghcr.io/flouse/godwoken-prebuilds:v1.0.x-202203160423
+  godwoken:
+    image: ghcr.io/nervosnetwork/godwoken-prebuilds:v1.0.0-rc1-202203231045
+    healthcheck:
+      test: cat /var/lib/layer2/config/polyjuice-root-account-id && curl http://127.0.0.1:8119 || exit 1
+      interval: 5s
+      timeout: 10s
+      retries: 70
     environment:
+      RUST_LOG: info,gw_generator=debug
+      GODWOKEN_MODE: fullnode
+      RUST_BACKTRACE: full
+      STORE_PATH: /var/lib/layer2/data
+      ACCOUNTS_DIR: /accounts
       POSTGRES_USER: user
       POSTGRES_DB: lumos
       POSTGRES_PASSWORD: password
-      GODWOKEN_MODE: fullnode
-      STORE_PATH: /var/lib/layer2/data
-      ACCOUNTS_DIR: /accounts
       GITHUB_RUN_ID: ${GITHUB_RUN_ID:-""}
     volumes:
       - ./layer2:/var/lib/layer2
       - ../accounts:/accounts
-    entrypoint: "/var/lib/layer2/setup-godwoken.sh"
+    ports:
+      - 8119:8119 # rpc
+      - 8120:8120 # err_receipt_ws_listen
+    entrypoint: "/var/lib/layer2/entrypoint.sh"
     deploy:
       restart_policy:
         condition: on-failure
-        max_attempts: 10
+        max_attempts: 1
     depends_on:
+      postgres:
+        condition: service_started
       ckb:
         condition: service_started
       ckb-miner:
@@ -93,39 +109,11 @@ services:
         condition: service_started
       check-ckb-started-successfully:
         condition: service_completed_successfully
-      postgres:
-        condition: service_started
 
-  godwoken:
-    image: ghcr.io/flouse/godwoken-prebuilds:v1.0.x-202203160423
-    environment:
-      RUST_LOG: info,gw_generator=debug
-      GODWOKEN_MODE: fullnode
-      RUST_BACKTRACE: full
-      ACCOUNTS_DIR: /accounts
-    volumes:
-      - ./layer2:/var/lib/layer2
-      - ../accounts:/accounts
-    ports:
-      - 8119:8119 # rpc
-      - 8120:8120 # err_receipt_ws_listen
-    command: [ "godwoken", "run", "-c", "/var/lib/layer2/config/godwoken-config.toml" ]
-    depends_on:
-      setup-godwoken:
-        condition: service_completed_successfully
-      postgres:
-        condition: service_started
-
-  check-godwoken-started-successfully:
-    image: ghcr.io/flouse/godwoken-prebuilds:v1.0.x-202203160423
-    volumes:
-      - ./layer2/:/var/lib/layer2
-    entrypoint: /var/lib/layer2/check-godwoken-started-successfully.sh
-    depends_on:
-      - godwoken
-    
   web3:
     image: ghcr.io/nervosnetwork/godwoken-web3-prebuilds:compatibility-breaking-changes-1a52afb
+    healthcheck:
+      test: curl http://127.0.0.1:8024 || exit 1
     volumes: 
       - ./layer2/config:/var/lib/layer2/config
       - ./web3/entrypoint.sh:/var/lib/web3/entrypoint.sh
@@ -145,12 +133,8 @@ services:
         condition: service_started
       check-ckb-started-successfully:
         condition: service_completed_successfully
-      setup-godwoken:
-        condition: service_completed_successfully
       godwoken:
-        condition: service_started
-      check-godwoken-started-successfully:
-        condition: service_completed_successfully
+        condition: service_healthy
       postgres:
         condition: service_started
       redis:
@@ -158,10 +142,14 @@ services:
 
   web3-indexer:
     image: ghcr.io/nervosnetwork/godwoken-web3-indexer-prebuilds:compatibility-breaking-changes-94e2025
-    volumes: 
-      - ./layer2/config/web3-indexer-config.toml:/var/lib/web3-indexer/indexer-config.toml
+    volumes:
+      - ./layer2/config:/var/lib/layer2/config
+      - ./web3/indexer_entrypoint.sh:/var/lib/web3-indexer/entrypoint.sh
     working_dir: /var/lib/web3-indexer
-    command: [ "gw-web3-indexer" ]
+    entrypoint: /var/lib/web3-indexer/entrypoint.sh
+    environment:
+      CONFIG_DIR: /var/lib/layer2/config
+      RUST_LOG: info
     deploy:
       restart_policy:
         condition: on-failure
@@ -170,9 +158,7 @@ services:
       web3:
         condition: service_started
       godwoken:
-        condition: service_started
-      check-godwoken-started-successfully:
-        condition: service_completed_successfully
+        condition: service_healthy
       postgres:
         condition: service_started
       redis:

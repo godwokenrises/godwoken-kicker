@@ -18,7 +18,7 @@
       "dep_type" : "code",
       "out_point" : {
          "index" : "0x5",
-         "tx_hash" : "0x11b88e3920917b04f780000fc9493ef59930742556cf2ddefb7a22b23a5ad6b4"
+         "tx_hash" : "0x2b397667654f3bc1fcb3efc7db0fd2799eaef962b7920840f3f4c7b467be5487"
       }
    },
    "l1_sudt_script_type_hash" : "0x6283a479a3cf5d4276cd93594de9f1827ab9b55c7b05b3d28e4c2e0a696cfefd",
