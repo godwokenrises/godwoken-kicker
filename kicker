@@ -404,11 +404,13 @@ function prepare-repo() {
         if [ "$ALWAYS_FETCH_NEW_PACKAGE" != "false" ]; then
             erun git -C $dir fetch origin $checkout
             erun git -C $dir checkout FETCH_HEAD
+            erun git -C $dir submodule update --init --recursive --depth=1
         fi  
     else
-        erun git clone --depth=1 --recursive $url $dir
+        erun git clone --depth=1 $url $dir
         erun git -C $dir fetch origin $checkout
         erun git -C $dir checkout FETCH_HEAD
+        erun git -C $dir submodule update --init --recursive --depth=1
     fi
 }
 
