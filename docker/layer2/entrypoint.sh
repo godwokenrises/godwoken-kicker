@@ -235,6 +235,7 @@ CHAIN_ID=$(($COMPATIBLE_CHAIN_ID << 32 + $creator_account_id))
 # signature can be omit. Therefore we fill the RawL2Transaction.from_id
 # with this DEFAULT_FROM_ID (corresponding to DEFAULT_FROM_ADDRESS).
 DEFAULT_FROM_ID=2
+DEFAULT_FROM_ADDRESS=0x2e9df163055245bfadd35e3a1f05f06096447c85
 
 ETH_ADDRESS_REGISTRY_ACCOUNT_ID=3
 EOF
