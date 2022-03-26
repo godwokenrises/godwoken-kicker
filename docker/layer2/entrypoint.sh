@@ -39,6 +39,10 @@ function start-godwoken-at-background() {
     log "Godwoken started"
 }
 
+# Notice: Be careful, if you you try to stop Godwoken in the early phase,
+# you should make sure that the Polyjuice root account is created and the layer2 block is synced.
+#
+# Try to avoid restarting Godwoken if you can.
 function stop-godwoken() {
     log "Killing the Godwoken process"
     if [ ! -z "$GODWOKEN_PID" ]; then
@@ -180,7 +184,8 @@ function config-godwoken-eoa-register() {
         return 0
     fi
 
-    # User block_producer account as eth_eoa_mapping register
+    # User block_producer account as eth_eoa_mapping register,
+    # so we don't need to spend time to create (deposit) another layer2 account.
     echo ""                                                                                     >> $CONFIG_DIR/godwoken-config.toml
     echo "[eth_eoa_mapping_config.register_wallet_config]"                                      >> $CONFIG_DIR/godwoken-config.toml
     echo "privkey_path = '$ACCOUNTS_DIR/godwoken-block-producer.key'"                           >> $CONFIG_DIR/godwoken-config.toml
