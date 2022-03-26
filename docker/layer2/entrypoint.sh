@@ -303,13 +303,15 @@ function main() {
 
     start-godwoken-at-background
 
+    # Should make sure that the Polyjuice root account was created and the layer2 block was synced
     create-polyjuice-root-account
     generate-web3-config
     generate-web3-indexer-config
 
-    # Wait until the Polyjuice root account created and the layer2 block is synced
-    # Use this time to deposit for test accounts
-    # deposit-for-test-accounts
+    # Godwoken is ready for test
+    # Now we can deposit for test accounts, this should NOT block other operations
+    deposit-for-test-accounts
+    # TODO: add more test accounts
 
     # Godwoken daemon
     while true; do

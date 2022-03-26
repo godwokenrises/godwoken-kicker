@@ -142,11 +142,13 @@ services:
   web3-indexer:
     image: ghcr.io/nervosnetwork/godwoken-web3-indexer-prebuilds:compatibility-breaking-changes-94e2025
     volumes:
-      # FIXME: rm: cannot remove 'docker/layer2/config/web3-indexer-config.toml': Is a directory
-      # It seems to be that web3-indexer-config.toml is mounte as a directory sometimes
-      - ./layer2/config/web3-indexer-config.toml:/var/lib/web3-indexer/indexer-config.toml
+      - ./layer2/config:/var/lib/layer2/config
+      - ./web3/indexer_entrypoint.sh:/var/lib/web3-indexer/entrypoint.sh
     working_dir: /var/lib/web3-indexer
-    command: [ "gw-web3-indexer" ]
+    entrypoint: /var/lib/web3-indexer/entrypoint.sh
+    environment:
+      CONFIG_DIR: /var/lib/layer2/config
+      RUST_LOG: info
     deploy:
       restart_policy:
         condition: on-failure
