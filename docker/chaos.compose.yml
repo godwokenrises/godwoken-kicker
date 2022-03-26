@@ -10,7 +10,7 @@ version: '3.8'
 
 services:
   ckb:
-    image: nervos/ckb:v0.101.4
+    image: nervos/ckb:v0.101.7
     user: root
     ports:
       - 8114:8114   # rpc
@@ -20,7 +20,7 @@ services:
     command: [ "run", "-C", "/var/lib/ckb" ]
 
   ckb2:
-    image: nervos/ckb:v0.101.4
+    image: nervos/ckb:v0.101.7
     user: root
     ports:
       - 8116:8114     # rpc
@@ -30,7 +30,7 @@ services:
     command: [ "run", "-C", "/var/lib/ckb" ]
 
   ckb3:
-    image: nervos/ckb:v0.101.4
+    image: nervos/ckb:v0.101.7
     user: root
     ports:
       - 8118:8114     # rpc
@@ -40,7 +40,7 @@ services:
     command: [ "run", "-C", "/var/lib/ckb" ]
 
   ckb-miner:
-    image: nervos/ckb:v0.101.4
+    image: nervos/ckb:v0.101.7
     user: root
     volumes:
       - ./layer1/ckb:/var/lib/ckb
@@ -49,7 +49,7 @@ services:
 
   ckb2-miner:
     user: root
-    image: nervos/ckb:v0.101.4
+    image: nervos/ckb:v0.101.7
     volumes:
       - ./layer1/ckb2:/var/lib/ckb
     command: [ "miner", "-C", "/var/lib/ckb" ]
@@ -57,7 +57,7 @@ services:
 
   ckb3-miner:
     user: root
-    image: nervos/ckb:v0.101.4
+    image: nervos/ckb:v0.101.7
     volumes:
       - ./layer1/ckb3:/var/lib/ckb
     command: [ "miner", "-C", "/var/lib/ckb" ]
