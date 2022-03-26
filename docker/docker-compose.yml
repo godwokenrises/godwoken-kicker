@@ -73,7 +73,7 @@ services:
   godwoken:
     image: ghcr.io/nervosnetwork/godwoken-prebuilds:v1.0.0-rc1-202203231045
     healthcheck:
-      test: curl http://127.0.0.1:8119 || exit 1
+      test: cat /var/lib/layer2/config/polyjuice-root-account-id && curl http://127.0.0.1:8119 || exit 1
       interval: 5s
       timeout: 10s
       retries: 70
