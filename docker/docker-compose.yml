@@ -23,7 +23,7 @@ services:
       - ./redis/data:/data
 
   ckb:
-    image: nervos/ckb:v0.101.4
+    image: nervos/ckb:v0.101.7
     user: root
     ports:
       - 8114:8114   # rpc
@@ -33,7 +33,7 @@ services:
     command: [ "run", "-C", "/var/lib/ckb" ]
 
   ckb-miner:
-    image: nervos/ckb:v0.101.4
+    image: nervos/ckb:v0.101.7
     user: root
     volumes:
       - ./layer1/ckb:/var/lib/ckb
@@ -71,10 +71,9 @@ services:
         condition: service_completed_successfully
 
   godwoken:
-    image: ghcr.io/flouse/godwoken-prebuilds:v1.0.x-202203160423
+    image: ghcr.io/nervosnetwork/godwoken-prebuilds:v1.0.0-rc1-202203231045
     healthcheck:
-      test: grep -q eth_eoa_mapping_config /var/lib/layer2/config/godwoken-config.toml && curl http://127.0.0.1:8119 || exit 1
-      # test: telnet 127.0.0.1:8120 && curl http://127.0.0.1:8119 || exit 1
+      test: cat /var/lib/layer2/config/polyjuice-root-account-id && curl http://127.0.0.1:8119 || exit 1
       interval: 5s
       timeout: 10s
       retries: 70
@@ -113,6 +112,8 @@ services:
 
   web3:
     image: ghcr.io/nervosnetwork/godwoken-web3-prebuilds:compatibility-breaking-changes-1a52afb
+    healthcheck:
+      test: curl http://127.0.0.1:8024 || exit 1
     volumes: 
       - ./layer2/config:/var/lib/layer2/config
       - ./web3/entrypoint.sh:/var/lib/web3/entrypoint.sh
@@ -141,10 +142,14 @@ services:
 
   web3-indexer:
     image: ghcr.io/nervosnetwork/godwoken-web3-indexer-prebuilds:compatibility-breaking-changes-94e2025
-    volumes: 
-      - ./layer2/config/web3-indexer-config.toml:/var/lib/web3-indexer/indexer-config.toml
+    volumes:
+      - ./layer2/config:/var/lib/layer2/config
+      - ./web3/indexer_entrypoint.sh:/var/lib/web3-indexer/entrypoint.sh
     working_dir: /var/lib/web3-indexer
-    command: [ "gw-web3-indexer" ]
+    entrypoint: /var/lib/web3-indexer/entrypoint.sh
+    environment:
+      CONFIG_DIR: /var/lib/layer2/config
+      RUST_LOG: info
     deploy:
       restart_policy:
         condition: on-failure

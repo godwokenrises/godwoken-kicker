@@ -8,31 +8,25 @@ Using the following command, you can find out more about each account.
 $ ls -1 accounts
 ckb-miner-and-faucet.key
 godwoken-block-producer.key
-godwoken-eoa-register-and-polyjuice-root-account.key
 rollup-scripts-deployer.key
 
-$ ckb-cli util key-info --privkey-path accounts/godwoken-eoa-register-and-polyjuice-root-account.key
+$ ckb-cli util key-info --privkey-path accounts/godwoken-block-producer.key
 Put this config in < ckb.toml >:
 
 [block_assembler]
 code_hash = "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8"
 hash_type = "type"
-args = "0x2fb2d69092a6c9206c7f5c2348ebf0a84438bcf2"
+args = "0x1d4b2a15f55ba1aa035f64ad6080e0943cc5ec0b"
 message = "0x"
 
 address:
-  mainnet: ckb1qyqzlvkkjzf2djfqd3l4cg6ga0c2s3pchneq02k5an
-  testnet: ckt1qyqzlvkkjzf2djfqd3l4cg6ga0c2s3pchneqj0gt30
-lock_arg: 0x2fb2d69092a6c9206c7f5c2348ebf0a84438bcf2
-lock_hash: 0xdef995f28d313531a8b2bfb2c38b933f91803cee857df6741982a4293a49f007
-old-testnet-address: ckt1q9gry5zg97eddyyj5myjqmrlts3536ls4pzr308j2mc4qc
-pubkey: 03b87ab0edfbc154c6cc6437a773f343ba1120825be5f2664f41ce3e4180b05aa7
+  mainnet: ckb1qyqp6je2zh64hgd2qd0kfttqsrsfg0x9as9szl4xjv
+  testnet: ckt1qyqp6je2zh64hgd2qd0kfttqsrsfg0x9as9sl6te7s
+lock_arg: 0x1d4b2a15f55ba1aa035f64ad6080e0943cc5ec0b
+lock_hash: 0x24842c3d28d9df39325ad05284efc3492972eec61606b51ded82369b3de72f04
+old-testnet-address: ckt1q9gry5zgr49j5904tws65q6lvjkkpq8qjs7vtmqt3eg4j8
+pubkey: 02261c3634191150993cb256adeb0ddf29a2b317b99885323564e28886933c9099
 
-$ ethereum_private_key_to_address $(cat accounts/godwoken-eoa-register-and-polyjuice-root-account.key)
-0x5Afa08022F00A540FBB0F743c63d835c08056E89
-
-$ grep $(cat accounts/godwoken-eoa-register-and-polyjuice-root-account.key) docker/layer1/ckb/specs/dev.toml
-# private key: 0x751bce00b384d4a6f65034346761c66aa958072163eb5bd1f6f8bd300dc11b9f
 ```
 
 > It is possible to use only one key to do everything, but I think mixing keys will cause confusion and make debugging more difficult.
@@ -72,14 +66,3 @@ $ grep $(cat accounts/godwoken-eoa-register-and-polyjuice-root-account.key) dock
   hash_type = 'type'
   args = '0x952809177232d0dba355ba5b6f4eaca39cc57746'
   ```
-
-## [Polyjuice Root Account](../accounts/godwoken-eoa-register-and-polyjuice-root-account.key)
-
-  [godwoken/life_of_a_polyjuice_transaction.md](https://github.com/nervosnetwork/godwoken/blob/master/docs/life_of_a_polyjuice_transaction.md#root-account--deployment)
-
-  After polyjuice root account was created by `gw-tools create-creator-account`, the resulting account id will be configured as `CREATOR_ACCOUNT_ID` in Godwoken-Web3 configuration file.
-
-
-## [Godwoken EOA Register (will be deprecated at Godwoken v1)](../accounts/godwoken-eoa-register-and-polyjuice-root-account.key)
-
-  This key belongs to [EthEoaMappingRegister.wallet](https://github.com/nervosnetwork/godwoken/blob/3605c70/crates/eoa-mapping/src/eth_register.rs#L22). It must be related to a created Godwoken Account. It will be used to [sign](https://github.com/nervosnetwork/godwoken/blob/3605c70/crates/eoa-mapping/src/eth_register.rs#L147) EthEoaMappingRegister transaction which is a layer2 transaction.
