@@ -1,3 +1,5 @@
+name: Simple Test
+
 on:
   push:
     branches: [develop, master, ci, 'v1*', compatibility-changes]
