@@ -73,8 +73,7 @@ services:
   godwoken:
     image: ghcr.io/nervosnetwork/godwoken-prebuilds:v1.0.0-rc1-202203231045
     healthcheck:
-      test: grep -q eth_eoa_mapping_config /var/lib/layer2/config/godwoken-config.toml && curl http://127.0.0.1:8119 || exit 1
-      # test: telnet 127.0.0.1:8120 && curl http://127.0.0.1:8119 || exit 1
+      test: curl http://127.0.0.1:8119 || exit 1
       interval: 5s
       timeout: 10s
       retries: 70
@@ -113,6 +112,8 @@ services:
 
   web3:
     image: ghcr.io/nervosnetwork/godwoken-web3-prebuilds:compatibility-breaking-changes-1a52afb
+    healthcheck:
+      test: curl http://127.0.0.1:8024 || exit 1
     volumes: 
       - ./layer2/config:/var/lib/layer2/config
       - ./web3/entrypoint.sh:/var/lib/web3/entrypoint.sh
