@@ -86,6 +86,9 @@ function compose() {
     if [ "$MANUAL_BUILD_WEB3_INDEXER" = "true" ]; then
         override="$override -f docker/manual-web3-indexer.compose.yml"
     fi
+    if [ "$MANUAL_BUILD_POLYJUICE" = "true" ]; then
+        override="$override -f docker/manual-polyjuice.compose.yml"
+    fi
 
     erun docker-compose -f docker/docker-compose.yml $override "$@"
 }
@@ -280,7 +283,7 @@ function manual-build() {
         dstdir=$WORKSPACE/docker/manual-artifacts/godwoken-web3
 
         # Download repo
-        download-repo godwoken-web3 "$WEB3_GIT_URL" "$WEB3_GIT_CHECKOUT"
+        prepare-repo godwoken-web3 "$WEB3_GIT_URL" "$WEB3_GIT_CHECKOUT"
 
         # Yarn install via docker (assumes the "web3" docker-compose service installed yarn)
 
@@ -312,7 +315,7 @@ function manual-build() {
         dstdir=$WORKSPACE/docker/manual-artifacts
 
         # Download repo
-        download-repo godwoken-web3 "$WEB3_GIT_URL" "$WEB3_GIT_CHECKOUT"
+        prepare-repo godwoken-web3 "$WEB3_GIT_URL" "$WEB3_GIT_CHECKOUT"
 
         # Cargo fetch Rust dependencies (in order to access network via
         # host network). The docker image must have installed cargo, molecule
@@ -343,7 +346,7 @@ function manual-build() {
         dstdir=$WORKSPACE/docker/manual-artifacts
 
         # Download repo
-        download-repo godwoken "$GODWOKEN_GIT_URL" "$GODWOKEN_GIT_CHECKOUT"
+        prepare-repo godwoken "$GODWOKEN_GIT_URL" "$GODWOKEN_GIT_CHECKOUT"
 
         # Cargo fetch Rust dependencies (in order to access network via
         # host network). The docker image must have installed cargo and molecule
@@ -355,7 +358,7 @@ function manual-build() {
             --workdir /app \
             retricsu/godwoken-manual-build:ckb2021 cargo build --locked --release
 
-        # Copy the built artifacts to `docker/manual-artifacts/gw-web3-indexer`
+        # Copy the built artifacts to `docker/manual-artifacts/`
         #
         # More: ./docker/manual-godwoken.compose.yml
         erun rm -rf $dstdir
@@ -363,11 +366,28 @@ function manual-build() {
         erun cp $srcdir/target/release/godwoken $dstdir
         erun cp $srcdir/target/release/gw-tools $dstdir
     else
-        info "skip building godwoken"
+        info "skip building Godwoken"
+    fi
+
+    if [ "$MANUAL_BUILD_POLYJUICE" = "true" ]; then
+        srcdir=$WORKSPACE/packages/godwoken-polyjuice
+        dstdir=$WORKSPACE/docker/manual-artifacts/polyjuice/
+
+        # Download repo
+        prepare-repo godwoken-polyjuice "$POLYJUICE_GIT_URL" "$POLYJUICE_GIT_CHECKOUT"
+
+        cd $srcdir
+        erun make all-via-docker
+
+        # Copy the built artifacts to `docker/manual-artifacts/`
+        mkdir -p $dstdir
+        erun cp -r build/* $dstdir
+    else
+        info "skip building Polyjuice"
     fi
 }
 
-function download-repo() {
+function prepare-repo() {
     name=$1
     url=$2
     checkout=$3
