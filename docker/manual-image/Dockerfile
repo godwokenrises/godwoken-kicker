@@ -17,6 +17,10 @@ RUN rustup component add rustfmt
 RUN which cargo
 RUN which rustfmt
 
+# Install Capsule
+RUN cargo install ckb-capsule
+RUN which capsule
+
 # install node 14
 RUN curl -sL https://deb.nodesource.com/setup_14.x  | DEBIAN_FRONTEND=noninteractive bash -
 RUN apt install -y nodejs
