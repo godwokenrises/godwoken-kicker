@@ -234,7 +234,7 @@ PORT=8024
 # * https://eips.ethereum.org/EIPS/eip-1344#specification
 CREATOR_ACCOUNT_ID=$creator_account_id
 COMPATIBLE_CHAIN_ID=$COMPATIBLE_CHAIN_ID
-CHAIN_ID=$(($COMPATIBLE_CHAIN_ID << 32 + $creator_account_id))
+CHAIN_ID=$((($COMPATIBLE_CHAIN_ID << 32) + $creator_account_id))
 
 # When requests "executeTransaction" RPC interface, the RawL2Transaction's
 # signature can be omit. Therefore we fill the RawL2Transaction.from_id
