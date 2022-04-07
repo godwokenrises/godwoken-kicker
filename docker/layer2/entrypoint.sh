@@ -27,6 +27,7 @@ function stop-ckb-miner() {
 
 function start-godwoken-at-background() {
     log "Starting"
+    start_time=$(date +%s)
     godwoken run -c $CONFIG_DIR/godwoken-config.toml & # &> /dev/null &
     GODWOKEN_PID=$!
     while true; do
@@ -34,6 +35,11 @@ function start-godwoken-at-background() {
         result=$(curl http://127.0.0.1:8119 &> /dev/null || echo "Godwoken not started")
         if [ "$result" != "Godwoken not started" ]; then
             break
+        fi
+        elapsed=$(( $(date +%s) - start_time ))
+        if [ $elapsed -gt 10 ]; then
+            log "ERROR: start godwoken timeout"
+            exit 2
         fi
     done
     log "Godwoken started"
