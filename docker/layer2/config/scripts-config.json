@@ -15,8 +15,8 @@
       "state_validator" : "/scripts/godwoken-scripts/state-validator",
       "tron_account_lock" : "/scripts/godwoken-scripts/tron-account-lock",
       "withdrawal_lock" : "/scripts/godwoken-scripts/withdrawal-lock",
-      "eth_addr_reg_validator": "/scripts/godwoken-polyjuice/eth_addr_reg_validator",
-      "eth_addr_reg_generator": "/scripts/godwoken-polyjuice/eth_addr_reg_generator",
+      "eth_addr_reg_validator": "/scripts/godwoken-scripts/eth-addr-reg-validator",
+      "eth_addr_reg_generator": "/scripts/godwoken-scripts/eth-addr-reg-generator",
       "omni_lock": "/scripts/godwoken-scripts/omni_lock"
    },
    "lock" : {
@@ -36,7 +36,7 @@
       "state_validator" : "/scripts/godwoken-scripts/state-validator",
       "tron_account_lock" : "/scripts/godwoken-scripts/tron-account-lock",
       "withdrawal_lock" : "/scripts/godwoken-scripts/withdrawal-lock",
-      "eth_addr_reg_validator": "/scripts/godwoken-polyjuice/eth_addr_reg_validator",
+      "eth_addr_reg_validator": "/scripts/godwoken-scripts/eth-addr-reg-validator",
       "omni_lock": "/scripts/godwoken-scripts/omni_lock"
    }
 }
