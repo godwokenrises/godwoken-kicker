@@ -71,7 +71,7 @@ services:
         condition: service_completed_successfully
 
   godwoken:
-    image: ghcr.io/nervosnetwork/godwoken-prebuilds:v1.1.x-202203270926
+    image: ghcr.io/keroro520/godwoken-prebuilds:v1-godwoken-pull-652-202204130926
     healthcheck:
       test: cat /var/lib/layer2/config/polyjuice-root-account-id && curl http://127.0.0.1:8119 || exit 1
       interval: 5s
