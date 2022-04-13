@@ -28,22 +28,33 @@ jobs:
       - run: ./kicker deposit 0xCD1d13450cFA630728D0390C99957C6948BF7d19 1000
 
       - run: echo "Part 2. Deploy A Simple Contract Using Hardhat"
-      - run: git clone --depth=1 https://github.com/NomicFoundation/hardhat
-      - run: npm install --save-dev hardhat @nomiclabs/hardhat-waffle
-        working-directory: hardhat/packages/hardhat-core/sample-projects/basic/
+      - run: |
+          git clone --depth=1 https://github.com/NomicFoundation/hardhat
+          mv hardhat/packages/hardhat-core/sample-projects/basic .
+      - uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - name: Install hardhat
+        working-directory: basic
+        run: |
+          npm install --save-dev hardhat @nomiclabs/hardhat-waffle chai
+          npx hardhat --version
       - name: Adapt hardhat.config.js to our local network of Godwoken
         run: |
           sed -i 's#solidity:#    networks: { gw_devnet_v1: { url: `http://127.0.0.1:8024`, accounts: [`0x9d5bc55413c14cf4ce360a6051eacdc0e580100a0d3f7f2f48f63623f6b05361`], } }, solidity:#g' hardhat.config.js
           cat hardhat.config.js
-        working-directory: hardhat/packages/hardhat-core/sample-projects/basic/
+        working-directory: basic
       - run: npx hardhat accounts --network gw_devnet_v1
-        working-directory: hardhat/packages/hardhat-core/sample-projects/basic/
+        working-directory: basic
       - run: npx hardhat compile
-        working-directory: hardhat/packages/hardhat-core/sample-projects/basic/
+        working-directory: basic
       - run: npx hardhat test --network gw_devnet_v1
-        working-directory: hardhat/packages/hardhat-core/sample-projects/basic/
+        working-directory: basic
       - run: npx hardhat run --network gw_devnet_v1 scripts/sample-script.js
-        working-directory: hardhat/packages/hardhat-core/sample-projects/basic/
+        working-directory: basic
 
       - run: echo "Part3. Clean Up"
       - run: ./kicker stop
