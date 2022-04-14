@@ -118,6 +118,8 @@ function generate-godwoken-config() {
         return 0
     fi
 
+    # Node: 0x2e9df163055245bfadd35e3a1f05f06096447c85 is the eth_address of
+    # `godwoken-block-producer.key`
     RUST_BACKTRACE=full gw-tools generate-config \
         --ckb-rpc http://ckb:8114 \
         --ckb-indexer-rpc http://ckb-indexer:8116 \
@@ -126,9 +128,9 @@ function generate-godwoken-config() {
         --omni-lock-config-path $CONFIG_DIR/scripts-deployment.json \
         -g $CONFIG_DIR/rollup-genesis-deployment.json \
         --rollup-config $CONFIG_DIR/rollup-config.json \
-        --privkey-path $ACCOUNTS_DIR/godwoken-block-producer.key \
         -o $CONFIG_DIR/godwoken-config.toml \
         --rpc-server-url 0.0.0.0:8119 \
+        --privkey-path $ACCOUNTS_DIR/godwoken-block-producer.key \
         --block-producer-address 0x2e9df163055245bfadd35e3a1f05f06096447c85
 
     # some dirty modification
@@ -139,7 +141,6 @@ function generate-godwoken-config() {
         sed -i 's#^path = .*$#path = '"'$STORE_PATH'"'#' $CONFIG_DIR/godwoken-config.toml
     fi
     sed -i 's#enable_methods = \[\]#err_receipt_ws_listen = '"'0.0.0.0:8120'"'#' $CONFIG_DIR/godwoken-config.toml
-    # config-godwoken-eoa-register
 
     log "Generate file \"$CONFIG_DIR/godwoken-config.toml\""
 }
@@ -191,7 +192,7 @@ function generate-web3-config() {
 
     creator_account_id=$(cat $CONFIG_DIR/polyjuice-root-account-id)
 
-    # TODO: get ETH_ADDRESS_REGISTRY_ACCOUNT_ID from the args of creator_script.args
+    
     cat <<EOF > $CONFIG_DIR/web3-config.env
 ROLLUP_TYPE_HASH=$(jq -r '.rollup_type_hash' $CONFIG_DIR/rollup-genesis-deployment.json)
 ETH_ACCOUNT_LOCK_HASH=$(jq -r '.eth_account_lock.script_type_hash' $CONFIG_DIR/scripts-deployment.json)
@@ -215,12 +216,16 @@ CHAIN_ID=$CHAIN_ID
 # see: https://github.com/nervosnetwork/godwoken/blob/develop/docs/life_of_a_polyjuice_transaction.md#root-account--deployment
 CREATOR_ACCOUNT_ID=$creator_account_id
 
-# When requests "executeTransaction" RPC interface, the RawL2Transaction's
+# When requesting to "executeTransaction" RPC interface, the RawL2Transaction's
 # signature can be omit. Therefore we fill the RawL2Transaction.from_id
 # with this DEFAULT_FROM_ID (corresponding to DEFAULT_FROM_ADDRESS).
+#
+# Usually, ID(3) indicates the first deposited Godwoken account.
 DEFAULT_FROM_ID=3
 DEFAULT_FROM_ADDRESS=0x2e9df163055245bfadd35e3a1f05f06096447c85
 
+# The builtin ETH_ADDRESS_REGISTRY_ACCOUNT_ID is 2.
+# see: https://github.com/nervosnetwork/godwoken/blob/6180f04/crates/common/src/builtins.rs#L5
 ETH_ADDRESS_REGISTRY_ACCOUNT_ID=2
 EOF
 
@@ -290,8 +295,7 @@ function main() {
     start-godwoken-at-background
 
     # Should make sure that the Polyjuice root account was created and the layer2 block was synced
-    create-polyjuice-root-account \
-    || echo "Error:Failed to create-polyjuice-root-account"
+    create-polyjuice-root-account
 
     generate-web3-config
     generate-web3-indexer-config
