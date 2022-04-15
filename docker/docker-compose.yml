@@ -23,7 +23,7 @@ services:
       - ./redis/data:/data
 
   ckb:
-    image: nervos/ckb:v0.101.7
+    image: nervos/ckb:v0.103.0
     user: root
     ports:
       - 8114:8114   # rpc
@@ -33,7 +33,7 @@ services:
     command: [ "run", "-C", "/var/lib/ckb" ]
 
   ckb-miner:
-    image: nervos/ckb:v0.101.7
+    image: nervos/ckb:v0.103.0
     user: root
     volumes:
       - ./layer1/ckb:/var/lib/ckb
