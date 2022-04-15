@@ -1,3 +1,5 @@
+# This workflow simulates the steps described in `docs/hardhat-simple-project.md`.
+# Code authors should ensure the workflow follows this tutorial document.
 name: Simple Test
 
 on:

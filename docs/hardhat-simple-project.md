@@ -10,7 +10,8 @@
 
 ```sh
 $ git clone --depth=1 ssh://git@github.com/NomicFoundation/hardhat
-$ cd hardhat/packages/hardhat-core/sample-projects/basic/
+$ mv hardhat/packages/hardhat-core/sample-projects/basic/ .
+$ cd basic/
 $ ls
 LICENSE.md  README.md  cache  contracts  hardhat.config.js  scripts  test
 ```
@@ -18,12 +19,14 @@ LICENSE.md  README.md  cache  contracts  hardhat.config.js  scripts  test
 ### Install requirements
 
 ```sh
+# Enter `basic/` directory
+# $ cd basic/
 $ npm install --save-dev hardhat @nomiclabs/hardhat-waffle
 ```
 
 ### Adapt `hardhat.config.js` to our local network of Godwoken
 
-Add the below `network` configuration into `hardhat.config.js`:
+Add the below `network` configuration into `basic/hardhat.config.js`:
 
 ```js
 module.exports = {
@@ -45,6 +48,8 @@ module.exports = {
 ### Run hardhat on our local network of Godwoken by `--network gw_devnet_v1`
 
 ```sh
+# Enter `basic/` directory
+# $ cd basic/
 $ npx hardhat accounts --network gw_devnet_v1
 $ npx hardhat compile
 $ npx hardhat test --network gw_devnet_v1
