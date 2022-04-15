@@ -71,12 +71,12 @@ services:
         condition: service_completed_successfully
 
   godwoken:
-    image: ghcr.io/flouse/godwoken-prebuilds:dev-202204131032
+    image: ghcr.io/flouse/godwoken-prebuilds:dev-202204151735
     healthcheck:
-      test: cat /var/lib/layer2/config/polyjuice-root-account-id && curl http://127.0.0.1:8119 || exit 1
-      interval: 5s
-      timeout: 10s
-      retries: 70
+      test: /var/lib/layer2/healthcheck.sh
+      start_period: 10s
+      interval: 30s
+      retries: 600
     environment:
       RUST_LOG: info,gw_generator=debug
       GODWOKEN_MODE: fullnode
