@@ -296,8 +296,7 @@ function main() {
     start-godwoken-at-background
 
     # Should make sure that the Polyjuice root account was created and the layer2 block was synced
-    create-polyjuice-root-account \
-    || echo "Error:Failed to create-polyjuice-root-account"
+    create-polyjuice-root-account
 
     generate-web3-config
     generate-web3-indexer-config
