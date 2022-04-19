@@ -211,7 +211,6 @@ function deposit() {
 
     abspkpath="$( cd -- "$(dirname "$pkpath")" >/dev/null 2>&1 ; pwd -P )/$(basename $pkpath)"
     docker-compose -f docker/docker-compose.yml run \
-        --no-deps \
         --use-aliases \
         --volume=$WORKSPACE/docker/layer2/config:/config \
         --volume=$abspkpath:/privkey-path \
@@ -232,7 +231,6 @@ function get-balance() {
     ethaddr=${1:?"\"$EXECUTABLE get-balance\" requires eth address as 1st argument"}
     short_script_hash=$(to-short-script-hash "$ethaddr")
     docker-compose -f docker/docker-compose.yml run \
-        --no-deps \
         --use-aliases \
         --entrypoint "gw-tools get-balance \
             --godwoken-rpc-url http://godwoken:8119 \
@@ -244,7 +242,6 @@ function get-balance() {
 function to-short-script-hash() {
     ethaddr=${1:?"\"$EXECUTABLE to-short-script-hash\" requires eth address as 1st argument"}
     output=$(docker-compose -f docker/docker-compose.yml run \
-        --no-deps \
         --use-aliases \
         --volume=$WORKSPACE/docker/layer2/config:/config \
         --entrypoint "gw-tools to-short-script-hash \
@@ -298,7 +295,6 @@ function manual-build() {
         # the `docker/manual-artifacts` directory, it is not what we expect.
         erun docker-compose -f docker/docker-compose.yml run \
             --rm \
-            --no-deps \
             --volume=$WORKSPACE/packages/godwoken-web3:/app \
             --workdir=/app \
             --entrypoint "\"yarn install\"" \
