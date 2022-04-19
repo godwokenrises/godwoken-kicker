@@ -155,6 +155,7 @@ function create-polyjuice-root-account() {
     start-ckb-miner-at-background
 
     # Deposit for block_producer
+    log "Deposit for block_producer"
     RUST_BACKTRACE=full gw-tools deposit-ckb \
         --privkey-path $ACCOUNTS_DIR/godwoken-block-producer.key \
         --godwoken-rpc-url http://127.0.0.1:8119 \
@@ -164,17 +165,17 @@ function create-polyjuice-root-account() {
         --capacity 2000
 
     # Create Polyjuice root account (this is a layer2 transaction)
+    log "Create Polyjuice root account"
     RUST_BACKTRACE=full gw-tools create-creator-account \
         --privkey-path $ACCOUNTS_DIR/godwoken-block-producer.key \
         --godwoken-rpc-url http://127.0.0.1:8119 \
         --scripts-deployment-path $CONFIG_DIR/scripts-deployment.json \
         --config-path $CONFIG_DIR/godwoken-config.toml \
         --sudt-id 1 \
-    > /var/tmp/gw-tools.log 2>&1
+    2>&1 | tee /var/tmp/gw-tools.log
 
     stop-ckb-miner
 
-    cat /var/tmp/gw-tools.log
     tail -n 1 /var/tmp/gw-tools.log | grep -oE '[0-9]+$' > $CONFIG_DIR/polyjuice-root-account-id
     log "Generate file \"$CONFIG_DIR/polyjuice-root-account-id\""
 }
