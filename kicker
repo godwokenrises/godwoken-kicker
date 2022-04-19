@@ -210,25 +210,20 @@ function deposit() {
     fi
 
     abspkpath="$( cd -- "$(dirname "$pkpath")" >/dev/null 2>&1 ; pwd -P )/$(basename $pkpath)"
-    # FIXME: Deposit CKB error: invalid type: null, expected struct TransactionView
-    # => fix wait_for_tx function in gw-tools
-    while true; do
-        docker-compose -f docker/docker-compose.yml run \
-            --no-deps \
-            --use-aliases \
-            --volume=$WORKSPACE/docker/layer2/config:/config \
-            --volume=$abspkpath:/privkey-path \
-            --entrypoint "gw-tools deposit-ckb \
-                    --godwoken-rpc-url http://godwoken:8119 \
-                    --ckb-rpc http://ckb:8114 \
-                    --scripts-deployment-path /config/scripts-deployment.json \
-                    --config-path /config/godwoken-config.toml \
-                    --privkey-path /privkey-path \
-                    --eth-address $ethaddr \
-                    --capacity $amount" \
-            godwoken && echo "Deposit finished" && break
-        sleep 6 && echo "Retry"
-    done
+    docker-compose -f docker/docker-compose.yml run \
+        --no-deps \
+        --use-aliases \
+        --volume=$WORKSPACE/docker/layer2/config:/config \
+        --volume=$abspkpath:/privkey-path \
+        --entrypoint "gw-tools deposit-ckb \
+                --godwoken-rpc-url http://godwoken:8119 \
+                --ckb-rpc http://ckb:8114 \
+                --scripts-deployment-path /config/scripts-deployment.json \
+                --config-path /config/godwoken-config.toml \
+                --privkey-path /privkey-path \
+                --eth-address $ethaddr \
+                --capacity $amount" \
+        godwoken && echo "Deposit finished"
 }
 
 # Note that this function MUST be in tty mode.
