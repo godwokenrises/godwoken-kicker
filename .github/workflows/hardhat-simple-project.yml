@@ -17,7 +17,7 @@ jobs:
       - name: Checkout Godwoken-Kicker
         uses: actions/checkout@v2
       - run: git rev-parse HEAD
-      - run: ./kicker init
+      - run: MANUAL_BUILD_GODWOKEN=true GODWOKEN_GIT_URL=https://github.com/nervosnetwork/godwoken GODWOKEN_GIT_CHECKOUT=527025a5163d035aaf63a54b22d2a67286f13704 ./kicker init
       - run: ./kicker start
       - run: ./kicker info
       - run: ./kicker ps
