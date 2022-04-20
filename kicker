@@ -247,13 +247,14 @@ function deposit() {
 function get-balance() {
     ethaddr=${1:?"\"$EXECUTABLE get-balance\" requires eth address as 1st argument"}
     script_hash=$(to-script-hash "$ethaddr")
+    echo "script hash: ${script_hash}"
     docker-compose -f docker/docker-compose.yml run \
         --no-deps \
         --use-aliases \
         --entrypoint "gw-tools get-balance \
             --godwoken-rpc-url http://godwoken:8119 \
             --account $script_hash" \
-        godwoken
+        godwoken 2>&1
 }
 
 # @to-script-hash "0x0C1EfCCa2Bcb65A532274f3eF24c044EF4ab6D73"
@@ -267,7 +268,7 @@ function to-script-hash() {
             --config-path /config/godwoken-config.toml \
             --scripts-deployment-path /config/scripts-deployment.json \
             --eth-address $ethaddr" \
-            godwoken)
+            godwoken 2>&1)
     echo "$output" | grep -oE '0x.*'
 }
 
