@@ -92,6 +92,9 @@ function compose() {
     if [ "$MANUAL_BUILD_SCRIPTS" = "true" ]; then
         override="$override -f docker/manual-scripts.compose.yml"
     fi
+    if [ "$START_GODWOKEN_V0" = "true" ]; then
+        override="$override -f docker/manual-godwoken-v0.compose.yml"
+    fi
 
     erun docker-compose -f docker/docker-compose.yml $override "$@"
 }
@@ -155,34 +158,42 @@ function clean() {
         exit 1
     fi
 
-	echo "rm -rf docker/layer2/data/"
-	echo "rm -f  docker/layer2/config/scripts-deployment.json"
-	echo "rm -f  docker/layer2/config/rollup-genesis-deployment.json"
-	echo "rm -f  docker/layer2/config/godwoken-config.toml"
-	echo "rm -f  docker/layer2/config/polyjuice-root-account-id"
-	echo "rm -f  docker/layer2/config/web3-config.env"
-	echo "rm -f  docker/layer2/config/web3-indexer-config.toml"
-	echo "rm -rf docker/ckb-indexer/"
-	echo "rm -rf docker/layer1/ckb/data/"
-	echo "rm -rf docker/layer1/ckb2/data/"
-	echo "rm -rf docker/layer1/ckb3/data/"
-	echo "rm -rf docker/postgres/data"
-	echo "rm -rf docker/redis/data"
-	echo "rm -rf docker/manual-artifacts"
-	rm -rf docker/layer2/data/
-	rm -f  docker/layer2/config/scripts-deployment.json
-	rm -f  docker/layer2/config/rollup-genesis-deployment.json
-	rm -f  docker/layer2/config/godwoken-config.toml
-	rm -f  docker/layer2/config/polyjuice-root-account-id
-	rm -f  docker/layer2/config/web3-config.env
-	rm -f  docker/layer2/config/web3-indexer-config.toml
-	rm -rf docker/ckb-indexer/
-	rm -rf docker/layer1/ckb/data/
-	rm -rf docker/layer1/ckb2/data/
-	rm -rf docker/layer1/ckb3/data/
-	rm -rf docker/postgres/data
-	rm -rf docker/redis/data
-	rm -rf docker/manual-artifacts
+    echo "rm -rf docker/layer2-v0/data/"
+    echo "rm -f  docker/layer2-v0/config/scripts-deployment.json"
+    echo "rm -f  docker/layer2-v0/config/rollup-genesis-deployment.json"
+    echo "rm -f  docker/layer2-v0/config/godwoken-config.toml"
+    echo "rm -rf docker/layer2/data/"
+    echo "rm -f  docker/layer2/config/scripts-deployment.json"
+    echo "rm -f  docker/layer2/config/rollup-genesis-deployment.json"
+    echo "rm -f  docker/layer2/config/godwoken-config.toml"
+    echo "rm -f  docker/layer2/config/polyjuice-root-account-id"
+    echo "rm -f  docker/layer2/config/web3-config.env"
+    echo "rm -f  docker/layer2/config/web3-indexer-config.toml"
+    echo "rm -rf docker/ckb-indexer/"
+    echo "rm -rf docker/layer1/ckb/data/"
+    echo "rm -rf docker/layer1/ckb2/data/"
+    echo "rm -rf docker/layer1/ckb3/data/"
+    echo "rm -rf docker/postgres/data"
+    echo "rm -rf docker/redis/data"
+    echo "rm -rf docker/manual-artifacts"
+    rm -rf docker/layer2-v0/data/
+    rm -f  docker/layer2-v0/config/scripts-deployment.json
+    rm -f  docker/layer2-v0/config/rollup-genesis-deployment.json
+    rm -f  docker/layer2-v0/config/godwoken-config.toml
+    rm -rf docker/layer2/data/
+    rm -f  docker/layer2/config/scripts-deployment.json
+    rm -f  docker/layer2/config/rollup-genesis-deployment.json
+    rm -f  docker/layer2/config/godwoken-config.toml
+    rm -f  docker/layer2/config/polyjuice-root-account-id
+    rm -f  docker/layer2/config/web3-config.env
+    rm -f  docker/layer2/config/web3-indexer-config.toml
+    rm -rf docker/ckb-indexer/
+    rm -rf docker/layer1/ckb/data/
+    rm -rf docker/layer1/ckb2/data/
+    rm -rf docker/layer1/ckb3/data/
+    rm -rf docker/postgres/data
+    rm -rf docker/redis/data
+    rm -rf docker/manual-artifacts
 }
 
 function ps() {
@@ -235,29 +246,95 @@ function deposit() {
 # @example get-balance "0x0C1EfCCa2Bcb65A532274f3eF24c044EF4ab6D73"
 function get-balance() {
     ethaddr=${1:?"\"$EXECUTABLE get-balance\" requires eth address as 1st argument"}
-    short_script_hash=$(to-short-script-hash "$ethaddr")
+    script_hash=$(to-script-hash "$ethaddr")
+    echo "script hash: ${script_hash}"
     docker-compose -f docker/docker-compose.yml run \
         --no-deps \
         --use-aliases \
         --entrypoint "gw-tools get-balance \
             --godwoken-rpc-url http://godwoken:8119 \
-            --account $short_script_hash" \
-        godwoken
+            --account $script_hash" \
+        godwoken 2>&1
 }
 
-# @to-short-script-hash "0x0C1EfCCa2Bcb65A532274f3eF24c044EF4ab6D73"
-function to-short-script-hash() {
-    ethaddr=${1:?"\"$EXECUTABLE to-short-script-hash\" requires eth address as 1st argument"}
+# @to-script-hash "0x0C1EfCCa2Bcb65A532274f3eF24c044EF4ab6D73"
+function to-script-hash() {
+    ethaddr=${1:?"\"$EXECUTABLE to-script-hash\" requires eth address as 1st argument"}
     output=$(docker-compose -f docker/docker-compose.yml run \
         --no-deps \
         --use-aliases \
         --volume=$WORKSPACE/docker/layer2/config:/config \
-        --entrypoint "gw-tools to-short-script-hash \
+        --entrypoint "gw-tools to-script-hash \
             --config-path /config/godwoken-config.toml \
             --scripts-deployment-path /config/scripts-deployment.json \
             --eth-address $ethaddr" \
-            godwoken)
+            godwoken 2>&1)
     echo "$output" | grep -oE '0x.*'
+}
+
+# TODO: Test deposit v0, remove after abandon v0
+# @example deposit-v0 1000
+function deposit-v0() {
+    amount=${1:?"\"$EXECUTABLE deposit\" requires amount as 1nd argument"}
+
+    pkpath=${PRIVATE_KEY_PATH:-"$WORKSPACE/accounts/ckb-miner-and-faucet.key"}
+    if [ ! -f $pkpath ]; then
+        error "$pkpath: No such file or directory"
+        exit 1
+    fi
+
+    abspkpath="$( cd -- "$(dirname "$pkpath")" >/dev/null 2>&1 ; pwd -P )/$(basename $pkpath)"
+    # FIXME: Deposit CKB error: invalid type: null, expected struct TransactionView
+    # => fix wait_for_tx function in gw-tools
+    while true; do
+        docker-compose -f docker/docker-compose.yml -f docker/manual-godwoken-v0.compose.yml run \
+            --no-deps \
+            --use-aliases \
+            --volume=$WORKSPACE/docker/layer2-v0/config:/config \
+            --volume=$abspkpath:/privkey-path \
+            --entrypoint "gw-tools deposit-ckb \
+                    --godwoken-rpc-url http://godwoken-v0:8119 \
+                    --ckb-rpc http://ckb:8114 \
+                    --scripts-deployment-path /config/scripts-deployment.json \
+                    --config-path /config/godwoken-config.toml \
+                    --privkey-path /privkey-path \
+                    --capacity $amount" \
+            godwoken-v0 && echo "Deposit finished" && break
+        sleep 6 && echo "Retry"
+    done
+}
+
+# TODO: Test withdraw v0 to v1, remove after abandon v0
+# @example withdraw-v0-to-v1 "0x0C1EfCCa2Bcb65A532274f3eF24c044EF4ab6d77" 500
+function withdraw-v0-to-v1() {
+    ethaddr=${1:?"\"$EXECUTABLE withdraw-v0-to-v1\" requires eth address as 1st argument"}
+    amount=${2:?"\"$EXECUTABLE withdraw-v0-to-v1\" requires amount as 2nd argument"}
+
+    pkpath=${PRIVATE_KEY_PATH:-"$WORKSPACE/accounts/ckb-miner-and-faucet.key"}
+    if [ ! -f $pkpath ]; then
+        error "$pkpath: No such file or directory"
+        exit 1
+    fi
+
+    abspkpath="$( cd -- "$(dirname "$pkpath")" >/dev/null 2>&1 ; pwd -P )/$(basename $pkpath)"
+    # FIXME: Deposit CKB error: invalid type: null, expected struct TransactionView
+    # => fix wait_for_tx function in gw-tools
+    while true; do
+        docker-compose -f docker/docker-compose.yml -f docker/manual-godwoken-v0.compose.yml run \
+            --no-deps \
+            --use-aliases \
+            --volume=$WORKSPACE/docker/layer2-v0/config:/config \
+            --volume=$abspkpath:/privkey-path \
+            --entrypoint "gw-tools withdraw-to-v1 \
+                    --godwoken-rpc-url http://godwoken-v0:8119 \
+                    --scripts-deployment-path /config/scripts-deployment.json \
+                    --config-path /config/godwoken-config.toml \
+                    --privkey-path /privkey-path \
+                    --eth-address $ethaddr \
+                    --capacity $amount" \
+            godwoken-v0 && echo "Withdraw v0 to v1 finished" && break
+        sleep 6 && echo "Retry"
+    done
 }
 
 # @example MANUAL_BUILD_WEB3=true \
@@ -496,6 +573,12 @@ function main() {
             ;;
         "deposit")
             deposit "$@"
+            ;;
+        "deposit-v0")
+            deposit-v0 "$@"
+            ;;
+        "withdraw-v0-to-v1")
+            withdraw-v0-to-v1 "$@"
             ;;
         "get-balance")
             get-balance "$@"
