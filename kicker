@@ -246,24 +246,24 @@ function deposit() {
 # @example get-balance "0x0C1EfCCa2Bcb65A532274f3eF24c044EF4ab6D73"
 function get-balance() {
     ethaddr=${1:?"\"$EXECUTABLE get-balance\" requires eth address as 1st argument"}
-    short_script_hash=$(to-short-script-hash "$ethaddr")
+    script_hash=$(to-script-hash "$ethaddr")
     docker-compose -f docker/docker-compose.yml run \
         --no-deps \
         --use-aliases \
         --entrypoint "gw-tools get-balance \
             --godwoken-rpc-url http://godwoken:8119 \
-            --account $short_script_hash" \
+            --account $script_hash" \
         godwoken
 }
 
-# @to-short-script-hash "0x0C1EfCCa2Bcb65A532274f3eF24c044EF4ab6D73"
-function to-short-script-hash() {
-    ethaddr=${1:?"\"$EXECUTABLE to-short-script-hash\" requires eth address as 1st argument"}
+# @to-script-hash "0x0C1EfCCa2Bcb65A532274f3eF24c044EF4ab6D73"
+function to-script-hash() {
+    ethaddr=${1:?"\"$EXECUTABLE to-script-hash\" requires eth address as 1st argument"}
     output=$(docker-compose -f docker/docker-compose.yml run \
         --no-deps \
         --use-aliases \
         --volume=$WORKSPACE/docker/layer2/config:/config \
-        --entrypoint "gw-tools to-short-script-hash \
+        --entrypoint "gw-tools to-script-hash \
             --config-path /config/godwoken-config.toml \
             --scripts-deployment-path /config/scripts-deployment.json \
             --eth-address $ethaddr" \
