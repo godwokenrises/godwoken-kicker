@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  # For fast withdraw from v0 to v1 test
+  # 1. Then start docker-compose service:
+  #
+  #   ```
+  #   docker-compose -f docker/docker-compose.yml -f docker/manual-godwoken-v0.compose.yml up -d godwoken
+  #   ```
+  godwoken-v0:
+    image: ghcr.io/zeroqn/godwoken-prebuilds:dev-feat-fast-withdrawal-to-v1.1
+    healthcheck:
+      test: curl http://127.0.0.1:8119 || exit 1
+      start_period: 10s
+      interval: 30s
+      retries: 600
+    environment:
+      RUST_LOG: info,gw_generator=debug
+      GODWOKEN_MODE: fullnode
+      RUST_BACKTRACE: full
+      STORE_PATH: /var/lib/layer2/data
+      ACCOUNTS_DIR: /accounts
+      GITHUB_RUN_ID: ${GITHUB_RUN_ID:-""}
+    volumes:
+      - ./layer2-v0:/var/lib/layer2
+      - ./layer2/config:/var/lib/layer2/v1config
+      - ../accounts:/accounts
+    ports:
+      - 18119:8119 # rpc
+      - 18120:8120 # err_receipt_ws_listen
+    entrypoint: "/var/lib/layer2/entrypoint.sh"
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 1
+    depends_on:
+      ckb:
+        condition: service_started
+      ckb-miner:
+        condition: service_started
+      ckb-indexer:
+        condition: service_started
+      check-ckb-started-successfully:
+        condition: service_completed_successfully
+      godwoken:
+        condition: service_healthy
