@@ -80,10 +80,6 @@ function generate-godwoken-config() {
     fi
     sed -i 's#enable_methods = \[\]#err_receipt_ws_listen = '"'0.0.0.0:8120'"'#' $CONFIG_DIR/godwoken-config.toml
 
-    if [ ! -z "$V1_GODWOKEN_CONFIG" ]; then
-        log "godwoken v1 isn't ready"
-        return 1
-    fi
     printf "$(generate-withdrawal-to-v1-config)" >> $CONFIG_DIR/godwoken-config.toml
 
     log "Generate file \"$CONFIG_DIR/godwoken-config.toml\""
@@ -140,9 +136,9 @@ function main() {
     deploy-rollup-genesis
     generate-godwoken-config
     
-    start-godwoken-at-background
-
-    deposit-for-test-accounts
+    # start-godwoken-at-background
+    #
+    # deposit-for-test-accounts
 
     # Godwoken daemon
     while true; do
