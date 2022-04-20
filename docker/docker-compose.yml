@@ -71,7 +71,7 @@ services:
         condition: service_completed_successfully
 
   godwoken:
-    image: ghcr.io/flouse/godwoken-prebuilds:v1.1-fix-polyjuice-creator-args-and-revert-p2p-feat
+    image: ghcr.io/zeroqn/godwoken-prebuilds:v1.1-fix-tools-get-balance-parse-account-str
     healthcheck:
       test: /var/lib/layer2/healthcheck.sh
       start_period: 10s
