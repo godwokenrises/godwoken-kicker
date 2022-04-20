@@ -272,8 +272,8 @@ function to-script-hash() {
     echo "$output" | grep -oE '0x.*'
 }
 
-# TODO: Test withdraw v0 to v1, remove after abandon v0
-# @example deposit 1000
+# TODO: Test deposit v0, remove after abandon v0
+# @example deposit-v0 1000
 function deposit-v0() {
     amount=${1:?"\"$EXECUTABLE deposit\" requires amount as 1nd argument"}
 
@@ -307,8 +307,8 @@ function deposit-v0() {
 # TODO: Test withdraw v0 to v1, remove after abandon v0
 # @example withdraw-v0-to-v1 "0x0C1EfCCa2Bcb65A532274f3eF24c044EF4ab6d77" 500
 function withdraw-v0-to-v1() {
-    ethaddr=${1:?"\"$EXECUTABLE withdraw v0 to v1\" requires eth address as 1st argument"}
-    amount=${2:?"\"$EXECUTABLE withdraw v0 to v1\" requires amount as 2nd argument"}
+    ethaddr=${1:?"\"$EXECUTABLE withdraw-v0-to-v1\" requires eth address as 1st argument"}
+    amount=${2:?"\"$EXECUTABLE withdraw-v0-to-v1\" requires amount as 2nd argument"}
 
     pkpath=${PRIVATE_KEY_PATH:-"$WORKSPACE/accounts/ckb-miner-and-faucet.key"}
     if [ ! -f $pkpath ]; then
