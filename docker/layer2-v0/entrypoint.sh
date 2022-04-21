@@ -136,9 +136,9 @@ function main() {
     deploy-rollup-genesis
     generate-godwoken-config
     
-    # start-godwoken-at-background
-    #
-    # deposit-for-test-accounts
+    start-godwoken-at-background
+
+    deposit-for-test-accounts
 
     # Godwoken daemon
     while true; do
