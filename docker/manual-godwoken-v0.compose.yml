@@ -45,3 +45,17 @@ services:
         condition: service_completed_successfully
       godwoken:
         condition: service_healthy
+
+  wait-until-godwoken-v0-healthy:
+    image: curlimages/curl
+    volumes:
+      - ./layer2-v0:/var/lib/layer2
+    command: [ 'http://godwoken-v0:8119', '-H', 'content-type: application/json', '-d', '{ "id": 42, "jsonrpc": "2.0", "method": "gw_get_mem_pool_state_root", "params": [] }' ]
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 1000
+    depends_on:
+      godwoken-v0:
+        condition: service_healthy
+
