@@ -11,7 +11,7 @@ services:
   godwoken-v0:
     image: ghcr.io/zeroqn/godwoken-prebuilds:dev-feat-fast-withdrawal-to-v1.1
     healthcheck:
-      test: cat /var/lib/layer2/config/godwoken-config.toml || curl http://127.0.0.1:8119 || exit 1
+      test: /var/lib/layer2/healthcheck.sh
       start_period: 600s
       interval: 30s
       retries: 600
