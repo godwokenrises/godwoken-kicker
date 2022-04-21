@@ -12,7 +12,7 @@ services:
     image: ghcr.io/zeroqn/godwoken-prebuilds:dev-feat-fast-withdrawal-to-v1.1
     healthcheck:
       test: /var/lib/layer2/healthcheck.sh
-      start_period: 600s
+      start_period: 10s
       interval: 30s
       retries: 600
     environment:
@@ -44,12 +44,10 @@ services:
       check-ckb-started-successfully:
         condition: service_completed_successfully
       godwoken:
-        condition: service_healthy
+        condition: service_started
 
-  wait-until-godwoken-v0-healthy:
+  wait-until-godwoken-v0-becomes-healthy:
     image: curlimages/curl
-    volumes:
-      - ./layer2-v0:/var/lib/layer2
     command: [ 'http://godwoken-v0:8119', '-H', 'content-type: application/json', '-d', '{ "id": 42, "jsonrpc": "2.0", "method": "gw_get_mem_pool_state_root", "params": [] }' ]
     deploy:
       restart_policy:
