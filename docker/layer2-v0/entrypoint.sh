@@ -5,7 +5,8 @@ set -o errexit
 WORKSPACE="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 CONFIG_DIR="$WORKSPACE/config"
 ACCOUNTS_DIR="${ACCOUNTS_DIR:-"ACCOUNTS_DIR is required"}"
-V1_GODWOKEN_CONFIG=$WORKSPACE/v1config/godwoken-config.toml
+V1_CONFIG_DIR="$WORKSPACE/v1config"
+V1_GODWOKEN_CONFIG="$WORKSPACE/v1config/godwoken-config.toml"
 
 function log() {
     echo "[${FUNCNAME[1]}] $1"
@@ -18,11 +19,13 @@ function deploy-scripts() {
         return 0
     fi
 
+    start-ckb-miner-at-background
     RUST_BACKTRACE=full gw-tools deploy-scripts \
         --ckb-rpc http://ckb:8114 \
         -i $CONFIG_DIR/scripts-config.json \
         -o $CONFIG_DIR/scripts-deployment.json \
         -k $ACCOUNTS_DIR/ckb-miner-and-faucet.key
+    stop-ckb-miner
 
     log "Generate file \"$CONFIG_DIR/scripts-deployment.json\""
     log "Finished"
@@ -35,6 +38,7 @@ function deploy-rollup-genesis() {
         return 0
     fi
 
+    start-ckb-miner-at-background
     RUST_BACKTRACE=full gw-tools deploy-genesis \
         --ckb-rpc http://ckb:8114 \
         --scripts-deployment-path $CONFIG_DIR/scripts-deployment.json \
@@ -42,6 +46,8 @@ function deploy-rollup-genesis() {
         --rollup-config $CONFIG_DIR/rollup-config.json \
         -o $CONFIG_DIR/rollup-genesis-deployment.json \
         -k $ACCOUNTS_DIR/ckb-miner-and-faucet.key
+    stop-ckb-miner
+
     log "Generate file \"$CONFIG_DIR/rollup-genesis-deployment.json\""
 }
 
@@ -59,6 +65,20 @@ function generate-godwoken-config() {
         log "$CONFIG_DIR/godwoken-config.toml already exists, skip"
         return 0
     fi
+
+    log "check godwoken v1 config file exists"
+    start_time=$(date +%s)
+    while true; do
+        sleep 1
+        if [ -f "${V1_GODWOKEN_CONFIG}" ]; then
+            break
+        fi
+        elapsed=$(( $(date +%s) - start_time ))
+        if [ $elapsed -gt 1200 ]; then
+            log "ERROR: Godwoken v1 config file not found"
+            exit 2
+        fi
+    done
 
     RUST_BACKTRACE=full gw-tools generate-config \
         --ckb-rpc http://ckb:8114 \
@@ -125,6 +145,20 @@ function deposit-for-test-accounts() {
         --eth-address 0x4fef21f1d42e0d23d72100aefe84d555781c31bb \
         --capacity 10000 || echo "FIXME: gw_tools Deposit CKB error: invalid type: null, expected struct TransactionView"
     log "Fininshed"
+}
+
+function start-ckb-miner-at-background() {
+    ckb -C $V1_CONFIG_DIR miner &> /dev/null &
+    CKB_MINER_PID=$!
+    log "ckb-miner is mining..."
+}
+
+function stop-ckb-miner() {
+    log "Kill the ckb-miner process"
+    if [ ! -z "$CKB_MINER_PID" ]; then
+        kill $CKB_MINER_PID
+        CKB_MINER_PID=""
+    fi
 }
 
 function main() {
