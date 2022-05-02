@@ -1,0 +1,12 @@
+{
+  "poa_setup": {
+    "identity_size": 1,
+    "round_interval_uses_seconds": true,
+    "identities": [
+      "0x90f95b4a388b6c1a4a220917def9438265f02460bdea1b17d2314163f14b9f39"
+    ],
+    "aggregator_change_threshold": 1,
+    "round_intervals": 10,
+    "subblocks_per_round": 1
+  }
+}
