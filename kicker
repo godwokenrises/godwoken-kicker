@@ -124,7 +124,7 @@ function start() {
         fi
     fi
     if [ "$MANUAL_BUILD_WEB3" = "true" ]; then
-        if [ ! -f "$WORKSPACE/docker/manual-artifacts/godwoken-web3" ]; then
+        if [ ! -d "$WORKSPACE/docker/manual-artifacts/godwoken-web3/" ]; then
             error "\"MANUAL_BUILD_WEB3 = true\" but \"docker/manual-artifacts/godwoken-web3\" not found"
             exit 1
         fi
