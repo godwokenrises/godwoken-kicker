@@ -257,29 +257,6 @@ EOF
     log "Finished"
 }
 
-# FIXME: gw_tools Deposit CKB error: invalid type: null, expected struct TransactionView
-function deposit-for-test-accounts() {
-    log "Start"
-    gw-tools deposit-ckb \
-        --godwoken-rpc-url http://godwoken:8119 \
-        --ckb-rpc http://ckb:8114 \
-        --scripts-deployment-path $CONFIG_DIR/scripts-deployment.json \
-        --config-path $CONFIG_DIR/godwoken-config.toml \
-        --privkey-path $ACCOUNTS_DIR/ckb-miner-and-faucet.key \
-        --eth-address 0x966b30e576a4d6731996748b48dd67c94ef29067 \
-        --capacity 10000 || echo "FIXME: gw_tools Deposit CKB error: invalid type: null, expected struct TransactionView"
-
-    gw-tools deposit-ckb \
-        --godwoken-rpc-url http://godwoken:8119 \
-        --ckb-rpc http://ckb:8114 \
-        --scripts-deployment-path $CONFIG_DIR/scripts-deployment.json \
-        --config-path $CONFIG_DIR/godwoken-config.toml \
-        --privkey-path $ACCOUNTS_DIR/ckb-miner-and-faucet.key \
-        --eth-address 0x4fef21f1d42e0d23d72100aefe84d555781c31bb \
-        --capacity 10000 || echo "FIXME: gw_tools Deposit CKB error: invalid type: null, expected struct TransactionView"
-    log "Fininshed"
-}
-
 function log() {
     echo "[${FUNCNAME[1]}] $1"
 }
@@ -300,11 +277,6 @@ function main() {
 
     generate-web3-config
     generate-web3-indexer-config
-
-    # Godwoken is ready for test
-    # Now we can deposit for test accounts, this should NOT block other operations
-    deposit-for-test-accounts
-    # TODO: add more test accounts
 
     # Godwoken daemon
     while true; do
