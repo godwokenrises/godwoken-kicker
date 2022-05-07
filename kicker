@@ -126,6 +126,7 @@ function start() {
     if [ "$MANUAL_BUILD_WEB3" = "true" ]; then
         if [ ! -d "$WORKSPACE/docker/manual-artifacts/godwoken-web3/" ]; then
             error "\"MANUAL_BUILD_WEB3 = true\" but \"docker/manual-artifacts/godwoken-web3\" not found"
+            erun ls -l -a $WORKSPACE/docker/manual-artifacts/godwoken-web3/
             exit 1
         fi
     fi
@@ -391,7 +392,11 @@ function manual-build() {
         # More: ./docker/manual-web3.compose.yml
         erun rm -rf $dstdir
         erun mkdir -p $dstdir
-        erun cp -r $srcdir/packages $srcdir/node_modules $srcdir/package.json $dstdir
+        erun cp -r $srcdir/packages \
+            $srcdir/package.json \
+            $srcdir/node_modules \
+            $srcdir/yarn.lock \
+            $dstdir
     else
         info "skip building godwoken-web3"
     fi
@@ -420,7 +425,6 @@ function manual-build() {
         # Copy the built artifacts to `docker/manual-artifacts/gw-web3-indexer`
         #
         # More: ./docker/manual-web3-indexer.compose.yml
-        erun rm -rf $dstdir
         erun mkdir -p $dstdir
         erun cp $srcdir/target/release/gw-web3-indexer $dstdir
     else
@@ -449,7 +453,6 @@ function manual-build() {
         # Copy the built artifacts to `docker/manual-artifacts/`
         #
         # More: ./docker/manual-godwoken.compose.yml
-        erun rm -rf $dstdir
         erun mkdir -p $dstdir
         erun cp $srcdir/target/release/godwoken $dstdir
         erun cp $srcdir/target/release/gw-tools $dstdir
