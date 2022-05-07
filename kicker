@@ -384,7 +384,7 @@ function manual-build() {
             --no-deps \
             --volume=$WORKSPACE/packages/godwoken-web3:/app \
             --workdir=/app \
-            --entrypoint "\"yarn install\"" \
+            --entrypoint "\"bash -c 'yarn install && yarn run build'\"" \
             web3
 
         # Copy the built artifacts to `docker/manual-artifacts/godwoken-web3`.
