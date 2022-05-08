@@ -71,7 +71,7 @@ services:
         condition: service_completed_successfully
 
   godwoken:
-    image: ghcr.io/flouse/godwoken-prebuilds:dev-202205020457
+    image: ghcr.io/nervosnetwork/godwoken-prebuilds:v1.1.0-beta-202205080219
     healthcheck:
       test: /var/lib/layer2/healthcheck.sh
       start_period: 10s
@@ -111,7 +111,7 @@ services:
         condition: service_completed_successfully
 
   web3:
-    image: ghcr.io/nervosnetwork/godwoken-web3-prebuilds:compatibility-breaking-changes-7de34a7
+    image: ghcr.io/nervosnetwork/godwoken-web3-prebuilds:compatibility-breaking-changes-2b1dc8e
     healthcheck:
       test: curl http://127.0.0.1:8024 || exit 1
       start_period: 10s
@@ -144,7 +144,7 @@ services:
         condition: service_started
 
   web3-indexer:
-    image: ghcr.io/nervosnetwork/godwoken-web3-indexer-prebuilds:compatibility-breaking-changes-7de34a7
+    image: ghcr.io/nervosnetwork/godwoken-web3-indexer-prebuilds:compatibility-breaking-changes-b97b1a5
     volumes:
       - ./layer2/config:/var/lib/layer2/config
       - ./web3/indexer_entrypoint.sh:/var/lib/web3-indexer/entrypoint.sh
