@@ -64,6 +64,14 @@ EXAMPLES:
     $ ./kicker -- --help
 ```
 
+## Bug Report
+
+Whenever you encounter a problem with Kicker, please let us know by providing the following information. This will help us dig into the problem:
+
+- Version: `git log --format="%H" -n 1`
+- Service running status: `./kicker ps`
+- Service logs: `./kicker logs`
+
 ## More
 
 * [Manual build mode](docs/manual-build.md)
