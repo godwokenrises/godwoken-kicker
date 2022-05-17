@@ -47,7 +47,6 @@ plugins/gw-schema/tmp
 /docker/layer2/config/rollup-genesis-deployment.json
 /docker/layer2/config/godwoken-config.toml
 /docker/layer2/config/polyjuice-root-account-id
-/docker/layer2/config/web3-config.env
 /docker/layer2/config/web3-indexer-config.toml
 /docker/manual-artifacts/
 /docker/layer2-v0/data/

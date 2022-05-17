@@ -83,9 +83,6 @@ services:
       RUST_BACKTRACE: full
       STORE_PATH: /var/lib/layer2/data
       ACCOUNTS_DIR: /accounts
-      POSTGRES_USER: user
-      POSTGRES_DB: lumos
-      POSTGRES_PASSWORD: password
       GITHUB_RUN_ID: ${GITHUB_RUN_ID:-""}
     volumes:
       - ./layer2:/var/lib/layer2
@@ -111,7 +108,7 @@ services:
         condition: service_completed_successfully
 
   web3:
-    image: nervos/godwoken-web3-prebuilds:v1.1.0-beta
+    image: ghcr.io/nervosnetwork/godwoken-web3-prebuilds:compatibility-breaking-changes-871b301
     healthcheck:
       test: curl http://127.0.0.1:8024 || exit 1
       start_period: 10s

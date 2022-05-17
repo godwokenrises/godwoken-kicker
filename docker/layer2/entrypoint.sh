@@ -180,60 +180,6 @@ function create-polyjuice-root-account() {
     log "Generate file \"$CONFIG_DIR/polyjuice-root-account-id\""
 }
 
-function generate-web3-config() {
-    log "Start"
-    if [ -s "$CONFIG_DIR/web3-config.env" ]; then
-        log "$CONFIG_DIR/web3-config.env already exists, skip"
-        return 0
-    fi
-
-    if ! command -v jq &> /dev/null; then
-        apt-get install -y jq &>/dev/null
-    fi
-
-    creator_account_id=$(cat $CONFIG_DIR/polyjuice-root-account-id)
-
-    
-    cat <<EOF > $CONFIG_DIR/web3-config.env
-ROLLUP_TYPE_HASH=$(jq -r '.rollup_type_hash' $CONFIG_DIR/rollup-genesis-deployment.json)
-ETH_ACCOUNT_LOCK_HASH=$(jq -r '.eth_account_lock.script_type_hash' $CONFIG_DIR/scripts-deployment.json)
-POLYJUICE_VALIDATOR_TYPE_HASH=$(jq -r '.polyjuice_validator.script_type_hash' $CONFIG_DIR/scripts-deployment.json)
-L2_SUDT_VALIDATOR_SCRIPT_TYPE_HASH=$(jq -r '.l2_sudt_validator.script_type_hash' $CONFIG_DIR/scripts-deployment.json)
-
-DATABASE_URL=postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@postgres:5432/$POSTGRES_DB
-REDIS_URL=redis://redis:6379
-GODWOKEN_JSON_RPC=http://godwoken:8119
-GODWOKEN_WS_RPC_URL=ws://godwoken:8120
-PORT=8024
-
-# The CHAIN_ID is the identifier of our Godwoken devnet, which is defined in
-# Godwoken [RollupConfig#chain_id](https://github.com/nervosnetwork/godwoken/blob/a099f2010b212355f5504a8d464b6b70d29640a5/crates/types/schemas/godwoken.mol#L64).
-#
-# More about chain id:
-# * https://eips.ethereum.org/EIPS/eip-1344#specification
-CHAIN_ID=$CHAIN_ID
-
-# Polyjuice Root Account
-# see: https://github.com/nervosnetwork/godwoken/blob/develop/docs/life_of_a_polyjuice_transaction.md#root-account--deployment
-CREATOR_ACCOUNT_ID=$creator_account_id
-
-# When requesting to "executeTransaction" RPC interface, the RawL2Transaction's
-# signature can be omit. Therefore we fill the RawL2Transaction.from_id
-# with this DEFAULT_FROM_ID (corresponding to DEFAULT_FROM_ADDRESS).
-#
-# Usually, ID(3) indicates the first deposited Godwoken account.
-DEFAULT_FROM_ID=3
-DEFAULT_FROM_ADDRESS=0x2e9df163055245bfadd35e3a1f05f06096447c85
-
-# The builtin ETH_ADDRESS_REGISTRY_ACCOUNT_ID is 2.
-# see: https://github.com/nervosnetwork/godwoken/blob/6180f04/crates/common/src/builtins.rs#L5
-ETH_ADDRESS_REGISTRY_ACCOUNT_ID=2
-EOF
-
-    log "Generate file \"$CONFIG_DIR/web3-config.env\""
-    log "Finished"
-}
-
 function generate-web3-indexer-config() {
     log "Start"
     if [ -s "$CONFIG_DIR/web3-indexer-config.toml" ]; then
@@ -241,16 +187,21 @@ function generate-web3-indexer-config() {
         return 0
     fi
 
-    source $CONFIG_DIR/web3-config.env
+    if ! command -v jq &> /dev/null; then
+        apt-get install -y jq &>/dev/null
+    fi
+
     cat <<EOF > $CONFIG_DIR/web3-indexer-config.toml
 chain_id=$CHAIN_ID
-l2_sudt_type_script_hash="$L2_SUDT_VALIDATOR_SCRIPT_TYPE_HASH"
-polyjuice_type_script_hash="$POLYJUICE_VALIDATOR_TYPE_HASH"
-rollup_type_hash="$ROLLUP_TYPE_HASH"
-eth_account_lock_hash="$ETH_ACCOUNT_LOCK_HASH"
-godwoken_rpc_url="$GODWOKEN_JSON_RPC"
-pg_url="$DATABASE_URL"
-ws_rpc_url="$GODWOKEN_WS_RPC_URL"
+l2_sudt_type_script_hash="$(jq -r '.l2_sudt_validator.script_type_hash' $CONFIG_DIR/scripts-deployment.json)"
+polyjuice_type_script_hash="$(jq -r '.polyjuice_validator.script_type_hash' $CONFIG_DIR/scripts-deployment.json)"
+rollup_type_hash="$(jq -r '.rollup_type_hash' $CONFIG_DIR/rollup-genesis-deployment.json)"
+eth_account_lock_hash="$(jq -r '.eth_account_lock.script_type_hash' $CONFIG_DIR/scripts-deployment.json)"
+
+godwoken_rpc_url="http://godwoken:8119"
+ws_rpc_url="ws://godwoken:8120"
+
+pg_url="postgres://user:password@postgres:5432/lumos"
 EOF
 
     log "Generate file \"$CONFIG_DIR/web3-indexer-config.toml\""
@@ -275,7 +226,6 @@ function main() {
     # Should make sure that the Polyjuice root account was created and the layer2 block was synced
     create-polyjuice-root-account
 
-    generate-web3-config
     generate-web3-indexer-config
 
     # Godwoken daemon
