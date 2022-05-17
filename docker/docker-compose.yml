@@ -118,10 +118,8 @@ services:
       interval: 10s
       retries: 30
     volumes: 
-      - ./layer2/config:/var/lib/layer2/config
+      - ./layer2/config/web3-config.env:/godwoken-web3/packages/api-server/.env
       - ./web3/entrypoint.sh:/var/lib/web3/entrypoint.sh
-    environment: 
-      CONFIG_DIR: /var/lib/layer2/config
     entrypoint: /var/lib/web3/entrypoint.sh
     ports:
       - 8024:8024
