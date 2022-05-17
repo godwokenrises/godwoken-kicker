@@ -71,7 +71,7 @@ services:
         condition: service_completed_successfully
 
   godwoken:
-    image: ghcr.io/nervosnetwork/godwoken-prebuilds:v1.1.0-beta.1
+    image: ghcr.io/nervosnetwork/godwoken-prebuilds:v1.1
     healthcheck:
       test: /var/lib/layer2/healthcheck.sh
       start_period: 10s
