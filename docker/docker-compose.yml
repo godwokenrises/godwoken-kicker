@@ -107,7 +107,7 @@ services:
         condition: service_completed_successfully
 
   web3-migrations:
-    image: ghcr.io/nervosnetwork/godwoken-web3-prebuilds:refactor-db-0f229fa
+    image: ghcr.io/nervosnetwork/godwoken-web3-prebuilds:refactor-db-01b5da5
     volumes: 
       - ./layer2/config/web3-config.env:/godwoken-web3/packages/api-server/.env
       - ./web3/migrations_entrypoint.sh:/var/lib/web3/migrations_entrypoint.sh
@@ -131,7 +131,7 @@ services:
         condition: service_started
 
   web3:
-    image: ghcr.io/nervosnetwork/godwoken-web3-prebuilds:refactor-db-0f229fa
+    image: ghcr.io/nervosnetwork/godwoken-web3-prebuilds:refactor-db-01b5da5
     healthcheck:
       test: curl http://127.0.0.1:8024 || exit 1
       start_period: 10s
@@ -152,7 +152,7 @@ services:
         condition: service_completed_successfully
 
   web3-indexer:
-    image: ghcr.io/nervosnetwork/godwoken-web3-indexer-prebuilds:refactor-db-0f229fa
+    image: ghcr.io/nervosnetwork/godwoken-web3-indexer-prebuilds:refactor-db-01b5da5
     volumes:
       - ./layer2/config:/var/lib/layer2/config
       - ./web3/indexer_entrypoint.sh:/var/lib/web3-indexer/entrypoint.sh
