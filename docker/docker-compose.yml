@@ -11,7 +11,6 @@ services:
       POSTGRES_DB: lumos
       POSTGRES_PASSWORD: password
     volumes:
-      - ./postgres/web3-indexer-schema.sql:/docker-entrypoint-initdb.d/web3-indexer-schema.sql
       - ./postgres/data:/var/lib/postgresql/data
     
   redis:
@@ -71,7 +70,7 @@ services:
         condition: service_completed_successfully
 
   godwoken:
-    image: ghcr.io/nervosnetwork/godwoken-prebuilds:v1.1
+    image: ghcr.io/nervosnetwork/godwoken-prebuilds:main-202205170929
     healthcheck:
       test: /var/lib/layer2/healthcheck.sh
       start_period: 10s
@@ -107,24 +106,17 @@ services:
       check-ckb-started-successfully:
         condition: service_completed_successfully
 
-  web3:
-    image: ghcr.io/nervosnetwork/godwoken-web3-prebuilds:compatibility-breaking-changes-871b301
-    healthcheck:
-      test: curl http://127.0.0.1:8024 || exit 1
-      start_period: 10s
-      interval: 10s
-      retries: 30
+  web3-migrations:
+    image: ghcr.io/nervosnetwork/godwoken-web3-prebuilds:refactor-db-0f229fa
     volumes: 
       - ./layer2/config/web3-config.env:/godwoken-web3/packages/api-server/.env
-      - ./web3/entrypoint.sh:/var/lib/web3/entrypoint.sh
-    entrypoint: /var/lib/web3/entrypoint.sh
-    ports:
-      - 8024:8024
+      - ./web3/migrations_entrypoint.sh:/var/lib/web3/migrations_entrypoint.sh
+    entrypoint: /var/lib/web3/migrations_entrypoint.sh
     deploy:
       restart_policy:
         condition: on-failure
         max_attempts: 10
-    depends_on: 
+    depends_on:
       ckb:
         condition: service_started
       ckb-miner:
@@ -138,8 +130,29 @@ services:
       redis:
         condition: service_started
 
+  web3:
+    image: ghcr.io/nervosnetwork/godwoken-web3-prebuilds:refactor-db-0f229fa
+    healthcheck:
+      test: curl http://127.0.0.1:8024 || exit 1
+      start_period: 10s
+      interval: 10s
+      retries: 30
+    volumes:
+      - ./layer2/config/web3-config.env:/godwoken-web3/packages/api-server/.env
+      - ./web3/entrypoint.sh:/var/lib/web3/entrypoint.sh
+    entrypoint: /var/lib/web3/entrypoint.sh
+    ports:
+      - 8024:8024
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 10
+    depends_on:
+      web3-migrations:
+        condition: service_completed_successfully
+
   web3-indexer:
-    image: nervos/godwoken-web3-indexer-prebuilds:v1.1.0-beta
+    image: ghcr.io/nervosnetwork/godwoken-web3-indexer-prebuilds:refactor-db-0f229fa
     volumes:
       - ./layer2/config:/var/lib/layer2/config
       - ./web3/indexer_entrypoint.sh:/var/lib/web3-indexer/entrypoint.sh
@@ -153,11 +166,5 @@ services:
         condition: on-failure
         max_attempts: 10
     depends_on: 
-      web3:
-        condition: service_healthy
-      godwoken:
-        condition: service_healthy
-      postgres:
-        condition: service_started
-      redis:
-        condition: service_started
+      web3-migrations:
+        condition: service_completed_successfully
