@@ -71,7 +71,7 @@ services:
         condition: service_completed_successfully
 
   godwoken:
-    image: ghcr.io/nervosnetwork/godwoken-prebuilds:v1.1.0-beta.1
+    image: ghcr.io/nervosnetwork/godwoken-prebuilds:v1.1
     healthcheck:
       test: /var/lib/layer2/healthcheck.sh
       start_period: 10s
@@ -83,9 +83,6 @@ services:
       RUST_BACKTRACE: full
       STORE_PATH: /var/lib/layer2/data
       ACCOUNTS_DIR: /accounts
-      POSTGRES_USER: user
-      POSTGRES_DB: lumos
-      POSTGRES_PASSWORD: password
       GITHUB_RUN_ID: ${GITHUB_RUN_ID:-""}
     volumes:
       - ./layer2:/var/lib/layer2
@@ -111,17 +108,15 @@ services:
         condition: service_completed_successfully
 
   web3:
-    image: nervos/godwoken-web3-prebuilds:v1.1.0-beta
+    image: ghcr.io/nervosnetwork/godwoken-web3-prebuilds:compatibility-breaking-changes-871b301
     healthcheck:
       test: curl http://127.0.0.1:8024 || exit 1
       start_period: 10s
       interval: 10s
       retries: 30
     volumes: 
-      - ./layer2/config:/var/lib/layer2/config
+      - ./layer2/config/web3-config.env:/godwoken-web3/packages/api-server/.env
       - ./web3/entrypoint.sh:/var/lib/web3/entrypoint.sh
-    environment: 
-      CONFIG_DIR: /var/lib/layer2/config
     entrypoint: /var/lib/web3/entrypoint.sh
     ports:
       - 8024:8024
