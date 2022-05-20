@@ -233,7 +233,7 @@ function deposit() {
                 --privkey-path /privkey-path \
                 --eth-address $ethaddr \
                 --capacity $amount" \
-        godwoken && echo "Deposit finished" && break
+        godwoken
 }
 
 # Note that this function MUST be in tty mode.
@@ -290,7 +290,7 @@ function deposit-v0() {
                 --config-path /config/godwoken-config.toml \
                 --privkey-path /privkey-path \
                 --capacity $amount" \
-        godwoken-v0 && echo "Deposit finished" && break
+        godwoken-v0
 }
 
 # TODO: Test withdraw v0 to v1, remove after abandon v0
@@ -318,7 +318,7 @@ function withdraw-v0-to-v1() {
                 --privkey-path /privkey-path \
                 --eth-address $ethaddr \
                 --capacity $amount" \
-        godwoken-v0 && echo "Withdraw v0 to v1 finished" && break
+        godwoken-v0
 }
 
 # @example MANUAL_BUILD_WEB3=true \
