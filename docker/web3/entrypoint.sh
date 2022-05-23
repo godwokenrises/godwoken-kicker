@@ -8,4 +8,6 @@ mkdir -p /usr/local/godwoken-web3/address-mapping
 
 # WORKSPACE=/godwoken-web3
 cd /godwoken-web3
+
+yarn knex migrate:latest
 yarn run start
