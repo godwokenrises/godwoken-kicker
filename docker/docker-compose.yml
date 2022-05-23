@@ -106,30 +106,6 @@ services:
       check-ckb-started-successfully:
         condition: service_completed_successfully
 
-  web3-migrations:
-    image: ghcr.io/nervosnetwork/godwoken-web3-prebuilds:refactor-db-01b5da5
-    volumes: 
-      - ./layer2/config/web3-config.env:/godwoken-web3/packages/api-server/.env
-      - ./web3/migrations_entrypoint.sh:/var/lib/web3/migrations_entrypoint.sh
-    entrypoint: /var/lib/web3/migrations_entrypoint.sh
-    deploy:
-      restart_policy:
-        condition: on-failure
-        max_attempts: 10
-    depends_on:
-      ckb:
-        condition: service_started
-      ckb-miner:
-        condition: service_started
-      check-ckb-started-successfully:
-        condition: service_completed_successfully
-      godwoken:
-        condition: service_healthy
-      postgres:
-        condition: service_started
-      redis:
-        condition: service_started
-
   web3:
     image: ghcr.io/nervosnetwork/godwoken-web3-prebuilds:refactor-db-01b5da5
     healthcheck:
@@ -148,8 +124,18 @@ services:
         condition: on-failure
         max_attempts: 10
     depends_on:
-      web3-migrations:
+      ckb:
+        condition: service_started
+      ckb-miner:
+        condition: service_started
+      check-ckb-started-successfully:
         condition: service_completed_successfully
+      godwoken:
+        condition: service_healthy
+      postgres:
+        condition: service_started
+      redis:
+        condition: service_started
 
   web3-indexer:
     image: ghcr.io/nervosnetwork/godwoken-web3-indexer-prebuilds:refactor-db-01b5da5
@@ -166,5 +152,11 @@ services:
         condition: on-failure
         max_attempts: 10
     depends_on: 
-      web3-migrations:
-        condition: service_completed_successfully
+      web3:
+        condition: service_healthy
+      godwoken:
+        condition: service_healthy
+      postgres:
+        condition: service_started
+      redis:
+        condition: service_started
