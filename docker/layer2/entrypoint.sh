@@ -155,6 +155,11 @@ function create-polyjuice-root-account() {
     start-ckb-miner-at-background
 
     # Deposit for block_producer
+    #
+    # Here we deposit from ckb-miner-and-faucet.key instead of
+    # godwoken-block-producer.key to avoid double spending cells locked by the
+    # latter -- godwoken has already started and may spend them too for block
+    # submission etc.
     log "Deposit for block_producer"
     RUST_BACKTRACE=full gw-tools deposit-ckb \
         --privkey-path $ACCOUNTS_DIR/ckb-miner-and-faucet.key \
