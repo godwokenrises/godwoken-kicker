@@ -124,8 +124,8 @@ services:
       - ./layer2:/var/lib/layer2
       - ../accounts:/accounts:ro
     ports:
-      - 18119:8119 # rpc
-      - 18120:8120 # err_receipt_ws_listen
+      - 28119:8119 # rpc
+      - 28120:8120 # err_receipt_ws_listen
     entrypoint: "/var/lib/layer2/entrypoint-readonly.sh"
     deploy:
       restart_policy:
