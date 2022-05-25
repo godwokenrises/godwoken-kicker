@@ -19,3 +19,7 @@ services:
     volumes:
       - ./manual-artifacts/godwoken:/usr/bin/godwoken
       - ./manual-artifacts/gw-tools:/usr/bin/gw-tools
+  godwoken-readonly:
+    volumes:
+      - ./manual-artifacts/godwoken:/usr/bin/godwoken
+      - ./manual-artifacts/gw-tools:/usr/bin/gw-tools
