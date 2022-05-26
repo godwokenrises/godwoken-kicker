@@ -1,4 +1,4 @@
-name: Integration Test
+name: Godwoken Tests
 
 on:
   push:
@@ -9,7 +9,8 @@ on:
 
 jobs:
   godwoken-tests:
-    uses: nervosnetwork/godwoken-tests/.github/workflows/reusable-integration-test-v1.yml@develop
+    uses: nervosnetwork/godwoken-tests/.github/workflows/reusable-integration-test-v1.yml@simplify-workflow
     with:
-      # github.ref: The branch or tag ref that triggered the workflow run. For branches this is the format refs/heads/<branch_name>, and for tags it is refs/tags/<tag_name>.
-      kicker_ref: ${{ github.ref }}
+      extra_github_env: |
+        GODWOKEN_KICKER_REPO=${{ github.repository }}
+        GODWOKEN_KICKER_REF=${{ github.ref }}
