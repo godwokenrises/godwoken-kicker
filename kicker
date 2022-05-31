@@ -409,6 +409,7 @@ function manual-build() {
         #
         # More: ./docker/manual-web3-indexer.compose.yml
         erun mkdir -p $dstdir
+        erun rm -rf $dstdir/gw-web3-indexer
         erun cp $srcdir/target/release/gw-web3-indexer $dstdir
     else
         info "skip building godwoken-web3-indexer(gw-web3-indexer)"
@@ -437,6 +438,7 @@ function manual-build() {
         #
         # More: ./docker/manual-godwoken.compose.yml
         erun mkdir -p $dstdir
+        erun rm -rf $dstdir/godwoken $dstdir/gw-tools
         erun cp $srcdir/target/release/godwoken $dstdir
         erun cp $srcdir/target/release/gw-tools $dstdir
     else
@@ -454,7 +456,8 @@ function manual-build() {
         erun make all-via-docker
 
         # Copy the built artifacts to `docker/manual-artifacts/`
-        mkdir -p $dstdir
+        erun rm -rf $dstdir
+        erun mkdir -p $dstdir
         erun cp -r build/* $dstdir
     else
         info "skip building Polyjuice"
@@ -483,7 +486,8 @@ function manual-build() {
         erun make all-via-docker
 
         # Copy the built artifacts to `docker/manual-artifacts/`
-        mkdir -p $dstdir
+        erun rm -rf $dstdir
+        erun mkdir -p $dstdir
         erun cp -r $srcdir/build/release/* $dstdir
         erun cp $srcdir/c/build/*-generator $dstdir
         erun cp $srcdir/c/build/*-validator $dstdir

@@ -35,6 +35,10 @@ plugins/gw-schema/schemas
 plugins/gw-schema/tmp
 
 *.log
+.tmp/
+*debug-tx-dump/
+*mem_block/
+/docker/override.compose.yml
 
 /docker/postgres/data/
 /docker/redis/data/

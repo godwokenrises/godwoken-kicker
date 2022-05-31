@@ -232,7 +232,7 @@ function main() {
     # Should make sure that the Polyjuice root account was created and the layer2 block was synced
     create-polyjuice-root-account
 
-    generate-web3-indexer-config
+    # generate-web3-indexer-config
 
     # Godwoken daemon
     while true; do

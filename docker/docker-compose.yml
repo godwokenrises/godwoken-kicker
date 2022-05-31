@@ -114,11 +114,14 @@ services:
       interval: 10s
       retries: 30
     volumes:
-      - ./layer2/config/web3-config.env:/godwoken-web3/packages/api-server/.env
       - ./web3/entrypoint.sh:/var/lib/web3/entrypoint.sh
     entrypoint: /var/lib/web3/entrypoint.sh
     ports:
       - 8024:8024
+    environment:
+      GODWOKEN_JSON_RPC: http://godwoken:8119
+      DATABASE_URL: postgres://user:password@postgres:5432/lumos
+      REDIS_URL: redis://redis:6379
     deploy:
       restart_policy:
         condition: on-failure
@@ -139,14 +142,13 @@ services:
 
   web3-indexer:
     image: nervos/godwoken-web3-indexer-prebuilds:v1.1.0-rc1
-    volumes:
-      - ./layer2/config:/var/lib/layer2/config
-      - ./web3/indexer_entrypoint.sh:/var/lib/web3-indexer/entrypoint.sh
     working_dir: /var/lib/web3-indexer
-    entrypoint: /var/lib/web3-indexer/entrypoint.sh
+    entrypoint: /usr/bin/gw-web3-indexer
     environment:
-      CONFIG_DIR: /var/lib/layer2/config
       RUST_LOG: info
+      pg_url: postgres://user:password@postgres:5432/lumos
+      godwoken_rpc_url: http://godwoken:8119
+      ws_rpc_url: http://godwoken:8120
     deploy:
       restart_policy:
         condition: on-failure
