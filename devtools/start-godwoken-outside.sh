@@ -35,8 +35,8 @@ cat $WORKSPACE/../docker/layer2/config/godwoken-config.toml \
   | sed "s#/scripts/#$GODWOKEN_DATA_DIR/scripts/#" \
   | sed "s#/accounts/#$WORKSPACE/../accounts/#" > $GODWOKEN_DATA_DIR/godwoken-config.toml
 
-echo "Godwoken starting..."
-screen -d -m godwoken run -c $GODWOKEN_DATA_DIR/godwoken-config.toml
+echo "Godwoken starting... godwoken log path is $GODWOKEN_DATA_DIR/godwoken.log"
+screen -dmS gw bash -c "godwoken run -c $GODWOKEN_DATA_DIR/godwoken-config.toml | tee --append $GODWOKEN_DATA_DIR/godwoken.log"
 timeout 10s $(while true; do
     echo '{
       "id": 42,
