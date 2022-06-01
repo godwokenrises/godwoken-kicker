@@ -226,8 +226,8 @@ function deposit() {
         --volume=$WORKSPACE/docker/layer2/config:/config \
         --volume=$abspkpath:/privkey-path \
         --entrypoint "gw-tools deposit-ckb \
-                --godwoken-rpc-url http://godwoken:8119 \
-                --ckb-rpc http://ckb:8114 \
+                --godwoken-rpc-url http://docker.host.internal:8119 \
+                --ckb-rpc http://docker.host.internal:8114 \
                 --scripts-deployment-path /config/scripts-deployment.json \
                 --config-path /config/godwoken-config.toml \
                 --privkey-path /privkey-path \
@@ -246,7 +246,7 @@ function get-balance() {
         --no-deps \
         --use-aliases \
         --entrypoint "gw-tools get-balance \
-            --godwoken-rpc-url http://godwoken:8119 \
+            --godwoken-rpc-url http://docker.host.internal:8119 \
             --account $script_hash" \
         godwoken 2>&1
 }
@@ -284,8 +284,8 @@ function deposit-v0() {
         --volume=$WORKSPACE/docker/layer2-v0/config:/config \
         --volume=$abspkpath:/privkey-path \
         --entrypoint "gw-tools deposit-ckb \
-                --godwoken-rpc-url http://godwoken-v0:8119 \
-                --ckb-rpc http://ckb:8114 \
+                --godwoken-rpc-url http://docker.host.internal:18119 \
+                --ckb-rpc http://docker.host.internal:8114 \
                 --scripts-deployment-path /config/scripts-deployment.json \
                 --config-path /config/godwoken-config.toml \
                 --privkey-path /privkey-path \
@@ -312,7 +312,7 @@ function withdraw-v0-to-v1() {
         --volume=$WORKSPACE/docker/layer2-v0/config:/config \
         --volume=$abspkpath:/privkey-path \
         --entrypoint "gw-tools withdraw-to-v1 \
-                --godwoken-rpc-url http://godwoken-v0:8119 \
+                --godwoken-rpc-url http://docker.host.internal:18119 \
                 --scripts-deployment-path /config/scripts-deployment.json \
                 --config-path /config/godwoken-config.toml \
                 --privkey-path /privkey-path \
