@@ -73,6 +73,10 @@ Whenever you encounter a problem with Kicker, please let us know by providing th
 - Service running status: `./kicker ps`
 - Service logs: `./kicker logs`
 
+## Contributing to Godwoken-Kicker
+
+[CONTRIBUTING.md](docs/CONTRIBUTING.md)
+
 ## More
 
 * [Manual build mode](docs/manual-build.md)
