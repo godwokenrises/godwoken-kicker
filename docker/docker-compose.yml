@@ -70,7 +70,7 @@ services:
         condition: service_completed_successfully
 
   godwoken:
-    image: ghcr.io/keroro520/godwoken-prebuilds:v1-godwoken-d3eb41a-202205310512
+    image: ghcr.io/classicalliu/godwoken-prebuilds:dev-202206060552
     healthcheck:
       test: /var/lib/layer2/healthcheck.sh
       start_period: 10s
