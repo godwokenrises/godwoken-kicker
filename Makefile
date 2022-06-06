@@ -32,6 +32,7 @@ uninstall:
 
 clean-cache:
 	rm -rf cache/activity/*
+	[ -d packages/godwoken-polyman/packages/runner/db ] && rm -rf packages/godwoken-polyman/packages/runner/db || echo "local polyman db not exist."
 	echo "remove all cache activities data."
 
 clean-workspace:
@@ -66,6 +67,13 @@ install:
 		source ./gw_util.sh && prepare_package godwoken-web3 $$WEB3_GIT_URL $$WEB3_GIT_CHECKOUT > /dev/null; \
 		"$(INSTALL_JS_NODE_MODULE_NOT_COPY)" && make install-web3-node-modules-if-empty || make copy-web3-node-modules-if-empty ;\
 		docker run --rm -v `pwd`/packages/godwoken-web3:/app -w=/app $$DOCKER_WEB3_PREBUILD_IMAGE_NAME:$$DOCKER_WEB3_PREBUILD_IMAGE_TAG /bin/bash -c "yarn build" ; \
+	fi
+# if manual build web3-indexer
+	if [ "$(MANUAL_BUILD_WEB3_INDEXER)" = true ] ; then \
+		source ./gw_util.sh && prepare_package godwoken-web3 $$WEB3_GIT_URL $$WEB3_GIT_CHECKOUT > /dev/null; \
+		source ./gw_util.sh &&  cargo_build_web3_indexer_on_local_or_docker ; \
+		make copy-web3-indexer-binary-from-packages-to-workspace ; \
+	else make copy-web3-indexer-bin-from-docker;\
 	fi
 # if manual build polyman
 	if [ "$(MANUAL_BUILD_POLYMAN)" = true ] ; then \
@@ -160,6 +168,8 @@ indexer:
 # show web3
 web3:
 	cd docker && docker-compose logs -f --tail 200 web3
+web3-indexer:
+	cd docker && docker-compose logs -f --tail 200 web3-indexer
 # show ckb
 ckb:
 	cd docker && docker-compose logs -f --tail 200 ckb
@@ -214,6 +224,12 @@ start-web3:
 
 stop-web3:
 	cd docker && docker-compose stop web3
+
+start-web3-indexer:
+	cd docker && docker-compose start web3-indexer
+
+stop-web3-indexer:
+	cd docker && docker-compose stop web3-indexer
 
 start-ckb:
 	cd docker && docker-compose start ckb
@@ -275,6 +291,9 @@ enter-polyjuice:
 
 enter-web3:
 	cd docker && docker-compose exec web3 bash
+
+enter-web3-indexer:
+	cd docker && docker-compose exec web3-indexer bash
 
 enter-ckb:
 	cd docker && docker-compose exec ckb bash
@@ -382,10 +401,22 @@ copy-poa-scripts-from-docker: rm-dummy-docker-if-name-exits
 # paste the prebuild scripts to workspace dir for use
 	cp quick-mode/clerkb/* workspace/scripts/release/
 
+copy-web3-indexer-bin-from-docker: rm-dummy-docker-if-name-exits
+	mkdir -p `pwd`/quick-mode/web3
+	docker run -it -d --name dummy $$DOCKER_WEB3_INDEXER_PREBUILD_IMAGE_NAME:$$DOCKER_WEB3_INDEXER_PREBUILD_IMAGE_TAG
+	docker cp dummy:/bin/gw-web3-indexer `pwd`/quick-mode/web3/gw-web3-indexer
+	docker rm -f dummy
+# paste the prebuild bin to workspace dir for use
+	cp quick-mode/web3/gw-web3-indexer workspace/bin/
+
 copy-godwoken-binary-from-packages-to-workspace:
 	mkdir -p workspace/bin
 	cp packages/godwoken/target/release/godwoken workspace/bin/godwoken
 	cp packages/godwoken/target/release/gw-tools workspace/bin/gw-tools
+
+copy-web3-indexer-binary-from-packages-to-workspace:
+	mkdir -p workspace/bin
+	cp packages/godwoken-web3/target/release/gw-web3-indexer workspace/bin/gw-web3-indexer
 
 copy-web3-node-modules-if-empty:
 	docker run --rm -v `pwd`/packages/godwoken-web3:/app $$DOCKER_WEB3_PREBUILD_IMAGE_NAME:$$DOCKER_WEB3_PREBUILD_IMAGE_TAG /bin/bash -c "cd app && yarn check --verify-tree && cd .. || ( cd .. && echo 'start copying web3 node_modules from docker to local package..' && cp -r ./godwoken-web3/node_modules ./app/) ;"

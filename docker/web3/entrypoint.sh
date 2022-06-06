@@ -4,6 +4,7 @@ set -o errexit
 #set -o xtrace
 PROJECT_DIR="/code"
 GODWOKEN_RPC_URL="http://godwoken:8119"
+GODWOKEN_WS_RPC_URL="ws://godwoken:8120"
 POLYMAN_SERVER_RPC_URL="http://polyjuice:6101"
 
 # import some helper function
@@ -79,6 +80,10 @@ L2_SUDT_VALIDATOR_SCRIPT_TYPE_HASH=$L2SudtValidatorCodeHash
 TRON_ACCOUNT_LOCK_HASH=$TronAccountLockCodeHash
 REDIS_URL=redis://redis:6379
 EOF
+
+# generate indexer config
+node scripts/generate-indexer-config.js $GODWOKEN_WS_RPC_URL 
+cp indexer-config.toml ${PROJECT_DIR}/workspace/
 
 # start web3 server
 cd packages/api-server 
