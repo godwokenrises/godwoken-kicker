@@ -17,8 +17,7 @@ cargo-cache-data/
 quick-mode/
 
 config/scripts/release/*
-!config/scripts/release/poa
-!config/scripts/release/state
+
 
 config/*generator
 config/*validator
@@ -36,3 +35,21 @@ plugins/gw-schema/schemas
 plugins/gw-schema/tmp
 
 *.log
+
+/docker/postgres/data/
+/docker/redis/data/
+/docker/ckb-indexer/data/
+/docker/layer1/ckb/data/
+/docker/layer1/ckb2/data/
+/docker/layer1/ckb3/data/
+/docker/layer2/data/
+/docker/layer2/config/scripts-deployment.json
+/docker/layer2/config/rollup-genesis-deployment.json
+/docker/layer2/config/godwoken-config.toml
+/docker/layer2/config/polyjuice-root-account-id
+/docker/layer2/config/web3-indexer-config.toml
+/docker/manual-artifacts/
+/docker/layer2-v0/data/
+/docker/layer2-v0/config/scripts-deployment.json
+/docker/layer2-v0/config/rollup-genesis-deployment.json
+/docker/layer2-v0/config/godwoken-config.toml

@@ -1,139 +1,247 @@
 #!/bin/bash
 
+# NOTE: In `config/rollup-config.json`, `l1_sudt_cell_dep` identifies the l1_sudt cell located at the genesis block of CKB. Please type `ckb -C docker/layer1/ckb list-hash` for more information.
+
 set -o errexit
 
-PROJECT_DIR="/code"
-LUMOS_CONFIG_FILE=${PROJECT_DIR}/workspace/deploy/lumos-config.json
-GODWOKEN_CONFIG_TOML_FILE=${PROJECT_DIR}/workspace/config.toml
+WORKSPACE="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+CONFIG_DIR="$WORKSPACE/config"
+ACCOUNTS_DIR="${ACCOUNTS_DIR:-"ACCOUNTS_DIR is required"}"
+CKB_MINER_PID=""
+GODWOKEN_PID=""
+CHAIN_ID=71400
 
-PRIVKEY=deploy/private_key
-CKB_RPC=http://ckb:8114
-INDEXER_RPC=http://indexer:8116
-POLYMAN_RPC=http://call-polyman:6102
-DATABASE_URL=postgres://user:password@postgres:5432/lumos
-GODWOKEN_BIN=${PROJECT_DIR}/workspace/bin/godwoken
-GW_TOOLS_BIN=${PROJECT_DIR}/workspace/bin/gw-tools
-
-function runGodwoken(){
-  # wait for ckb rpc server to start
-  while true; do
-      sleep 0.2;
-      if isCkbRpcRunning "${CKB_RPC}";
-      then
-        break;
-      else echo "keep waitting for ckb rpc..."
-      fi
-  done
-  # running godwoken
-  RUST_LOG=info,gw_mem_pool=trace,gw_block_producer=info,gw_generator=debug,gw_web3_indexer=debug $GODWOKEN_BIN
+function start-ckb-miner-at-background() {
+    ckb -C $CONFIG_DIR miner &> /dev/null &
+    CKB_MINER_PID=$!
+    log "ckb-miner is mining..."
 }
 
-# import some helper function
-source ${PROJECT_DIR}/gw_util.sh
-
-# ready to start godwoken
-cd ${PROJECT_DIR}/workspace
- 
-# detect which mode to start godwoken
-if test -f "$GODWOKEN_CONFIG_TOML_FILE"; then
-  if [ "$FORCE_GODWOKEN_REDEPLOY" = true ]; then
-    echo "godwoken config.toml exists, but force_godwoken_redeploy is enabled, so use fat mode."
-    # fat start, re-deploy godwoken chain 
-    export START_MODE="fat_start" 
-  else
-    echo "godwoken config.toml exists. try search rollup cell.."
-    if isRollupCellExits "${GODWOKEN_CONFIG_TOML_FILE}" "${INDEXER_RPC}";
-    then
-      # slim start, just start godwoken, no re-deploy scripts
-       export START_MODE="slim_start" 
-    else
-      # fat start, re-deploy godwoken chain 
-      export START_MODE="fat_start"
+function stop-ckb-miner() {
+    log "Kill the ckb-miner process"
+    if [ ! -z "$CKB_MINER_PID" ]; then
+        kill $CKB_MINER_PID
+        CKB_MINER_PID=""
     fi
-  fi
-else 
-  export START_MODE="fat_start"
-fi
+}
 
-if [ $START_MODE = "slim_start" ]; then
-  runGodwoken
-  echo "Godwoken stopped!"
-  exit 125
-else
-  echo 'run deploy mode'
-fi
+function start-godwoken-at-background() {
+    log "Starting"
+    start_time=$(date +%s)
+    godwoken run -c $CONFIG_DIR/godwoken-config.toml & # &> /dev/null &
+    GODWOKEN_PID=$!
+    while true; do
+        sleep 1
+        result=$(curl http://127.0.0.1:8119 &> /dev/null || echo "Godwoken not started")
+        if [ "$result" != "Godwoken not started" ]; then
+            break
+        fi
+        elapsed=$(( $(date +%s) - start_time ))
+        if [ $elapsed -gt 10 ]; then
+            log "ERROR: start godwoken timeout"
+            exit 2
+        fi
+    done
+    log "Godwoken started"
+}
 
-# ========= below: run godwoken in deploy mode ============
+# Notice: Be careful, if you you try to stop Godwoken in the early phase,
+# you should make sure that the Polyjuice root account is created and the layer2 block is synced.
+#
+# Try to avoid restarting Godwoken if you can.
+function stop-godwoken() {
+    log "Killing the Godwoken process"
+    if [ ! -z "$GODWOKEN_PID" ]; then
+        kill $GODWOKEN_PID
+        GODWOKEN_PID=""
+    fi
+    while true; do
+        log "Wait until Godwoken exitted" && sleep 2
+        result=$(curl http://127.0.0.1:8119 &> /dev/null && echo "Godwoken is running")
+        if [ "$result" != "Godwoken is running" ]; then
+            break
+        fi 
+    done
+    log "Done"
+}
 
-# === check and prepare for l1-sudt-script
-wait_for_polyman_prepare_rpc "$POLYMAN_RPC"
-callPolyman "spilt_miner_cells?total_capacity=1000000000000000000&total_pieces=20" "$POLYMAN_RPC"
-callPolyman prepare_sudt_scripts "$POLYMAN_RPC"
-# save lumos-config file with new l1-sudt-script config in godwoken folder
-callPolyman get_lumos_config "$POLYMAN_RPC"
-echo $call_result > $LUMOS_CONFIG_FILE
-sed -i -e 's/{"status":"ok","data"://g' $LUMOS_CONFIG_FILE
-sed -i -e 's/}}}}/}}}/g' $LUMOS_CONFIG_FILE
-# update l1_sudt_script_hash in rollup-config.json file(if it exits) with lumos script.sudt.code_hash
-codeHash=$(get_lumos_config_script_key_value SUDT CODE_HASH "$LUMOS_CONFIG_FILE")
-depType=$(get_lumos_config_script_key_value SUDT DEP_TYPE "$LUMOS_CONFIG_FILE")
-txHash=$(get_lumos_config_script_key_value SUDT TX_HASH "$LUMOS_CONFIG_FILE")
-outpointIndex=$(get_lumos_config_script_key_value SUDT INDEX "$LUMOS_CONFIG_FILE")
+# The scripts-config.json file records the names and locations of all scripts
+# that have been compiled in docker image. These compiled scripts will be
+# deployed, and the deployment result will be stored into scripts-deployment.json.
+# 
+# To avoid redeploying, this command skips scripts-deployment.json if it already
+# exists.
+#
+# More info: https://github.com/nervosnetwork/godwoken-docker-prebuilds/blob/97729b15093af6e5f002b46a74c549fcc8c28394/Dockerfile#L42-L54
+function deploy-scripts() {
+    log "Start"
+    if [ -s "$CONFIG_DIR/scripts-deployment.json" ]; then
+        log "$CONFIG_DIR/scripts-deployment.json already exists, skip"
+        return 0
+    fi
 
-rollupConfig="
-{
-  \"l1_sudt_script_type_hash\": \"${codeHash}\",
-  \"l1_sudt_cell_dep\": {
-    \"dep_type\": \"code\",
-    \"out_point\": {
-      \"tx_hash\": \"${txHash}\",
-      \"index\": \"${outpointIndex}\"
-    }
-  },
-  \"cells_lock\": {
-    \"code_hash\": \"0x49027a6b9512ef4144eb41bc5559ef2364869748e65903bd14da08c3425c0503\",
-    \"hash_type\": \"type\",
-    \"args\": \"0x0000000000000000000000000000000000000000\"
-  },
-  \"reward_lock\": {
-    \"code_hash\": \"0x49027a6b9512ef4144eb41bc5559ef2364869748e65903bd14da08c3425c0503\",
-    \"hash_type\": \"type\",
-    \"args\": \"0x0000000000000000000000000000000000000001\"
-  },
-  \"burn_lock\": {
-    \"code_hash\": \"0x0000000000000000000000000000000000000000000000000000000000000000\",
-    \"hash_type\": \"data\",
-    \"args\": \"0x\"
-  },
-  \"required_staking_capacity\": 10000000000,
-  \"challenge_maturity_blocks\": 100,
-  \"finality_blocks\": 100,
-  \"reward_burn_rate\": 50,
-  \"allowed_eoa_type_hashes\": []
-}"
+    start-ckb-miner-at-background
+    RUST_BACKTRACE=full gw-tools deploy-scripts \
+        --ckb-rpc http://ckb:8114 \
+        -i $CONFIG_DIR/scripts-config.json \
+        -o $CONFIG_DIR/scripts-deployment.json \
+        -k $ACCOUNTS_DIR/rollup-scripts-deployer.key
+    stop-ckb-miner
 
-echo 'Generate deploy/rollup-config.json'
-echo $rollupConfig > "deploy/rollup-config.json"
+    log "Generate file \"$CONFIG_DIR/scripts-deployment.json\""
+    log "Finished"
+}
 
-# deploy scripts
-echo 'start deploying godwoken scripts, this might takes a little bit of time, please wait...'
-#$GW_TOOLS_BIN deploy-scripts -r ${CKB_RPC} -i deploy/scripts-deploy.json -o deploy/scripts-deploy-result.json -k ${PRIVKEY}
-deployGodwokenScripts 5 $POLYMAN_RPC "/code/workspace/deploy/scripts-deploy.json" "/code/workspace/deploy/scripts-deploy-result.json" 
+function deploy-rollup-genesis() {
+    log "start"
+    if [ -s "$CONFIG_DIR/rollup-genesis-deployment.json" ]; then
+        log "$CONFIG_DIR/rollup-genesis-deployment.json already exists, skip"
+        return 0
+    fi
 
-# register tron lock to allow-eoa-type-hash in rollup-config.json
-tronAccountLockTypeHash=$(jq -r ".tron_account_lock.script_type_hash" "deploy/scripts-deploy-result.json")
-cat <<< $(jq -r '.allowed_eoa_type_hashes += ["'$tronAccountLockTypeHash'"]' "deploy/rollup-config.json") > "deploy/rollup-config.json" 
+    start-ckb-miner-at-background
+    RUST_BACKTRACE=full gw-tools deploy-genesis \
+        --ckb-rpc http://ckb:8114 \
+        --scripts-deployment-path $CONFIG_DIR/scripts-deployment.json \
+        --omni-lock-config-path $CONFIG_DIR/scripts-deployment.json \
+        --rollup-config $CONFIG_DIR/rollup-config.json \
+        -o $CONFIG_DIR/rollup-genesis-deployment.json \
+        -k $ACCOUNTS_DIR/godwoken-block-producer.key
+    stop-ckb-miner
+    log "Generate file \"$CONFIG_DIR/rollup-genesis-deployment.json\""
+}
 
-# deploy genesis block
-$GW_TOOLS_BIN deploy-genesis --ckb-rpc ${CKB_RPC} --scripts-deployment-path deploy/scripts-deploy-result.json -p deploy/poa-config.json -r deploy/rollup-config.json -o deploy/genesis-deploy-result.json -k ${PRIVKEY}
+function generate-godwoken-config() {
+    log "start"
+    if [ -s "$CONFIG_DIR/godwoken-config.toml" ]; then
+        log "$CONFIG_DIR/godwoken-config.toml already exists, skip"
+        return 0
+    fi
 
-# generate config file
-$GW_TOOLS_BIN generate-config -d ${DATABASE_URL} --ckb-rpc ${CKB_RPC} --ckb-indexer-rpc ${INDEXER_RPC} -g deploy/genesis-deploy-result.json -r deploy/rollup-config.json --scripts-deployment-path deploy/scripts-deploy-result.json -k deploy/private_key -o config.toml -c deploy/scripts-deploy.json
+    # Node: 0x2e9df163055245bfadd35e3a1f05f06096447c85 is the eth_address of
+    # `godwoken-block-producer.key`
+    RUST_BACKTRACE=full gw-tools generate-config \
+        --ckb-rpc http://ckb:8114 \
+        --ckb-indexer-rpc http://ckb-indexer:8116 \
+        -c $CONFIG_DIR/scripts-config.json \
+        --scripts-deployment-path $CONFIG_DIR/scripts-deployment.json \
+        --omni-lock-config-path $CONFIG_DIR/scripts-deployment.json \
+        -g $CONFIG_DIR/rollup-genesis-deployment.json \
+        --rollup-config $CONFIG_DIR/rollup-config.json \
+        -o $CONFIG_DIR/godwoken-config.toml \
+        --rpc-server-url 0.0.0.0:8119 \
+        --privkey-path $ACCOUNTS_DIR/godwoken-block-producer.key \
+        --block-producer-address 0x2e9df163055245bfadd35e3a1f05f06096447c85
 
-# Update block_producer.wallet_config section to your own lock.
-edit_godwoken_config_toml $GODWOKEN_CONFIG_TOML_FILE
+    # some dirty modification
+    if [ ! -z "$GODWOKEN_MODE" ]; then
+        sed -i 's#^node_mode = .*$#node_mode = '"'$GODWOKEN_MODE'"'#' $CONFIG_DIR/godwoken-config.toml
+    fi
+    if [ ! -z "$STORE_PATH" ]; then
+        sed -i 's#^path = .*$#path = '"'$STORE_PATH'"'#' $CONFIG_DIR/godwoken-config.toml
+    fi
+    sed -i 's#enable_methods = \[\]#err_receipt_ws_listen = '"'0.0.0.0:8120'"'#' $CONFIG_DIR/godwoken-config.toml
 
-# start godwoken
-cd ${PROJECT_DIR}/workspace
-runGodwoken
+    log "Generate file \"$CONFIG_DIR/godwoken-config.toml\""
+}
 
+function create-polyjuice-root-account() {
+    log "start"
+    if [ -s "$CONFIG_DIR/polyjuice-root-account-id" ]; then
+        log "$CONFIG_DIR/polyjuice-root-account-id already exists, skip"
+        return 0
+    fi
+
+    start-ckb-miner-at-background
+
+    # Deposit for block_producer
+    #
+    # Here we deposit from ckb-miner-and-faucet.key instead of
+    # godwoken-block-producer.key to avoid double spending cells locked by the
+    # latter -- godwoken has already started and may spend them too for block
+    # submission etc.
+    log "Deposit for block_producer"
+    RUST_BACKTRACE=full gw-tools deposit-ckb \
+        --privkey-path $ACCOUNTS_DIR/ckb-miner-and-faucet.key \
+        --eth-address 0x2e9df163055245bfadd35e3a1f05f06096447c85 \
+        --godwoken-rpc-url http://127.0.0.1:8119 \
+        --ckb-rpc http://ckb:8114 \
+        --scripts-deployment-path $CONFIG_DIR/scripts-deployment.json \
+        --config-path $CONFIG_DIR/godwoken-config.toml \
+        --capacity 2000
+
+    # Create Polyjuice root account (this is a layer2 transaction)
+    log "Create Polyjuice root account"
+    RUST_BACKTRACE=full gw-tools create-creator-account \
+        --privkey-path $ACCOUNTS_DIR/godwoken-block-producer.key \
+        --godwoken-rpc-url http://127.0.0.1:8119 \
+        --scripts-deployment-path $CONFIG_DIR/scripts-deployment.json \
+        --config-path $CONFIG_DIR/godwoken-config.toml \
+        --sudt-id 1 \
+    2>&1 | tee /var/tmp/gw-tools.log
+
+    stop-ckb-miner
+
+    tail -n 1 /var/tmp/gw-tools.log | grep -oE '[0-9]+$' > $CONFIG_DIR/polyjuice-root-account-id
+    log "Generate file \"$CONFIG_DIR/polyjuice-root-account-id\""
+}
+
+function generate-web3-indexer-config() {
+    log "Start"
+    if [ -s "$CONFIG_DIR/web3-indexer-config.toml" ]; then
+        log "$CONFIG_DIR/web3-indexer-config.toml already exists, skip"
+        return 0
+    fi
+
+    if ! command -v jq &> /dev/null; then
+        apt-get install -y jq &>/dev/null
+    fi
+
+    cat <<EOF > $CONFIG_DIR/web3-indexer-config.toml
+chain_id=$CHAIN_ID
+l2_sudt_type_script_hash="$(jq -r '.l2_sudt_validator.script_type_hash' $CONFIG_DIR/scripts-deployment.json)"
+polyjuice_type_script_hash="$(jq -r '.polyjuice_validator.script_type_hash' $CONFIG_DIR/scripts-deployment.json)"
+rollup_type_hash="$(jq -r '.rollup_type_hash' $CONFIG_DIR/rollup-genesis-deployment.json)"
+eth_account_lock_hash="$(jq -r '.eth_account_lock.script_type_hash' $CONFIG_DIR/scripts-deployment.json)"
+
+godwoken_rpc_url="http://godwoken:8119"
+ws_rpc_url="ws://godwoken:8120"
+
+pg_url="postgres://user:password@postgres:5432/lumos"
+EOF
+
+    log "Generate file \"$CONFIG_DIR/web3-indexer-config.toml\""
+    log "Finished"
+}
+
+function log() {
+    echo "[${FUNCNAME[1]}] $1"
+}
+
+function main() {
+    godwoken --version
+    gw-tools --version
+
+    # Setup Godwoken at the first time
+    deploy-scripts
+    deploy-rollup-genesis
+    generate-godwoken-config
+
+    start-godwoken-at-background
+
+    # Should make sure that the Polyjuice root account was created and the layer2 block was synced
+    create-polyjuice-root-account
+
+    generate-web3-indexer-config
+
+    # Godwoken daemon
+    while true; do
+        result=$(curl http://127.0.0.1:8119 &> /dev/null || echo "wake up")
+        if [ "$result" == "wake up" ]; then
+            godwoken run -c $CONFIG_DIR/godwoken-config.toml || echo "Godwoken exit"
+        fi
+        sleep 30
+    done
+}
+
+main "$@"

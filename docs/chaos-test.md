@@ -1,21 +1,9 @@
 # How to enable ckb reorgs for chaos test
 
-## require
+***WARNING: Not Supported Yet***
 
-- yarn && nodejs
-- [pumba](https://github.com/alexei-led/pumba)
+## Run
 
-## run
-
-1. set env in `.build.mode.env` to true
-
-```s
-ENABLE_MULTI_CKB_NODES=true
-WATCH_CKB_REORG=true
+```shell
+ENABLE_MULTI_CKB_NODES=true WATCH_CKB_REORG=true make start
 ```
-
-2. `make init && make start`
-
-3. after kicker is up, run `make chaos`
-
-4. check `chain-reorg.log` file to see how many times reorg has happend. 

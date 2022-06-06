@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  # Use the manual built executables of Polyjuice
+  #
+  # 1. First you have to build Polyjuice manually and copy the executables in
+  # `build` dir to `docker/manual-artifacts/polyjuice`:
+  #
+  #   ```
+  #   set -a && source docker/.build.mode.env && ./kicker init
+  #   ```
+  #
+  # 2. Then start docker-compose service:
+  #
+  #   ```
+  #   set -a && source docker/.build.mode.env && ./kicker start
+  #   ```
+  godwoken:
+    volumes:
+      - ./manual-artifacts/polyjuice:/scripts/godwoken-polyjuice

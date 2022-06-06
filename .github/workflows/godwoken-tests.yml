@@ -1,0 +1,16 @@
+name: Godwoken Tests
+
+on:
+  push:
+    branches: [develop, master, ci, 'v1*', compatibility-changes]
+    # Publish semver tags as releases.
+    tags: ["v*.*.*"]
+  pull_request:
+
+jobs:
+  godwoken-tests:
+    uses: nervosnetwork/godwoken-tests/.github/workflows/reusable-integration-test-v1.yml@simplify-workflow
+    with:
+      extra_github_env: |
+        GODWOKEN_KICKER_REPO=${{ github.repository }}
+        GODWOKEN_KICKER_REF=${{ github.ref }}

@@ -1,0 +1,20 @@
+version: "3.8"
+
+services:
+  # Use the manual built executables of Scripts
+  #
+  # 1. First you have to build Scripts manually and copy the executables in
+  # `build` dir to `docker/manual-artifacts/scripts`:
+  #
+  #   ```
+  #   set -a && source docker/.build.mode.env && ./kicker init
+  #   ```
+  #
+  # 2. Then start docker-compose service:
+  #
+  #   ```
+  #   set -a && source docker/.build.mode.env && ./kicker start
+  #   ```
+  godwoken:
+    volumes:
+      - ./manual-artifacts/scripts:/scripts/godwoken-scripts

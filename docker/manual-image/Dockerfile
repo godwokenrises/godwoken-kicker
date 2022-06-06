@@ -1,4 +1,7 @@
 FROM ubuntu:20.04
+
+LABEL description="An all-in-one builder image for compiling Godwoken components"
+
 USER root
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -10,7 +13,13 @@ RUN apt update -y && \
 # Install Rust
 RUN curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain 1.54.0 -y
 ENV PATH=/root/.cargo/bin:$PATH
+RUN rustup component add rustfmt
 RUN which cargo
+RUN which rustfmt
+
+# Install Capsule
+RUN cargo install ckb-capsule
+RUN which capsule
 
 # install node 14
 RUN curl -sL https://deb.nodesource.com/setup_14.x  | DEBIAN_FRONTEND=noninteractive bash -
