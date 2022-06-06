@@ -1,4 +1,4 @@
-# {workspaceDir}/docker/docker-compose.yml
+# Requires docker-compose >= 1.29.0
 version: '3.8'
 
 services:
@@ -11,237 +11,152 @@ services:
       POSTGRES_DB: lumos
       POSTGRES_PASSWORD: password
     volumes:
-      - ../cache/activity/postgres-data:/var/lib/postgresql/data
-      # copy the sql script to create tables
-      - ../docker/postgres/web3-indexer-sql/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
+      - ./postgres/data:/var/lib/postgresql/data
     
   redis:
     image: redis:bullseye
-    user: root:root 
+    user: root:root
     ports: 
       - 6379:6379
     volumes:
-      - ../cache/activity/redis-data:/data
+      - ./redis/data:/data
 
   ckb:
-    build:
-      context: layer1
-      args: 
-        DOCKER_PREBUILD_IMAGE: "${DOCKER_PREBUILD_IMAGE_NAME}:${DOCKER_PREBUILD_IMAGE_TAG}"
+    image: nervos/ckb:v0.103.0
+    user: root
     ports:
-    - 28114:28114 # rpc.ws_listen_address
-    - 8114:8114
-    - 8115:8115   # 8115 is not using for now, but we may need it when extend kicker in the future
-   # - 8117:8117 # ckb node 2
-   # - 8118:8118
+      - 8114:8114   # rpc
+      - 8115:8115   # p2p network
     volumes:
-    - ../:/code       
-    - ../cache/activity/ckb-chain-data:/usr/local/ckb-chain-data
-    - ../cache/activity/ckb2-chain-data:/usr/local/ckb2-chain-data
-    environment:
-      # env of layer 1:
-      CKB_CHAIN: dev
-      BA_ARG: 0x43d509d97f26007a285f39241cffcd411157196c
-      BA_CODE_HASH: 0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8
-      BA_HASH_TYPE: type
-      BA_MESSAGE: 0x1234
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-# todo: fix the network issue when connecting two peers
-  ckb2:
-    build:
-      context: layer1/ckb2
-      args: 
-        DOCKER_PREBUILD_IMAGE: "${DOCKER_PREBUILD_IMAGE_NAME}:${DOCKER_PREBUILD_IMAGE_TAG}"
-    ports:
-    - 28117:28117 # rpc.ws_listen_address
-    - 8117:8117
-    - 8118:8118   # 8118 is not using for now, but we may need it when extend kicker in the future
-    volumes:
-    - ../:/code       
-    - ../cache/activity/ckb2-chain-data:/usr/local/ckb2-chain-data
-    environment:
-      # env of layer 1:
-      CKB_CHAIN: dev
-      BA_ARG: 0xc48a45e11c66b2c8b5c61f6036486ad4d9d2fd29
-      BA_CODE_HASH: 0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8
-      BA_HASH_TYPE: type
-      BA_MESSAGE: 0x1234
-      ENABLE_MULTI_CKB_NODES: ${ENABLE_MULTI_CKB_NODES}
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
+      - ./layer1/ckb:/var/lib/ckb
+    command: [ "run", "-C", "/var/lib/ckb" ]
 
-  # todo: fix the network issue when connecting two peers
-  ckb3:
-    build:
-      context: layer1/ckb3
-      args: 
-        DOCKER_PREBUILD_IMAGE: "${DOCKER_PREBUILD_IMAGE_NAME}:${DOCKER_PREBUILD_IMAGE_TAG}"
-    ports:
-    - 26117:26117 # rpc.ws_listen_address
-    - 6117:6117
-    - 6118:6118   # 8118 is not using for now, but we may need it when extend kicker in the future
+  ckb-miner:
+    image: nervos/ckb:v0.103.0
+    user: root
     volumes:
-    - ../:/code       
-    - ../cache/activity/ckb3-chain-data:/usr/local/ckb3-chain-data
-    environment:
-      # env of layer 1:
-      CKB_CHAIN: dev
-      BA_ARG: 0xb33248c08c55ed636d2f00d065d223ec1a0d333a
-      BA_CODE_HASH: 0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8
-      BA_HASH_TYPE: type
-      BA_MESSAGE: 0x1234
-      ENABLE_MULTI_CKB_NODES: ${ENABLE_MULTI_CKB_NODES}
+      - ./layer1/ckb:/var/lib/ckb
+    command: [ "miner", "-C", "/var/lib/ckb" ]
+
+  # "nervos/ckb" image have no http clients to do health check for CKB.
+  # This short-term service act as a workaround to do health check.
+  check-ckb-started-successfully:
+    image: curlimages/curl
+    volumes:
+      - ./layer1/ckb:/var/lib/ckb
+    command: [ 'http://ckb:8114', '-H', 'content-type: application/json', '-d', '{ "id": 2, "jsonrpc": "2.0", "method": "get_tip_block_number", "params": [] }' ]
     deploy:
-      resources:
-        limits:
-          cpus: '0.5'
+      restart_policy:
+        condition: on-failure
+        max_attempts: 1000
+    depends_on:
+      - ckb
+
+  ckb-indexer:
+    image: nervos/ckb-indexer:0.3.2
+    environment:
+      CKB_RPC: http://ckb:8114
+    ports:
+      - "8116:8116"
+    volumes:
+      - ./ckb-indexer:/var/lib/ckb-indexer
+    command: [ "-c", "http://ckb:8114", "-l", "0.0.0.0:8116", "-s", "/var/lib/ckb-indexer/data" ]
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 10
+    depends_on:
+      check-ckb-started-successfully:
+        condition: service_completed_successfully
 
   godwoken:
-    build: 
-      context: layer2
-      args: 
-        DOCKER_IMAGE: "${DOCKER_MANUAL_BUILD_IMAGE_NAME}:${DOCKER_MANUAL_BUILD_IMAGE_TAG}"
-    volumes:
-    - ../:/code
-    - ../cache/build/usr-local-cargo:/usr/local/cargo
-    - ../cache/activity/ckb-cli-data:/root/.ckb-cli
+    image: ghcr.io/keroro520/godwoken-prebuilds:v1-godwoken-d3eb41a-202205310512
+    healthcheck:
+      test: /var/lib/layer2/healthcheck.sh
+      start_period: 10s
+      interval: 30s
+      retries: 600
     environment:
-      GODWOKEN_MODE: fullmode
-      FORCE_GODWOKEN_REDEPLOY: ${FORCE_GODWOKEN_REDEPLOY}
-    command: bash /code/docker/layer2/entrypoint.sh
-    ports:
-      - 8119:8119
-      - 8120:8120
-    depends_on:
-      - ckb
-      - postgres
-      - indexer
-    
-  godwoken-readonly:
-    build: 
-      context: layer2
-      args: 
-        DOCKER_IMAGE: "${DOCKER_MANUAL_BUILD_IMAGE_NAME}:${DOCKER_MANUAL_BUILD_IMAGE_TAG}"
+      RUST_LOG: info,gw_generator=debug
+      GODWOKEN_MODE: fullnode
+      RUST_BACKTRACE: full
+      STORE_PATH: /var/lib/layer2/data
+      ACCOUNTS_DIR: /accounts
+      GITHUB_RUN_ID: ${GITHUB_RUN_ID:-""}
     volumes:
-    - ../:/code
-    environment:
-      GODWOKEN_MODE: readonly
-    command: bash /code/docker/layer2/readonly/entrypoint.sh
+      - ./layer2:/var/lib/layer2
+      - ../accounts:/accounts
     ports:
-      - 8219:8219
+      - 8119:8119 # rpc
+      - 8120:8120 # err_receipt_ws_listen
+    entrypoint: "/var/lib/layer2/entrypoint.sh"
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 1
     depends_on:
-      - ckb
-      - postgres
-      - indexer
-      - godwoken
-      
-  polyjuice:
-    build:
-      context: polyjuice 
-      args: 
-        DOCKER_PREBUILD_IMAGE: "${DOCKER_POLYMAN_PREBUILD_IMAGE_NAME}:${DOCKER_POLYMAN_PREBUILD_IMAGE_TAG}"
-    volumes:
-      - ../:/code
-      - ../cache/activity/polyjuice:/usr/local/polyman
-    environment: 
-      MANUAL_BUILD_POLYMAN: ${MANUAL_BUILD_POLYMAN}
-    command: bash /code/docker/polyjuice/entrypoint.sh 
-    ports:
-      - 6101:6101
-      - 6100:6100
-    depends_on:
-      - ckb
-      - postgres
-    
-  call-polyman:
-    build:
-      context: call-polyman
-      args: 
-        DOCKER_PREBUILD_IMAGE: "${DOCKER_POLYMAN_PREBUILD_IMAGE_NAME}:${DOCKER_POLYMAN_PREBUILD_IMAGE_TAG}"
-    volumes:
-      - ../:/code
-      - ../cache/activity/call-polyman:/usr/local/polyman/call-polyman
-    environment: 
-      MANUAL_BUILD_POLYMAN: ${MANUAL_BUILD_POLYMAN}
-    command: bash /code/docker/call-polyman/entrypoint.sh 
-    ports:
-      - 6102:6102
-    depends_on:
-      - ckb
-      - postgres 
+      postgres:
+        condition: service_started
+      ckb:
+        condition: service_started
+      ckb-miner:
+        condition: service_started
+      ckb-indexer:
+        condition: service_started
+      check-ckb-started-successfully:
+        condition: service_completed_successfully
 
   web3:
-    build:
-      context: web3
-      args: 
-        DOCKER_PREBUILD_IMAGE: "${DOCKER_WEB3_PREBUILD_IMAGE_NAME}:${DOCKER_WEB3_PREBUILD_IMAGE_TAG}"
-    volumes: 
-    - ../:/code # the manual-build resource all stays in /code dir
-    environment: 
-      MANUAL_BUILD_WEB3: ${MANUAL_BUILD_WEB3}
-      PORT: 8024
-    command: bash /code/docker/web3/entrypoint.sh
+    image: nervos/godwoken-web3-prebuilds:v1.1.1-rc1
+    healthcheck:
+      test: curl http://127.0.0.1:8024 || exit 1
+      start_period: 10s
+      interval: 10s
+      retries: 30
+    volumes:
+      - ./layer2/config/web3-config.env:/godwoken-web3/packages/api-server/.env
+      - ./web3/entrypoint.sh:/var/lib/web3/entrypoint.sh
+    entrypoint: /var/lib/web3/entrypoint.sh
     ports:
       - 8024:8024
-    depends_on: 
-      - redis
-      - postgres
-      - godwoken
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 10
+    depends_on:
+      ckb:
+        condition: service_started
+      ckb-miner:
+        condition: service_started
+      check-ckb-started-successfully:
+        condition: service_completed_successfully
+      godwoken:
+        condition: service_healthy
+      postgres:
+        condition: service_started
+      redis:
+        condition: service_started
 
   web3-indexer:
-    build:
-      context: web3/indexer
-      args: 
-        DOCKER_PREBUILD_IMAGE: "${DOCKER_WEB3_PREBUILD_IMAGE_NAME}:${DOCKER_WEB3_PREBUILD_IMAGE_TAG}"
-    volumes: 
-    - ../:/code # the manual-build resource all stays in /code dir
-    environment: 
-      MANUAL_BUILD_WEB3: ${MANUAL_BUILD_WEB3}
-    command: bash /code/docker/web3/indexer/entrypoint.sh
-    depends_on: 
-      - redis
-      - postgres
-      - godwoken
-      - web3
-  
-  indexer:
-    image: "${DOCKER_PREBUILD_IMAGE_NAME}:${DOCKER_PREBUILD_IMAGE_TAG}" 
-    command: bash /code/docker/indexer/entrypoint.sh 
+    image: nervos/godwoken-web3-indexer-prebuilds:v1.1.1-rc1
     volumes:
-    - ../:/code
-    - ../cache/activity/indexer-data:/usr/local/ckb-indexer/data
-    ports:
-      - 8116:8116
-    depends_on:
-        - ckb
-  
-  zookeeper:
-    image: zookeeper 
-    restart: always
-    hostname: zookeeper
+      - ./layer2/config:/var/lib/layer2/config
+      - ./web3/indexer_entrypoint.sh:/var/lib/web3-indexer/entrypoint.sh
+    working_dir: /var/lib/web3-indexer
+    entrypoint: /var/lib/web3-indexer/entrypoint.sh
     environment:
-      ZOO_MY_ID: 1
-    ports:
-      - 2181:2181
-    container_name: zookeeper
-
-  kafka:
-    image: "${KAFKA_PREBUILD_IMAGE_NAME}:${KAFKA_PREBUILD_IMAGE_TAG}" 
-    volumes: 
-    - ../:/code
-    ports:
-      - 9092:9092
-    depends_on:
-      - zookeeper
-    environment:
-      KAFKA_ADVERTISED_HOST_NAME: kafka
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_BROKER_ID: 1
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-    container_name: kafka
- 
+      CONFIG_DIR: /var/lib/layer2/config
+      RUST_LOG: info
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 10
+    depends_on: 
+      web3:
+        condition: service_healthy
+      godwoken:
+        condition: service_healthy
+      postgres:
+        condition: service_started
+      redis:
+        condition: service_started

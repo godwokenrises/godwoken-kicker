@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  # Replace the prebuild godwoken-web3-indexer with manual-build.
+  #
+  # 1. First you have to build godwoken-web3-indexer manually and copy
+  # the result artifacts to `docker/manual-artifacts/`:
+  #
+  #   ```
+  #   make init MANUAL_BUILD_WEB3_INDEXER=true
+  #   ```
+  #
+  # 2. Then start docker-compose service:
+  #
+  #   ```
+  #   docker-compose -f docker/docker-compose.yml -f docker/manual-web3-indexer.compose.yml up -d web3-indexer
+  #   ```
+  web3-indexer:
+    volumes:
+      - ./manual-artifacts/gw-web3-indexer:/usr/bin/gw-web3-indexer

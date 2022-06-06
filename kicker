@@ -1,0 +1,588 @@
+#!/bin/bash
+
+set -o errexit
+
+EXECUTABLE=$0
+WORKSPACE="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+
+# TODO ENABLE_MULTI_CKB_NODES
+# TODO WATCH_CKB_REORG
+# TODO INSTALL_JS_NODE_MODULE_NOT_COPY
+# TODO BUILD_WEB3_INDEXER_ON_LOCAL_OVER_DOCKER
+# TODO cargo fetch via proxy
+
+function usage() {
+    echo "Usage: $EXECUTABLE [OPTIONS] <SUBCOMMAND>"
+    echo
+    echo "OPTIONS:"
+    echo "  --help          Print usage information"
+    echo "  -- <args>...    Execute docker-compose command"
+    echo
+    echo "SUBCOMMANDS:"
+    echo "  init                    Init running environment"
+    echo "  start                   Start services and deploy local network"
+    echo "  stop                    Stop services"
+    echo "  info                    Print some useful info about the network and running services, such as Web3 RPC URL"
+    echo "  clean                   Clean containers volumed data"
+    echo "  ps [service]            List services"
+    echo "  logs [service]          Tail target service's logs"
+    echo "  enter <service>         Enter target service's container"
+    echo "  manual-build            Manually build services artifacts"
+    echo "  deposit <eth-address> <amount>  Deposit CKB to layer2"
+    echo "  get-balance <eth-address>       Get layer2 balance"
+    echo
+    echo "EXAMPLES:"
+    echo "  * Deploy the local network and print service info"
+    echo
+    echo "    $ $EXECUTABLE start"
+    echo "    $ $EXECUTABLE info"
+    echo
+    echo "  * Deposit 1000CKB from layer1 to layer2"
+    echo
+    echo "    $ $EXECUTABLE deposit 0x618cc3C660cEBFDbA8570CA739b1744AE3E2553a 1000"
+    echo "    $ $EXECUTABLE get-balance 0x618cc3C660cEBFDbA8570CA739b1744AE3E2553a"
+    echo
+    echo "  * Redeploy the local network"
+    echo
+    echo "    $ $EXECUTABLE -- kill"
+    echo "    $ $EXECUTABLE stop"
+    echo "    $ sudo $EXECUTABLE clean"
+    echo "    $ $EXECUTABLE start"
+    echo
+    echo "  * Execute docker-compose commands"
+    echo
+    echo "    $ $EXECUTABLE -- exec ckb ls -l"
+    echo "    $ $EXECUTABLE -- top godwoken"
+    echo "    $ $EXECUTABLE -- kill godwoken"
+    echo "    $ $EXECUTABLE -- --help"
+
+}
+
+function info() {
+    echo -e "\033[0;32m[${FUNCNAME[1]}] $1\033[0m"
+}
+
+function error() {
+    echo -e "\033[0;31m[${FUNCNAME[1]}] ERROR: $1\033[0m">&2
+}
+
+function erun() {
+    echo -e "\033[0;32m:> $*\033[0m">&2
+    echo
+    eval "$*"
+}
+
+function compose() {
+    override=""
+    if [ "$ENABLE_MULTI_CKB_NODES" = "true" ]; then
+        override="$override -f docker/chaos.compose.yml"
+    fi
+    if [ "$MANUAL_BUILD_GODWOKEN" = "true" ]; then
+        override="$override -f docker/manual-godwoken.compose.yml"
+    fi
+    if [ "$MANUAL_BUILD_WEB3" = "true" ]; then
+        override="$override -f docker/manual-web3.compose.yml"
+    fi
+    if [ "$MANUAL_BUILD_WEB3_INDEXER" = "true" ]; then
+        override="$override -f docker/manual-web3-indexer.compose.yml"
+    fi
+    if [ "$MANUAL_BUILD_POLYJUICE" = "true" ]; then
+        override="$override -f docker/manual-polyjuice.compose.yml"
+    fi
+    if [ "$MANUAL_BUILD_SCRIPTS" = "true" ]; then
+        override="$override -f docker/manual-scripts.compose.yml"
+    fi
+    if [ "$START_GODWOKEN_V0" = "true" ]; then
+        override="$override -f docker/manual-godwoken-v0.compose.yml"
+    fi
+
+    erun docker-compose -f docker/docker-compose.yml $override "$@"
+}
+
+function init() {
+    echo -e "\033[0;33mNOTE: The docker-compose version should be newer than 1.29.0\033[0m"
+    echo
+    erun docker-compose -f docker/docker-compose.yml build --no-rm
+
+    # In order to compat with old-version kicker, we execute manual-build at init
+    manual-build
+}
+
+function start() {
+    echo -e "\033[0;33mNOTE: The docker-compose version should be newer than 1.29.0\033[0m"
+    echo -e "\033[0;33mNOTE: This might take several minutes on the first run\033[0m"
+    echo
+
+    if [ "$MANUAL_BUILD_GODWOKEN" = "true" ]; then
+        if [ ! -f "$WORKSPACE/docker/manual-artifacts/godwoken" ]; then
+            error "\"MANUAL_BUILD_GODWOKEN = true\" but \"docker/manual-artifacts/godwoken\" not found"
+            exit 1
+        fi
+        if [ ! -f "$WORKSPACE/docker/manual-artifacts/gw-tools" ]; then
+            error "\"MANUAL_BUILD_GODWOKEN = true\" but \"docker/manual-artifacts/gw-tools\" not found"
+            exit 1
+        fi
+    fi
+    if [ "$MANUAL_BUILD_WEB3" = "true" ]; then
+        if [ ! -d "$WORKSPACE/docker/manual-artifacts/godwoken-web3/" ]; then
+            error "\"MANUAL_BUILD_WEB3 = true\" but \"docker/manual-artifacts/godwoken-web3\" not found"
+            erun ls -l -a $WORKSPACE/docker/manual-artifacts/godwoken-web3/
+            exit 1
+        fi
+    fi
+    if [ "$MANUAL_BUILD_WEB3_INDEXER" = "true" ]; then
+        if [ ! -f "$WORKSPACE/docker/manual-artifacts/gw-web3-indexer" ]; then
+            error "\"MANUAL_BUILD_WEB3_INDEXER = true\" but \"docker/manual-artifacts/gw-web3-indexer\" not found"
+            exit 1
+        fi
+    fi
+
+    compose up -d --build
+    if [ "$?" = "0" ]; then
+        info "Services started successfully"
+    fi
+}
+
+function stop() {
+    compose down --remove-orphans
+}
+
+function info_() {
+    echo "Web3 RPC URL: http://127.0.0.1:8024"
+}
+
+function clean() {
+    n_alive=$(compose ps --quiet | grep -oE '[0-9a-z]{64}' | wc -l | tr -d " ")
+    if [ $n_alive != 0 ]; then
+        error "Ensure container services are down"
+        compose ps
+        exit 1
+    fi
+
+    echo "rm -rf docker/layer2-v0/data/"
+    echo "rm -f  docker/layer2-v0/config/scripts-deployment.json"
+    echo "rm -f  docker/layer2-v0/config/rollup-genesis-deployment.json"
+    echo "rm -f  docker/layer2-v0/config/godwoken-config.toml"
+    echo "rm -rf docker/layer2/data/"
+    echo "rm -f  docker/layer2/config/scripts-deployment.json"
+    echo "rm -f  docker/layer2/config/rollup-genesis-deployment.json"
+    echo "rm -f  docker/layer2/config/godwoken-config.toml"
+    echo "rm -f  docker/layer2/config/polyjuice-root-account-id"
+    echo "rm -f  docker/layer2/config/web3-indexer-config.toml"
+    echo "rm -rf docker/ckb-indexer/"
+    echo "rm -rf docker/layer1/ckb/data/"
+    echo "rm -rf docker/layer1/ckb2/data/"
+    echo "rm -rf docker/layer1/ckb3/data/"
+    echo "rm -rf docker/postgres/data"
+    echo "rm -rf docker/redis/data"
+    echo "rm -rf docker/manual-artifacts"
+    rm -rf docker/layer2-v0/data/
+    rm -f  docker/layer2-v0/config/scripts-deployment.json
+    rm -f  docker/layer2-v0/config/rollup-genesis-deployment.json
+    rm -f  docker/layer2-v0/config/godwoken-config.toml
+    rm -rf docker/layer2/data/
+    rm -f  docker/layer2/config/scripts-deployment.json
+    rm -f  docker/layer2/config/rollup-genesis-deployment.json
+    rm -f  docker/layer2/config/godwoken-config.toml
+    rm -f  docker/layer2/config/polyjuice-root-account-id
+    rm -f  docker/layer2/config/web3-indexer-config.toml
+    rm -rf docker/ckb-indexer/
+    rm -rf docker/layer1/ckb/data/
+    rm -rf docker/layer1/ckb2/data/
+    rm -rf docker/layer1/ckb3/data/
+    rm -rf docker/postgres/data
+    rm -rf docker/redis/data
+    rm -rf docker/manual-artifacts
+}
+
+function ps() {
+    compose ps "$@"
+}
+
+function logs() {
+    compose logs "$@"
+}
+
+function enter() {
+    service="${1:?"\"$EXECUTABLE enter\" requires 1 arguments"}"
+    compose exec "$service" /bin/bash
+}
+
+# @example deposit "0x0C1EfCCa2Bcb65A532274f3eF24c044EF4ab6D73" 1000
+function deposit() {
+    ethaddr=${1:?"\"$EXECUTABLE deposit\" requires eth address as 1st argument"}
+    amount=${2:?"\"$EXECUTABLE deposit\" requires amount as 2nd argument"}
+
+    pkpath=${PRIVATE_KEY_PATH:-"$WORKSPACE/accounts/ckb-miner-and-faucet.key"}
+    if [ ! -f $pkpath ]; then
+        error "$pkpath: No such file or directory"
+        exit 1
+    fi
+
+    abspkpath="$( cd -- "$(dirname "$pkpath")" >/dev/null 2>&1 ; pwd -P )/$(basename $pkpath)"
+    docker-compose -f docker/docker-compose.yml run \
+        --no-deps \
+        --use-aliases \
+        --volume=$WORKSPACE/docker/layer2/config:/config \
+        --volume=$abspkpath:/privkey-path \
+        --entrypoint "gw-tools deposit-ckb \
+                --godwoken-rpc-url http://godwoken:8119 \
+                --ckb-rpc http://ckb:8114 \
+                --scripts-deployment-path /config/scripts-deployment.json \
+                --config-path /config/godwoken-config.toml \
+                --privkey-path /privkey-path \
+                --eth-address $ethaddr \
+                --capacity $amount" \
+        godwoken
+}
+
+# Note that this function MUST be in tty mode.
+# @example get-balance "0x0C1EfCCa2Bcb65A532274f3eF24c044EF4ab6D73"
+function get-balance() {
+    ethaddr=${1:?"\"$EXECUTABLE get-balance\" requires eth address as 1st argument"}
+    script_hash=$(to-script-hash "$ethaddr")
+    echo "script hash: ${script_hash}"
+    docker-compose -f docker/docker-compose.yml run \
+        --no-deps \
+        --use-aliases \
+        --entrypoint "gw-tools get-balance \
+            --godwoken-rpc-url http://godwoken:8119 \
+            --account $script_hash" \
+        godwoken 2>&1
+}
+
+# @to-script-hash "0x0C1EfCCa2Bcb65A532274f3eF24c044EF4ab6D73"
+function to-script-hash() {
+    ethaddr=${1:?"\"$EXECUTABLE to-script-hash\" requires eth address as 1st argument"}
+    output=$(docker-compose -f docker/docker-compose.yml run \
+        --no-deps \
+        --use-aliases \
+        --volume=$WORKSPACE/docker/layer2/config:/config \
+        --entrypoint "gw-tools to-script-hash \
+            --config-path /config/godwoken-config.toml \
+            --scripts-deployment-path /config/scripts-deployment.json \
+            --eth-address $ethaddr" \
+            godwoken 2>&1)
+    echo "$output" | grep -oE '0x.*'
+}
+
+# TODO: Test deposit v0, remove after abandon v0
+# @example deposit-v0 1000
+function deposit-v0() {
+    amount=${1:?"\"$EXECUTABLE deposit\" requires amount as 1nd argument"}
+
+    pkpath=${PRIVATE_KEY_PATH:-"$WORKSPACE/accounts/ckb-miner-and-faucet.key"}
+    if [ ! -f $pkpath ]; then
+        error "$pkpath: No such file or directory"
+        exit 1
+    fi
+
+    abspkpath="$( cd -- "$(dirname "$pkpath")" >/dev/null 2>&1 ; pwd -P )/$(basename $pkpath)"
+    docker-compose -f docker/docker-compose.yml -f docker/manual-godwoken-v0.compose.yml run \
+        --no-deps \
+        --use-aliases \
+        --volume=$WORKSPACE/docker/layer2-v0/config:/config \
+        --volume=$abspkpath:/privkey-path \
+        --entrypoint "gw-tools deposit-ckb \
+                --godwoken-rpc-url http://godwoken-v0:8119 \
+                --ckb-rpc http://ckb:8114 \
+                --scripts-deployment-path /config/scripts-deployment.json \
+                --config-path /config/godwoken-config.toml \
+                --privkey-path /privkey-path \
+                --capacity $amount" \
+        godwoken-v0
+}
+
+# TODO: Test withdraw v0 to v1, remove after abandon v0
+# @example withdraw-v0-to-v1 "0x0C1EfCCa2Bcb65A532274f3eF24c044EF4ab6d77" 500
+function withdraw-v0-to-v1() {
+    ethaddr=${1:?"\"$EXECUTABLE withdraw-v0-to-v1\" requires eth address as 1st argument"}
+    amount=${2:?"\"$EXECUTABLE withdraw-v0-to-v1\" requires amount as 2nd argument"}
+
+    pkpath=${PRIVATE_KEY_PATH:-"$WORKSPACE/accounts/ckb-miner-and-faucet.key"}
+    if [ ! -f $pkpath ]; then
+        error "$pkpath: No such file or directory"
+        exit 1
+    fi
+
+    abspkpath="$( cd -- "$(dirname "$pkpath")" >/dev/null 2>&1 ; pwd -P )/$(basename $pkpath)"
+    docker-compose -f docker/docker-compose.yml -f docker/manual-godwoken-v0.compose.yml run \
+        --no-deps \
+        --use-aliases \
+        --volume=$WORKSPACE/docker/layer2-v0/config:/config \
+        --volume=$abspkpath:/privkey-path \
+        --entrypoint "gw-tools withdraw-to-v1 \
+                --godwoken-rpc-url http://godwoken-v0:8119 \
+                --scripts-deployment-path /config/scripts-deployment.json \
+                --config-path /config/godwoken-config.toml \
+                --privkey-path /privkey-path \
+                --eth-address $ethaddr \
+                --capacity $amount" \
+        godwoken-v0
+}
+
+# @example MANUAL_BUILD_WEB3=true \
+#          WEB3_GIT_URL=ssh://git@github.com/nervosnetwork/godwoken-web3 \
+#          WEB3_GIT_CHECKOUT=compatibility-breaking-changes \
+#          ./kicker manual-build
+function manual-build() {
+    DOCKER_MANUAL_BUILD_IMAGE_NAME=${DOCKER_MANUAL_BUILD_IMAGE_NAME:-"retricsu/godwoken-manual-build"}
+    DOCKER_MANUAL_BUILD_IMAGE_TAG=${DOCKER_MANUAL_BUILD_IMAGE_TAG:-"ckb2021"}
+    DOCKER_MANUAL_BUILD_IMAGE="${DOCKER_MANUAL_BUILD_IMAGE:-"$DOCKER_MANUAL_BUILD_IMAGE_NAME:$DOCKER_MANUAL_BUILD_IMAGE_TAG"}"
+    
+    echo "MANUAL_BUILD_WEB3         =   \"$MANUAL_BUILD_WEB3\""
+    echo "WEB3_GIT_URL              =   \"$WEB3_GIT_URL\""
+    echo "WEB3_GIT_CHECKOUT         =   \"$WEB3_GIT_CHECKOUT\""
+    echo "MANUAL_BUILD_WEB3_INDEXER =   \"$MANUAL_BUILD_WEB3_INDEXER\""
+    echo "MANUAL_BUILD_GODWOKEN     =   \"$MANUAL_BUILD_GODWOKEN\""
+    echo "GODWOKEN_GIT_URL          =   \"$GODWOKEN_GIT_URL\""
+    echo "GODWOKEN_GIT_CHECKOUT     =   \"$GODWOKEN_GIT_CHECKOUT\""
+    echo "MANUAL_BUILD_SCRIPTS      =   \"$MANUAL_BUILD_SCRIPTS\""
+    echo "SCRIPTS_GIT_URL           =   \"$SCRIPTS_GIT_URL\""
+    echo "SCRIPTS_GIT_CHECKOUT      =   \"$SCRIPTS_GIT_CHECKOUT\""
+    echo "OMNI_LOCK_GIT_URL         =   \"$OMNI_LOCK_GIT_URL\""
+    echo "OMNI_LOCK_GIT_CHECKOUT    =   \"$OMNI_LOCK_GIT_CHECKOUT\""
+    echo "MANUAL_BUILD_POLYJUICE    =   \"$MANUAL_BUILD_POLYJUICE\""
+    echo "POLYJUICE_GIT_URL         =   \"$POLYJUICE_GIT_URL\""
+    echo "POLYJUICE_GIT_CHECKOUT    =   \"$POLYJUICE_GIT_CHECKOUT\""
+    echo "DOCKER_MANUAL_BUILD_IMAGE =   \"$DOCKER_MANUAL_BUILD_IMAGE\""
+    echo
+
+    if [ "$MANUAL_BUILD_WEB3" = "true" ]; then
+        info "Start building godwoken-web3"
+
+        srcdir=$WORKSPACE/packages/godwoken-web3
+        dstdir=$WORKSPACE/docker/manual-artifacts/godwoken-web3
+
+        # Download repo
+        prepare-repo godwoken-web3 "$WEB3_GIT_URL" "$WEB3_GIT_CHECKOUT"
+
+        # Yarn install via docker (assumes the "web3" docker-compose service installed yarn)
+
+        # ATTENTION: Do not use `compose run ...`. `compose run` will add
+        # `-f docker/manual-web3.compose.yml`, and it will volume
+        # the `docker/manual-artifacts` directory, it is not what we expect.
+        erun docker-compose -f docker/docker-compose.yml run \
+            --rm \
+            --no-deps \
+            --volume=$WORKSPACE/packages/godwoken-web3:/app \
+            --workdir=/app \
+            --entrypoint "\"bash -c 'yarn install && yarn run build'\"" \
+            web3
+
+        # Copy the built artifacts to `docker/manual-artifacts/godwoken-web3`.
+        #
+        # More: ./docker/manual-web3.compose.yml
+        erun rm -rf $dstdir
+        erun mkdir -p $dstdir
+        erun cp -r $srcdir/packages \
+            $srcdir/package.json \
+            $srcdir/node_modules \
+            $srcdir/yarn.lock \
+            $dstdir
+    else
+        info "skip building godwoken-web3"
+    fi
+
+    if [ "$MANUAL_BUILD_WEB3_INDEXER" = "true" ]; then
+        info "Start building godwoken-web3-indexer"
+
+        srcdir=$WORKSPACE/packages/godwoken-web3
+        dstdir=$WORKSPACE/docker/manual-artifacts
+
+        # Download repo
+        prepare-repo godwoken-web3 "$WEB3_GIT_URL" "$WEB3_GIT_CHECKOUT"
+
+        # Cargo fetch Rust dependencies (in order to access network via
+        # host network). The docker image must have installed cargo, molecule
+        # and rustfmt.
+        erun "cd $srcdir && CARGO_HOME=$srcdir/.cargo cargo fetch --locked && cd -"
+        erun docker run \
+            --rm \
+            --env CARGO_HOME=/app/.cargo \
+            --volume $srcdir:/app \
+            --volume $WORKSPACE/packages/.rustup:/root/.rustup \
+            --workdir /app \
+            retricsu/godwoken-manual-build:ckb2021 cargo build --locked --release
+
+        # Copy the built artifacts to `docker/manual-artifacts/gw-web3-indexer`
+        #
+        # More: ./docker/manual-web3-indexer.compose.yml
+        erun mkdir -p $dstdir
+        erun cp $srcdir/target/release/gw-web3-indexer $dstdir
+    else
+        info "skip building godwoken-web3-indexer(gw-web3-indexer)"
+    fi
+
+    if [ "$MANUAL_BUILD_GODWOKEN" = "true" ]; then
+        info "Start building godwoken"
+
+        srcdir=$WORKSPACE/packages/godwoken
+        dstdir=$WORKSPACE/docker/manual-artifacts
+
+        # Download repo
+        prepare-repo godwoken "$GODWOKEN_GIT_URL" "$GODWOKEN_GIT_CHECKOUT"
+
+        # Cargo fetch Rust dependencies (in order to access network via
+        # host network). The docker image must have installed cargo and molecule
+        erun docker run \
+            --rm \
+            --env CARGO_HOME=/app/.cargo \
+            --volume $srcdir:/app \
+            --volume $WORKSPACE/packages/.rustup:/root/.rustup \
+            --workdir /app \
+            retricsu/godwoken-manual-build:ckb2021 cargo build --locked --release
+
+        # Copy the built artifacts to `docker/manual-artifacts/`
+        #
+        # More: ./docker/manual-godwoken.compose.yml
+        erun mkdir -p $dstdir
+        erun cp $srcdir/target/release/godwoken $dstdir
+        erun cp $srcdir/target/release/gw-tools $dstdir
+    else
+        info "skip building Godwoken"
+    fi
+
+    if [ "$MANUAL_BUILD_POLYJUICE" = "true" ]; then
+        srcdir=$WORKSPACE/packages/godwoken-polyjuice
+        dstdir=$WORKSPACE/docker/manual-artifacts/polyjuice/
+
+        # Download repo
+        prepare-repo godwoken-polyjuice "$POLYJUICE_GIT_URL" "$POLYJUICE_GIT_CHECKOUT"
+
+        cd $srcdir
+        erun make all-via-docker
+
+        # Copy the built artifacts to `docker/manual-artifacts/`
+        mkdir -p $dstdir
+        erun cp -r build/* $dstdir
+    else
+        info "skip building Polyjuice"
+    fi
+
+    if [ "$MANUAL_BUILD_SCRIPTS" = "true" ]; then
+        srcdir=$WORKSPACE/packages/godwoken-scripts
+        srcdir2=$WORKSPACE/packages/ckb-production-scripts
+        dstdir=$WORKSPACE/docker/manual-artifacts/scripts/
+
+        # Download repo
+        prepare-repo godwoken-scripts "$SCRIPTS_GIT_URL" "$SCRIPTS_GIT_CHECKOUT"
+        prepare-repo ckb-production-scripts "$OMNI_LOCK_GIT_URL" "$OMNI_LOCK_GIT_CHECKOUT"
+
+        # Install capsule
+        # TODO: use cpasule from godwoken-manual-build image
+        if [ -z "$(command -v capsule)" ]; then
+            erun cargo install ckb-capsule
+        fi
+
+        cd $srcdir
+        erun capsule build --release --debug-output
+        cd $srcdir/c
+        erun make all-via-docker
+        cd $srcdir2
+        erun make all-via-docker
+
+        # Copy the built artifacts to `docker/manual-artifacts/`
+        mkdir -p $dstdir
+        erun cp -r $srcdir/build/release/* $dstdir
+        erun cp $srcdir/c/build/*-generator $dstdir
+        erun cp $srcdir/c/build/*-validator $dstdir
+        erun cp $srcdir2/build/omni_lock $dstdir
+    else
+        info "skip building Scripts"
+    fi
+}
+
+function prepare-repo() {
+    name=$1
+    url=$2
+    checkout=$3
+    dir="$WORKSPACE/packages/$name"
+
+    mkdir -p $WORKSPACE/packages
+    if [[ -d "$dir" ]]; then
+        remote_url=$(git -C $dir remote get-url origin)
+        if [ "$url" != "$remote_url" ]; then
+            error "$dir already exists and the remote url is not \"$url\""
+            exit 1
+        fi
+
+        if [ "$ALWAYS_FETCH_NEW_PACKAGE" != "false" ]; then
+            erun git -C $dir fetch origin $checkout
+            erun git -C $dir checkout FETCH_HEAD
+            erun git -C $dir submodule update --init --recursive --depth=1
+        fi  
+    else
+        erun git clone --depth=1 $url $dir
+        erun git -C $dir fetch origin $checkout
+        erun git -C $dir checkout FETCH_HEAD
+        erun git -C $dir submodule update --init --recursive --depth=1
+    fi
+}
+
+function main() {
+    if [ "$#" = "0" ]; then
+        usage
+        exit 0
+    fi
+
+    command="$1"
+    shift 1
+
+    case $command in
+        "--help")
+            usage
+            ;;
+        "init")
+            init
+            ;;
+        "start")
+            start
+            ;;
+        "stop")
+            stop
+            ;;
+        "info")
+            info_
+            ;;
+        "clean")
+            clean
+            ;;
+        "ps")
+            ps "$@"
+            ;;
+        "logs")
+            logs "$@"
+            ;;
+        "enter")
+            enter "$@"
+            ;;
+        "deposit")
+            deposit "$@"
+            ;;
+        "deposit-v0")
+            deposit-v0 "$@"
+            ;;
+        "withdraw-v0-to-v1")
+            withdraw-v0-to-v1 "$@"
+            ;;
+        "get-balance")
+            get-balance "$@"
+            ;;
+        "manual-build")
+            manual-build
+            ;;
+        "--")
+            compose "${@:?"\"$EXECUTABLE --\" requires at least one argument"}"
+            ;;
+        *)
+            error "unknown subcommand: \"$command\""
+            echo
+            usage
+            exit 1
+            ;;
+    esac
+}
+
+cd $WORKSPACE
+main "$@"

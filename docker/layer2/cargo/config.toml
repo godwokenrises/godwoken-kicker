@@ -1,5 +1,0 @@
-# add proxy like following:
-# please do not change `host.docker.internal`
-# only need to edit port and protocol
-[http]
-#proxy = "socks5://host.docker.internal:1086"
