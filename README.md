@@ -2,10 +2,11 @@
 
 One line command to start a local network of [Godwoken](https://github.com/nervosnetwork/godwoken).
 
-```md
-- master branch: for production release, should support both two modes.
-- develop branch: for newest development, might be broken. most of time, only support custom-mode.
-```
+---
+
+Godwoken v0: the latest stable version of Godwoken v0 is ["rc-0.10.0"](https://github.com/RetricSu/godwoken-kicker/tree/rc-0.10.0)
+
+Godwoken v1: Godwoken v1 is tracked by "main" and "rc-1.\*" branches
 
 ----
 
