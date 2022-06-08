@@ -99,6 +99,20 @@ function compose() {
     erun docker-compose -f docker/docker-compose.yml $override "$@"
 }
 
+function gw-tools-compose-override() {
+    override=""
+
+    if [ "$MANUAL_BUILD_GODWOKEN" = "true" ]; then
+        if [ ! -f "$WORKSPACE/docker/manual-artifacts/gw-tools" ]; then
+            error "\"MANUAL_BUILD_GODWOKEN = true\" but \"docker/manual-artifacts/gw-tools\" not found"
+            exit 1
+        fi
+        override="$override -f docker/manual-godwoken.compose.yml"
+    fi
+
+    echo $override
+}
+
 function init() {
     echo -e "\033[0;33mNOTE: The docker-compose version should be newer than 1.29.0\033[0m"
     echo
@@ -220,7 +234,7 @@ function deposit() {
     fi
 
     abspkpath="$( cd -- "$(dirname "$pkpath")" >/dev/null 2>&1 ; pwd -P )/$(basename $pkpath)"
-    docker-compose -f docker/docker-compose.yml run \
+    docker-compose -f docker/docker-compose.yml $(gw-tools-compose-override) run \
         --no-deps \
         --use-aliases \
         --volume=$WORKSPACE/docker/layer2/config:/config \
@@ -242,7 +256,7 @@ function get-balance() {
     ethaddr=${1:?"\"$EXECUTABLE get-balance\" requires eth address as 1st argument"}
     script_hash=$(to-script-hash "$ethaddr")
     echo "script hash: ${script_hash}"
-    docker-compose -f docker/docker-compose.yml run \
+    docker-compose -f docker/docker-compose.yml $(gw-tools-compose-override) run \
         --no-deps \
         --use-aliases \
         --entrypoint "gw-tools get-balance \
@@ -254,7 +268,8 @@ function get-balance() {
 # @to-script-hash "0x0C1EfCCa2Bcb65A532274f3eF24c044EF4ab6D73"
 function to-script-hash() {
     ethaddr=${1:?"\"$EXECUTABLE to-script-hash\" requires eth address as 1st argument"}
-    output=$(docker-compose -f docker/docker-compose.yml run \
+    compose_override=$(gw-tools-compose-override)
+    output=$(docker-compose -f docker/docker-compose.yml $compose_override run \
         --no-deps \
         --use-aliases \
         --volume=$WORKSPACE/docker/layer2/config:/config \
