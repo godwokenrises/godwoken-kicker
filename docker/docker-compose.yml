@@ -107,7 +107,7 @@ services:
         condition: service_completed_successfully
 
   godwoken-readonly:
-    image: ghcr.io/nervosnetwork/godwoken-prebuilds:main-202205170929
+    image: ghcr.io/keroro520/godwoken-prebuilds:v1-godwoken-d3eb41a-202205310512
     healthcheck:
       test: /var/lib/layer2/healthcheck.sh
       start_period: 10s
