@@ -73,9 +73,9 @@ services:
     image: ghcr.io/flouse/godwoken-prebuilds:1.2-gw-pull-721-merge-202206140118
     healthcheck:
       test: /var/lib/layer2/healthcheck.sh
-      start_period: 10s
-      interval: 30s
-      retries: 600
+      start_period: 600s
+      interval: 10s
+      retries: 3
     environment:
       RUST_LOG: info,gw_generator=debug
       GODWOKEN_MODE: fullnode
@@ -93,7 +93,7 @@ services:
     deploy:
       restart_policy:
         condition: on-failure
-        max_attempts: 1
+        max_attempts: 10
     depends_on:
       postgres:
         condition: service_started
@@ -141,7 +141,7 @@ services:
       test: curl http://127.0.0.1:8024 || exit 1
       start_period: 10s
       interval: 10s
-      retries: 30
+      retries: 3
     volumes:
       - ./layer2/config/web3-config.env:/godwoken-web3/packages/api-server/.env
       - ./web3/entrypoint.sh:/var/lib/web3/entrypoint.sh
