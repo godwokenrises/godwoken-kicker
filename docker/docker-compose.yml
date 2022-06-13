@@ -185,7 +185,7 @@ services:
     depends_on: 
       web3:
         condition: service_healthy
-      godwoken:
+      godwoken-readonly:
         condition: service_healthy
       postgres:
         condition: service_started
