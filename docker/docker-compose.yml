@@ -70,7 +70,7 @@ services:
         condition: service_completed_successfully
 
   godwoken:
-    image: ghcr.io/keroro520/godwoken-prebuilds:v1-godwoken-d3eb41a-202205310512
+    image: ghcr.io/flouse/godwoken-prebuilds:1.2-gw-pull-721-merge-202206140118
     healthcheck:
       test: /var/lib/layer2/healthcheck.sh
       start_period: 10s
@@ -106,6 +106,35 @@ services:
       check-ckb-started-successfully:
         condition: service_completed_successfully
 
+  godwoken-readonly:
+    image: ghcr.io/flouse/godwoken-prebuilds:1.2-gw-pull-721-merge-202206140118
+    healthcheck:
+      test: /var/lib/layer2/healthcheck.sh
+      start_period: 10s
+      interval: 30s
+      retries: 600
+    environment:
+      RUST_LOG: info,gw_generator=debug
+      GODWOKEN_MODE: readonly
+      RUST_BACKTRACE: full
+      STORE_PATH: /var/lib/layer2/data-readonly
+      ACCOUNTS_DIR: /accounts
+      GITHUB_RUN_ID: ${GITHUB_RUN_ID:-""}
+    volumes:
+      - ./layer2:/var/lib/layer2
+      - ../accounts:/accounts:ro
+    ports:
+      - 28119:8119 # rpc
+      - 28120:8120 # err_receipt_ws_listen
+    entrypoint: "/var/lib/layer2/entrypoint-readonly.sh"
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 1
+    depends_on:
+      godwoken:
+        condition: service_healthy
+
   web3:
     image: nervos/godwoken-web3-prebuilds:v1.1.2-rc1
     healthcheck:
@@ -132,6 +161,8 @@ services:
         condition: service_completed_successfully
       godwoken:
         condition: service_healthy
+      godwoken-readonly:
+        condition: service_healthy
       postgres:
         condition: service_started
       redis:
@@ -154,7 +185,7 @@ services:
     depends_on: 
       web3:
         condition: service_healthy
-      godwoken:
+      godwoken-readonly:
         condition: service_healthy
       postgres:
         condition: service_started

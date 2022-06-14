@@ -140,6 +140,11 @@ function generate-godwoken-config() {
     if [ ! -z "$STORE_PATH" ]; then
         sed -i 's#^path = .*$#path = '"'$STORE_PATH'"'#' $CONFIG_DIR/godwoken-config.toml
     fi
+    cat >> $CONFIG_DIR/godwoken-config.toml <<EOF
+
+[p2p_network_config]
+listen = "/ip4/0.0.0.0/tcp/9999"
+EOF
     sed -i 's#enable_methods = \[\]#err_receipt_ws_listen = '"'0.0.0.0:8120'"'#' $CONFIG_DIR/godwoken-config.toml
 
     log "Generate file \"$CONFIG_DIR/godwoken-config.toml\""
@@ -204,7 +209,7 @@ polyjuice_type_script_hash="$(jq -r '.polyjuice_validator.script_type_hash' $CON
 rollup_type_hash="$(jq -r '.rollup_type_hash' $CONFIG_DIR/rollup-genesis-deployment.json)"
 eth_account_lock_hash="$(jq -r '.eth_account_lock.script_type_hash' $CONFIG_DIR/scripts-deployment.json)"
 
-godwoken_rpc_url="http://godwoken:8119"
+godwoken_rpc_url="http://godwoken-readonly:8119"
 ws_rpc_url="ws://godwoken:8120"
 
 pg_url="postgres://user:password@postgres:5432/lumos"
