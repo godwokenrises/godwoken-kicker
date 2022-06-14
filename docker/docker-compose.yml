@@ -107,7 +107,7 @@ services:
         condition: service_completed_successfully
 
   godwoken-readonly:
-    image: ghcr.io/keroro520/godwoken-prebuilds:v1-godwoken-d3eb41a-202205310512
+    image: ghcr.io/flouse/godwoken-prebuilds:1.2-gw-pull-721-merge-202206140118
     healthcheck:
       test: /var/lib/layer2/healthcheck.sh
       start_period: 10s
