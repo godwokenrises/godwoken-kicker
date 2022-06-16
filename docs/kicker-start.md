@@ -54,6 +54,10 @@ $ ./kicker get-balance 0xCD1d13450cFA630728D0390C99957C6948BF7d19
 Balance: 99900000000
 ```
 
+## For Windows developers
+
+If you're using Windows, here's an example of running godwoken-kicker with WSL 2: [Running Godwoken-Kicker on Windows 11](./kicker-start-on-windows-11.md)
+
 ## What next
 
 Try to deploy your contracts using [Hardhat](https://hardhat.org/): [Deploy a simple contract using Hardhat](./hardhat-simple-project.md)
