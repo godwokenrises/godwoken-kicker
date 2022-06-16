@@ -1,11 +1,19 @@
 # Running Godwoken-Kicker on Windows 11
 
+## Why you need the article
+
+If you're a Windows-based developer, you might run into trouble trying to run Godwoken-Kicker on Windows, that's why we're bringing you this specific article as a guide. For example, you may encounter this error when Docker Compose is running: `exec /var/lib/layer2/entrypoint.sh: no such file or directory`, which we will get into the details of this error later.
+
+You can follow the steps in the article, to install WSL 2 to our system, and run Godwoken-Kicker on it. Or if you have already installed WSL 2 and know what to do, you can use the article as a troubleshooting guide and visit it if you run into trouble.
+
 ## Environment
 
 - Windows -  22000.708
 - Docker - 20.10.16
 - Docker Compose - 2.6.0
 - WSL 2 OS - Ubuntu 22.04 LTS
+
+----
 
 ## Install Docker Desktop
 
@@ -23,68 +31,35 @@ WSL 2 is great, you can view subsystem’s files directly on Windows’ File Exp
 
 ## Clone Godwoken-Kicker
 
-Now that we have our WSL 2 environment ready, we should clone the `godwoken-kicker` tool to our local environment, and in this part we also have two options to go:
+Now that we have WSL 2 environment ready, we should clone the `godwoken-kicker` tool to our local environment and start running it. You can follow the commands below to do this:
 
-- Clone kicker into Windows’ File System - Good for Windows based developers, but has a few adjustment works to do, otherwise the kicker tool is non-usable
-- Clone kicker into WSL 2 subsystem - Good for the kicker tool to execute since maintainers are mostly using macOS or Linux, Windows based developers will need to adapt for a while
-
-## Clone Godwoken-Kicker in Windows’ File System
-
-1. Go to a folder where you store projects, for example `D:/projects`
-2. Open a terminal, and then clone the kicker tool into the projects folder
-3. Go into the kicker tool’s root folder (for example `D:/projects/godwoken-kicker`), make sure all files in the folder are in `LF` format, if not then: 
-   1. run `git config --local core.autocrlf input` to change the git configuration for the project
-   2. run `git reset --hard head` to rebuild files so now all files are well-formatted
-4. In root folder of the kicker tool, there’s a file called `kicker`, change its filename to `kicker.sh` so Windows Terminal can execute it
-5. Open a terminal, run command `./kicker.sh start` to start building a Godwoken Devnet
-
-More friendly tips:
-
-- You might want to go to Windows Terminal’s setting page, then go to Profiles → Defaults → Advanced, find `Profile termination behavior` and set it to `Never close automatically`, this will prevent the kicker tool from closing itself automatically, after its task ends
-
-## Clone Godwoken-Kicker in WSL 2 Subsystem
-
-In this path, the most important task is to connect to Git in the subsystem, and for that we need to set up an SSH key. So we basically have 2 options, pick one you like:
-
-- Use `ssh-keygen` to generate SSH key in subsystem, then add it on GitHub
-    
-    [How to Use SSH with GitHub (Instead of HTTPS) on Windows WSL](https://simplernerd.com/git-ssh-keys/)
-    
-- Copy SSH key from Windows to Linux subsystem
-    
-    [Sharing SSH keys between Windows and WSL 2](https://devblogs.microsoft.com/commandline/sharing-ssh-keys-between-windows-and-wsl-2/)
-
-After that, we can begin to run the kicker tool in our subsystem:
-
-1. Go to the home folder of the current user, for example `/home/<username>`
-2. Create a folder to store your projects, for example `~/projects`
-3. Go into projects folder, and then clone the kicker tool into the folder
-4. Get into the `~/projects/godwoken-kicker` folder, run `./kicker start` command
-5. Wait for relevant containers to turn into `Running` status
+1. `cd /home/<username>` - go to the home folder of the current user
+2. `mkdir projects` - create a folder to store your projects
+3. `cd projects` - go to the projects folder
+4. `git clone https://github.com/RetricSu/godwoken-kicker` - clone the godwoken-kicker tool
+5. `cd godwoken-kicker` - go to the godwoken-kicker folder
+6. `./kicker start` - start the local network (devnet)
 
 ## While Docker Compose is processing
 
 ### LF/CRLF Error
     
-If your kicker project is cloned in Windows’ File System, and docker-compose stopped and logged an error while running the command `./kicker.sh start`:
+If docker-compose stopped and logged this error while running the command `./kicker.sh start`:
 
 ```
 exec /var/lib/layer2/entrypoint.sh: no such file or directory 
 ```
 
-This is most likely because Git assumes that you accept `CRLF` and not `LF` because you’re using Windows.
+This is most likely because Git assumes you accept line separator as `CRLF` instead of `LF` since you’re on Windows, but actually the kicker tool is running in a Unix VM, which does not support `CRLF` at all, so the program fails while running, naturally. 
 
-But actually the kicker tool is running in Unix VM, which does not support `CRLF` at all, so it fails while running the project, naturally. 
-
-In this case you can just reformat all files to `LF` and the problem solved.
+In this case you can just reformat the line separator for each file to `LF` in the project and the problem solved. You can find the setting for line separator in the bottom-right corner of most IDEs.
     
 ### Godwoken container runs for too long
 
 While running `kicker start` command, the Godwoken container could run for a long time, and this is totally normal if it doesn't throw any fatal error.
  
-As an example, it might take `4 minutes` for the whole `kicker start` command to finish: https://github.com/RetricSu/godwoken-kicker/runs/6824210175?check_suite_focus=true#step:6:2
-
-Depend on different environment, it could be longer or shorter.
+As an example, it might take `4 minutes` for the whole `kicker start` command to finish (depend on different environment, it could be longer or shorter):
+https://github.com/RetricSu/godwoken-kicker/runs/6824210175?check_suite_focus=true#step:6:2
 
 Environment of the example:  
 - Ubuntu 20.04.4 LTS  
