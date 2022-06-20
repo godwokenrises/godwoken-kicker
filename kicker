@@ -192,6 +192,7 @@ function clean() {
     rm -rf docker/layer1/ckb/data/
     rm -rf docker/layer1/ckb2/data/
     rm -rf docker/layer1/ckb3/data/
+    rm -rf docker/layer1/ckb.list-hashes.json
     rm -rf docker/postgres/data
     rm -rf docker/redis/data
     rm -rf docker/manual-artifacts

@@ -5,13 +5,13 @@ FROM ghcr.io/flouse/godwoken-prebuilds:1.2-gw-pull-721-merge-202206140118 AS gw-
 FROM nervos/ckb:v0.103.0
 
 USER root
-
 RUN apt-get update \
  && apt-get install -y jq golang-github-pelletier-go-toml \
  && apt-get clean
 
+USER ckb
 COPY --from=gw-v0 /scripts/ /v0-scripts/
 COPY --from=gw-v1 /scripts/ /v1-scripts/
 COPY entrypoint.sh /bin/entrypoint.sh
 
-ENTRYPOINT ["/bin/docker-entrypoint.sh"]
+ENTRYPOINT ["/bin/entrypoint.sh"]
