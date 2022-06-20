@@ -20,9 +20,11 @@ services:
       GODWOKEN_MODE: fullnode
       RUST_BACKTRACE: full
       STORE_PATH: /var/lib/layer2/data
+      CKB_DIR: /var/lib/ckb
       ACCOUNTS_DIR: /accounts
       GITHUB_RUN_ID: ${GITHUB_RUN_ID:-""}
     volumes:
+      - ./layer1/ckb:/var/lib/ckb
       - ./layer2-v0:/var/lib/layer2
       - ./layer2/config:/var/lib/layer2/v1config
       - ../accounts:/accounts
@@ -44,7 +46,7 @@ services:
       check-ckb-started-successfully:
         condition: service_completed_successfully
       godwoken:
-        condition: service_started
+        condition: service_healthy
 
   wait-until-godwoken-v0-becomes-healthy:
     image: curlimages/curl

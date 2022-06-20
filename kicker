@@ -176,11 +176,13 @@ function clean() {
     set -x
     rm -rf docker/layer2-v0/data/
     rm -f  docker/layer2-v0/config/scripts-deployment.json
+    rm -f  docker/layer2-v0/config/rollup-config.json
     rm -f  docker/layer2-v0/config/rollup-genesis-deployment.json
     rm -f  docker/layer2-v0/config/godwoken-config.toml
     rm -rf docker/layer2/data/
     rm -rf docker/layer2/data-readonly/
     rm -f  docker/layer2/config/scripts-deployment.json
+    rm -f  docker/layer2/config/rollup-config.json
     rm -f  docker/layer2/config/rollup-genesis-deployment.json
     rm -f  docker/layer2/config/godwoken-config.toml
     rm -f  docker/layer2/config/godwoken-config-readonly.toml

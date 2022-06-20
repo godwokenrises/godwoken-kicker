@@ -5,6 +5,8 @@ set -o errexit
 WORKSPACE="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 CONFIG_DIR="$WORKSPACE/config"
 ACCOUNTS_DIR="${ACCOUNTS_DIR:-"ACCOUNTS_DIR is required"}"
+CKB_DIR="${CKB_DIR:-"CKB_DIR is required"}"
+CKB_LIST_HASHES=$(cat $CKB_DIR/list-hashes.json)
 V1_CONFIG_DIR="$WORKSPACE/v1config"
 V1_GODWOKEN_CONFIG="$WORKSPACE/v1config/godwoken-config.toml"
 
@@ -12,22 +14,50 @@ function log() {
     echo "[${FUNCNAME[1]}] $1"
 }
 
-function deploy-scripts() {
+function generate-scripts-deployment() {
     log "Start"
     if [ -s "$CONFIG_DIR/scripts-deployment.json" ]; then
         log "$CONFIG_DIR/scripts-deployment.json already exists, skip"
         return 0
     fi
 
-    start-ckb-miner-at-background
-    RUST_BACKTRACE=full gw-tools deploy-scripts \
-        --ckb-rpc http://ckb:8114 \
-        -i $CONFIG_DIR/scripts-config.json \
-        -o $CONFIG_DIR/scripts-deployment.json \
-        -k $ACCOUNTS_DIR/ckb-miner-and-faucet.key
-    stop-ckb-miner
+    echo "{
+    $(get-script-deployment "custodian_lock"    "/v0-scripts/godwoken-scripts/custodian-lock"),
+    $(get-script-deployment "deposit_lock"      "/v0-scripts/godwoken-scripts/deposit-lock"),
+    $(get-script-deployment "withdrawal_lock"   "/v0-scripts/godwoken-scripts/withdrawal-lock"),
+    $(get-script-deployment "challenge_lock"    "/v0-scripts/godwoken-scripts/challenge-lock"),
+    $(get-script-deployment "stake_lock"        "/v0-scripts/godwoken-scripts/stake-lock"),
+    $(get-script-deployment "state_validator"   "/v0-scripts/godwoken-scripts/state-validator"),
+    $(get-script-deployment "l2_sudt_validator" "/v0-scripts/godwoken-scripts/sudt-validator"),
+    $(get-script-deployment "eth_account_lock"  "/v0-scripts/godwoken-scripts/eth-account-lock"),
+    $(get-script-deployment "tron_account_lock" "/v0-scripts/godwoken-scripts/tron-account-lock"),
+    $(get-script-deployment "meta_contract_validator"   "/v0-scripts/godwoken-scripts/meta-contract-validator"),
+    $(get-script-deployment "polyjuice_validator"       "/v0-scripts/godwoken-polyjuice/validator"),
+    $(get-script-deployment "state_validator_lock"      "/v0-scripts/clerkb/poa"),
+    $(get-script-deployment "poa_state"                 "/v0-scripts/clerkb/state")
+}" \
+    | jq > $CONFIG_DIR/scripts-deployment.json
 
     log "Generate file \"$CONFIG_DIR/scripts-deployment.json\""
+    log "Finished"
+}
+
+function generate-rollup-config() {
+    log "Start"
+    if [ -s "$CONFIG_DIR/rollup-config.json" ]; then
+        log "$CONFIG_DIR/rollup-config.json already exists, skip"
+        return 0
+    fi
+
+    l1_sudt_cell_dep=$(cat $V1_CONFIG_DIR/rollup-config.json | jq '.l1_sudt_cell_dep')
+    l1_sudt_script_type_hash=$(cat $V1_CONFIG_DIR/rollup-config.json | jq '.l1_sudt_script_type_hash')
+
+    cat $CONFIG_DIR/rollup-config.json.template \
+        | jq --argjson l1_sudt_cell_dep "$l1_sudt_cell_dep" '.l1_sudt_cell_dep = $l1_sudt_cell_dep' \
+        | jq --argjson l1_sudt_script_type_hash $l1_sudt_script_type_hash '.l1_sudt_script_type_hash = $l1_sudt_script_type_hash' \
+        > $CONFIG_DIR/rollup-config.json
+
+    log "Generate file \"$CONFIG_DIR/rollup-config.json\""
     log "Finished"
 }
 
@@ -161,12 +191,61 @@ function stop-ckb-miner() {
     fi
 }
 
+function get-system-cell() {
+    path=$1
+    echo "$CKB_LIST_HASHES" \
+        | jq ".ckb_dev.system_cells | map(select(.path | match(\".*$path.*\"))) | .[0]"
+}
+
+function get-index() {
+    path=$1
+    echo $(get-system-cell $path) | jq '.index' | xargs -I {} printf "\"0x%x\"" {}
+}
+
+function get-tx-hash() {
+    path=$1
+    echo $(get-system-cell $path) | jq '.tx_hash'
+}
+
+function get-type-hash() {
+    path=$1
+    echo $(get-system-cell $path) | jq '.type_hash'
+}
+
+function get-cell-dep() {
+    path=$1
+    echo "{
+        \"dep_type\": \"code\",
+        \"out_point\": {
+            \"tx_hash\": $(get-tx-hash $path),
+            \"index\": $(get-index $path)
+        }
+    }"
+}
+
+function get-script-deployment() {
+    name=$1
+    path=$2
+    echo "\"$name\": {
+        \"cell_dep\": $(get-cell-dep $path),
+        \"script_type_hash\": $(get-type-hash $path)
+    }"
+}
+
+function install-prerequired-toolchains() {
+    if ! command -v jq &> /dev/null; then
+        apt-get install -y jq
+    fi
+}
+
 function main() {
     godwoken --version
     gw-tools --version
 
-    # Setup Godwoken at the first time
-    deploy-scripts
+    install-prerequired-toolchains
+
+    generate-scripts-deployment
+    generate-rollup-config
     deploy-rollup-genesis
     generate-godwoken-config
     
