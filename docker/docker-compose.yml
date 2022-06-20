@@ -85,9 +85,11 @@ services:
       GODWOKEN_MODE: fullnode
       RUST_BACKTRACE: full
       STORE_PATH: /var/lib/layer2/data
+      CKB_DIR: /var/lib/ckb
       ACCOUNTS_DIR: /accounts
       GITHUB_RUN_ID: ${GITHUB_RUN_ID:-""}
     volumes:
+      - ./layer1/ckb:/var/lib/ckb
       - ./layer2:/var/lib/layer2
       - ../accounts:/accounts
     ports:
