@@ -25,11 +25,9 @@ function stop-ckb-miner() {
     fi
 }
 
-function start-godwoken-at-background() {
+function wait-for-godwoken-started() {
     log "Starting"
     start_time=$(date +%s)
-    godwoken run -c $CONFIG_DIR/godwoken-config.toml & # &> /dev/null &
-    GODWOKEN_PID=$!
     while true; do
         sleep 1
         result=$(curl http://127.0.0.1:8119 &> /dev/null || echo "Godwoken not started")
@@ -219,6 +217,15 @@ EOF
     log "Finished"
 }
 
+function post-godwoken-start-setup() {
+    wait-for-godwoken-started
+
+    # Should make sure that the Polyjuice root account was created and the layer2 block was synced
+    create-polyjuice-root-account
+
+    generate-web3-indexer-config
+}
+
 function log() {
     echo "[${FUNCNAME[1]}] $1"
 }
@@ -227,26 +234,19 @@ function main() {
     godwoken --version
     gw-tools --version
 
+    if [ -f "$CONFIG_DIR/web3-indexer-config.toml" ]; then
+        exec godwoken run -c $CONFIG_DIR/godwoken-config.toml
+    fi
+
     # Setup Godwoken at the first time
     deploy-scripts
     deploy-rollup-genesis
     generate-godwoken-config
 
-    start-godwoken-at-background
+    # Exec godwoken and finish setup in the background.
+    post-godwoken-start-setup &
 
-    # Should make sure that the Polyjuice root account was created and the layer2 block was synced
-    create-polyjuice-root-account
-
-    generate-web3-indexer-config
-
-    # Godwoken daemon
-    while true; do
-        result=$(curl http://127.0.0.1:8119 &> /dev/null || echo "wake up")
-        if [ "$result" == "wake up" ]; then
-            godwoken run -c $CONFIG_DIR/godwoken-config.toml || echo "Godwoken exit"
-        fi
-        sleep 30
-    done
+    exec godwoken run -c $CONFIG_DIR/godwoken-config.toml
 }
 
 main "$@"

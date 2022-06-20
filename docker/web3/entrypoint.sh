@@ -10,4 +10,4 @@ mkdir -p /usr/local/godwoken-web3/address-mapping
 cd /godwoken-web3
 
 yarn knex migrate:latest
-yarn run start
+yarn run start:prod
