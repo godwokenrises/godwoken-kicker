@@ -23,6 +23,7 @@ services:
 
   ckb:
     image: nervos/ckb:v0.103.0
+    build: ./layer1
     user: root
     ports:
       - 8114:8114   # rpc

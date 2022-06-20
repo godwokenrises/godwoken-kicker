@@ -35,7 +35,86 @@ file = { bundled = "specs/cells/secp256k1_blake160_multisig_all" }
 create_type_id = true
 capacity = 100_000_0000_0000
 [[genesis.system_cells]]
-file = { file = "sudt" }
+file = { file = "l1_sudt" }
+create_type_id = true
+
+# godwoken v1 scripts
+[[genesis.system_cells]]
+file = { file = "/v1-scripts/godwoken-scripts/withdrawal-lock" }
+create_type_id = true
+[[genesis.system_cells]]
+file = { file = "/v1-scripts/godwoken-scripts/sudt-validator" }
+create_type_id = true
+[[genesis.system_cells]]
+file = { file = "/v1-scripts/godwoken-scripts/state-validator" }
+create_type_id = true
+[[genesis.system_cells]]
+file = { file = "/v1-scripts/godwoken-scripts/challenge-lock" }
+create_type_id = true
+[[genesis.system_cells]]
+file = { file = "/v1-scripts/godwoken-scripts/omni_lock" }
+create_type_id = true
+[[genesis.system_cells]]
+file = { file = "/v1-scripts/godwoken-scripts/meta-contract-validator" }
+create_type_id = true
+[[genesis.system_cells]]
+file = { file = "/v1-scripts/godwoken-scripts/custodian-lock" }
+create_type_id = true
+[[genesis.system_cells]]
+file = { file = "/v1-scripts/godwoken-scripts/stake-lock" }
+create_type_id = true
+[[genesis.system_cells]]
+file = { file = "/v1-scripts/godwoken-scripts/eth-account-lock" }
+create_type_id = true
+[[genesis.system_cells]]
+file = { file = "/v1-scripts/godwoken-polyjuice/validator_log" }
+create_type_id = true
+[[genesis.system_cells]]
+file = { file = "/v1-scripts/godwoken-scripts/deposit-lock" }
+create_type_id = true
+[[genesis.system_cells]]
+file = { file = "/v1-scripts/godwoken-scripts/eth-addr-reg-validator" }
+create_type_id = true
+
+# godwoken v0 scripts
+[[genesis.system_cells]]
+file = { file = "/v0-scripts/godwoken-scripts/custodian-lock" }
+create_type_id = true
+[[genesis.system_cells]]
+file = { file = "/v0-scripts/godwoken-scripts/deposit-lock" }
+create_type_id = true
+[[genesis.system_cells]]
+file = { file = "/v0-scripts/godwoken-scripts/withdrawal-lock" }
+create_type_id = true
+[[genesis.system_cells]]
+file = { file = "/v0-scripts/godwoken-scripts/challenge-lock" }
+create_type_id = true
+[[genesis.system_cells]]
+file = { file = "/v0-scripts/godwoken-scripts/stake-lock" }
+create_type_id = true
+[[genesis.system_cells]]
+file = { file = "/v0-scripts/godwoken-scripts/state-validator" }
+create_type_id = true
+[[genesis.system_cells]]
+file = { file = "/v0-scripts/godwoken-scripts/sudt-validator" }
+create_type_id = true
+[[genesis.system_cells]]
+file = { file = "/v0-scripts/godwoken-scripts/meta-contract-validator" }
+create_type_id = true
+[[genesis.system_cells]]
+file = { file = "/v0-scripts/godwoken-scripts/eth-account-lock" }
+create_type_id = true
+[[genesis.system_cells]]
+file = { file = "/v0-scripts/godwoken-scripts/tron-account-lock" }
+create_type_id = true
+[[genesis.system_cells]]
+file = { file = "/v0-scripts/godwoken-polyjuice/validator" }
+create_type_id = true
+[[genesis.system_cells]]
+file = { file = "/v0-scripts/clerkb/poa" }
+create_type_id = true
+[[genesis.system_cells]]
+file = { file = "/v0-scripts/clerkb/state" }
 create_type_id = true
 
 [genesis.system_cells_lock]

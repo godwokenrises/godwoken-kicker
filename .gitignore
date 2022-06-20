@@ -39,12 +39,14 @@ plugins/gw-schema/tmp
 /docker/postgres/data/
 /docker/redis/data/
 /docker/ckb-indexer/data/
+/docker/layer1/ckb/list-hashes.json
 /docker/layer1/ckb/data/
 /docker/layer1/ckb2/data/
 /docker/layer1/ckb3/data/
 /docker/layer2/data/
 /docker/layer2/data-readonly/
 /docker/layer2/config/scripts-deployment.json
+/docker/layer2/config/rollup-config.json
 /docker/layer2/config/rollup-genesis-deployment.json
 /docker/layer2/config/godwoken-config.toml
 /docker/layer2/config/godwoken-config-readonly.toml
@@ -53,5 +55,6 @@ plugins/gw-schema/tmp
 /docker/manual-artifacts/
 /docker/layer2-v0/data/
 /docker/layer2-v0/config/scripts-deployment.json
+/docker/layer2-v0/config/rollup-config.json
 /docker/layer2-v0/config/rollup-genesis-deployment.json
 /docker/layer2-v0/config/godwoken-config.toml
