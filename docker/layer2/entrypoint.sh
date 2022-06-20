@@ -71,22 +71,32 @@ function generate-scripts-deployment() {
         return 0
     fi
 
-    echo "{
-$(get-script-deployment "challenge_lock"    "/v1-scripts/godwoken-scripts/challenge-lock"),
-$(get-script-deployment "custodian_lock"    "/v1-scripts/godwoken-scripts/custodian-lock"),
-$(get-script-deployment "deposit_lock"      "/v1-scripts/godwoken-scripts/deposit-lock"),
-$(get-script-deployment "eth_account_lock"  "/v1-scripts/godwoken-scripts/eth-account-lock"),
-$(get-script-deployment "l2_sudt_validator" "/v1-scripts/godwoken-scripts/sudt-validator"),
-$(get-script-deployment "meta_contract_validator"   "/v1-scripts/godwoken-scripts/meta-contract-validator"),
-$(get-script-deployment "polyjuice_validator"       "/v1-scripts/godwoken-polyjuice/validator"),
-$(get-script-deployment "stake_lock"        "/v1-scripts/godwoken-scripts/stake-lock"),
-$(get-script-deployment "state_validator"   "/v1-scripts/godwoken-scripts/state-validator"),
-$(get-script-deployment "tron_account_lock" "/v1-scripts/godwoken-scripts/tron-account-lock"),
-$(get-script-deployment "withdrawal_lock"   "/v1-scripts/godwoken-scripts/withdrawal-lock"),
-$(get-script-deployment "eth_addr_reg_validator"    "/v1-scripts/godwoken-scripts/eth-addr-reg-validator"),
-$(get-script-deployment "omni_lock"         "/v1-scripts/godwoken-scripts/omni_lock")
-}" \
-    | jq > $CONFIG_DIR/scripts-deployment.json
+    if [ "$MANUAL_BUILD_POLYJUICE" = "true" || "$MANUAL_BUILD_SCRIPTS" = "true" ]; then
+        start-ckb-miner-at-background
+        RUST_BACKTRACE=full gw-tools deploy-scripts \
+            --ckb-rpc http://ckb:8114 \
+            -i $CONFIG_DIR/scripts-config.json \
+            -o $CONFIG_DIR/scripts-deployment.json \
+            -k $ACCOUNTS_DIR/rollup-scripts-deployer.key
+        stop-ckb-miner
+    else
+        echo "{
+    $(get-script-deployment "challenge_lock"    "/v1-scripts/godwoken-scripts/challenge-lock"),
+    $(get-script-deployment "custodian_lock"    "/v1-scripts/godwoken-scripts/custodian-lock"),
+    $(get-script-deployment "deposit_lock"      "/v1-scripts/godwoken-scripts/deposit-lock"),
+    $(get-script-deployment "eth_account_lock"  "/v1-scripts/godwoken-scripts/eth-account-lock"),
+    $(get-script-deployment "l2_sudt_validator" "/v1-scripts/godwoken-scripts/sudt-validator"),
+    $(get-script-deployment "meta_contract_validator"   "/v1-scripts/godwoken-scripts/meta-contract-validator"),
+    $(get-script-deployment "polyjuice_validator"       "/v1-scripts/godwoken-polyjuice/validator"),
+    $(get-script-deployment "stake_lock"        "/v1-scripts/godwoken-scripts/stake-lock"),
+    $(get-script-deployment "state_validator"   "/v1-scripts/godwoken-scripts/state-validator"),
+    $(get-script-deployment "tron_account_lock" "/v1-scripts/godwoken-scripts/tron-account-lock"),
+    $(get-script-deployment "withdrawal_lock"   "/v1-scripts/godwoken-scripts/withdrawal-lock"),
+    $(get-script-deployment "eth_addr_reg_validator"    "/v1-scripts/godwoken-scripts/eth-addr-reg-validator"),
+    $(get-script-deployment "omni_lock"         "/v1-scripts/godwoken-scripts/omni_lock")
+    }" \
+        | jq > $CONFIG_DIR/scripts-deployment.json
+    fi
 
     log "Generate file \"$CONFIG_DIR/scripts-deployment.json\""
     log "Finished"

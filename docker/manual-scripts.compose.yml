@@ -18,3 +18,5 @@ services:
   godwoken:
     volumes:
       - ./manual-artifacts/scripts:/scripts/godwoken-scripts
+    environment:
+      MANUAL_BUILD_SCRIPTS: "true"
