@@ -236,6 +236,36 @@ function deposit() {
         godwoken
 }
 
+function transfer() {
+    toEthAddress=${1:?"\"$EXECUTABLE transfer\" requires toEthAddress as 1st argument"}
+    amount=${2:?"\"$EXECUTABLE transfer\" requires amount as 2nd argument"}
+    fee=${3:?"\"$EXECUTABLE transfer\" requires fee as 3nd argument"}
+    sudtId=${4:?"\"$EXECUTABLE transfer\" requires sudtId as 4nd argument"}
+
+    pkpath=${PRIVATE_KEY_PATH:-"$WORKSPACE/accounts/ckb-miner-and-faucet.key"}
+    if [ ! -f $pkpath ]; then
+        error "$pkpath: No such file or directory"
+        exit 1
+    fi
+
+    abspkpath="$( cd -- "$(dirname "$pkpath")" >/dev/null 2>&1 ; pwd -P )/$(basename $pkpath)"
+    docker-compose -f docker/docker-compose.yml run \
+        --no-deps \
+        --use-aliases \
+        --volume=$WORKSPACE/docker/layer2/config:/config \
+        --volume=$abspkpath:/privkey-path \
+        --entrypoint "gw-tools transfer \
+                --godwoken-rpc-url http://godwoken:8119 \
+                --scripts-deployment-path /config/scripts-deployment.json \
+                --config-path /config/godwoken-config.toml \
+                --privkey-path /privkey-path \
+                --sudt-id $sudtId \
+                --to $toEthAddress \
+                --fee $fee \
+                --amount $amount" \
+        godwoken
+}
+
 # Note that this function MUST be in tty mode.
 # @example get-balance "0x0C1EfCCa2Bcb65A532274f3eF24c044EF4ab6D73"
 function get-balance() {
@@ -563,6 +593,9 @@ function main() {
             ;;
         "deposit-v0")
             deposit-v0 "$@"
+            ;;
+        "transfer")
+            transfer "$@"
             ;;
         "withdraw-v0-to-v1")
             withdraw-v0-to-v1 "$@"
