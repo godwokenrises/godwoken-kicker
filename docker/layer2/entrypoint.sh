@@ -200,16 +200,9 @@ function generate-web3-indexer-config() {
         apt-get install -y jq &>/dev/null
     fi
 
+    # see: https://github.com/nervosnetwork/godwoken-web3#start-indexer
     cat <<EOF > $CONFIG_DIR/web3-indexer-config.toml
-chain_id=$CHAIN_ID
-l2_sudt_type_script_hash="$(jq -r '.l2_sudt_validator.script_type_hash' $CONFIG_DIR/scripts-deployment.json)"
-polyjuice_type_script_hash="$(jq -r '.polyjuice_validator.script_type_hash' $CONFIG_DIR/scripts-deployment.json)"
-rollup_type_hash="$(jq -r '.rollup_type_hash' $CONFIG_DIR/rollup-genesis-deployment.json)"
-eth_account_lock_hash="$(jq -r '.eth_account_lock.script_type_hash' $CONFIG_DIR/scripts-deployment.json)"
-
 godwoken_rpc_url="http://godwoken-readonly:8119"
-ws_rpc_url="ws://godwoken:8120"
-
 pg_url="postgres://user:password@postgres:5432/lumos"
 EOF
 
