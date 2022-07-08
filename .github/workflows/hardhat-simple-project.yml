@@ -31,7 +31,7 @@ jobs:
 
       - run: echo "Part 2. Deploy A Simple Contract Using Hardhat"
       - run: |
-          git clone --depth=1 https://github.com/NomicFoundation/hardhat
+          git clone -b hardhat@2.9.9 --depth=1 https://github.com/NomicFoundation/hardhat
           mv hardhat/packages/hardhat-core/sample-projects/basic .
       - uses: actions/cache@v3
         with:
