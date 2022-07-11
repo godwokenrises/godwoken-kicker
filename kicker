@@ -30,6 +30,7 @@ function usage() {
     echo "  manual-build            Manually build services artifacts"
     echo "  deposit <eth-address> <amount>  Deposit CKB to layer2"
     echo "  get-balance <eth-address>       Get layer2 balance"
+    echo "  transfer <eth-address> <amount> <fee> <sudt-id>      Transfer sudt token"
     echo
     echo "EXAMPLES:"
     echo "  * Deploy the local network and print service info"
