@@ -17,6 +17,7 @@ function generate-godwoken-readonly-config() {
     sed -i 's#^node_mode = .*$#node_mode = '"'$GODWOKEN_MODE'"'#' $CONFIG_DIR/godwoken-config-readonly.toml
     sed -i 's#^path = .*$#path = '"'$STORE_PATH'"'#' $CONFIG_DIR/godwoken-config-readonly.toml
     sed -i 's@listen = "/ip4/.*"@dial = ["/dns4/godwoken/tcp/9999"]@' $CONFIG_DIR/godwoken-config-readonly.toml
+    sed -i '/^\[block_producer.wallet_config\]/,+7d' $CONFIG_DIR/godwoken-config-readonly.toml
 
     log "Generate file \"$CONFIG_DIR/godwoken-config-readonly.toml\""
 }
