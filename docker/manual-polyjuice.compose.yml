@@ -7,13 +7,19 @@ services:
   # `build` dir to `docker/manual-artifacts/polyjuice`:
   #
   #   ```
-  #   set -a && source docker/.build.mode.env && ./kicker init
+  #   MANUAL_BUILD_POLYJUICE="true" \
+  #   POLYJUICE_GIT_URL=https://github.com/keroro520/godwoken-polyjuice \
+  #   POLYJUICE_GIT_CHECKOUT=6e4390df3d95484caaab5f37728cff1771b55c4e \
+  #   ./kicker init
   #   ```
   #
   # 2. Then start docker-compose service:
   #
   #   ```
-  #   set -a && source docker/.build.mode.env && ./kicker start
+  #   MANUAL_BUILD_POLYJUICE="true" \
+  #   POLYJUICE_GIT_URL=https://github.com/keroro520/godwoken-polyjuice \
+  #   POLYJUICE_GIT_CHECKOUT=6e4390df3d95484caaab5f37728cff1771b55c4e \
+  #   ./kicker start
   #   ```
   godwoken:
     volumes:
