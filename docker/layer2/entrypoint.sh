@@ -11,13 +11,13 @@ CKB_MINER_PID=""
 GODWOKEN_PID=""
 CHAIN_ID=71400
 
-function start-ckb-miner-at-background() {
+function start_ckb_miner_at_background() {
     ckb -C $CONFIG_DIR miner &> /dev/null &
     CKB_MINER_PID=$!
     log "ckb-miner is mining..."
 }
 
-function stop-ckb-miner() {
+function stop_ckb_miner() {
     log "Kill the ckb-miner process"
     if [ ! -z "$CKB_MINER_PID" ]; then
         kill $CKB_MINER_PID
@@ -25,7 +25,7 @@ function stop-ckb-miner() {
     fi
 }
 
-function wait-for-godwoken-started() {
+function wait_for_godwoken_started() {
     log "Starting"
     start_time=$(date +%s)
     while true; do
@@ -47,7 +47,7 @@ function wait-for-godwoken-started() {
 # you should make sure that the Polyjuice root account is created and the layer2 block is synced.
 #
 # Try to avoid restarting Godwoken if you can.
-function stop-godwoken() {
+function stop_godwoken() {
     log "Killing the Godwoken process"
     if [ ! -z "$GODWOKEN_PID" ]; then
         kill $GODWOKEN_PID
@@ -71,33 +71,33 @@ function stop-godwoken() {
 # exists.
 #
 # More info: https://github.com/nervosnetwork/godwoken-docker-prebuilds/blob/97729b15093af6e5f002b46a74c549fcc8c28394/Dockerfile#L42-L54
-function deploy-scripts() {
+function deploy_scripts() {
     log "Start"
     if [ -s "$CONFIG_DIR/scripts-deployment.json" ]; then
         log "$CONFIG_DIR/scripts-deployment.json already exists, skip"
         return 0
     fi
 
-    start-ckb-miner-at-background
+    start_ckb_miner_at_background
     RUST_BACKTRACE=full gw-tools deploy-scripts \
         --ckb-rpc http://ckb:8114 \
         -i $CONFIG_DIR/scripts-config.json \
         -o $CONFIG_DIR/scripts-deployment.json \
         -k $ACCOUNTS_DIR/rollup-scripts-deployer.key
-    stop-ckb-miner
+    stop_ckb_miner
 
     log "Generate file \"$CONFIG_DIR/scripts-deployment.json\""
     log "Finished"
 }
 
-function deploy-rollup-genesis() {
+function deploy_rollup_genesis() {
     log "start"
     if [ -s "$CONFIG_DIR/rollup-genesis-deployment.json" ]; then
         log "$CONFIG_DIR/rollup-genesis-deployment.json already exists, skip"
         return 0
     fi
 
-    start-ckb-miner-at-background
+    start_ckb_miner_at_background
     RUST_BACKTRACE=full gw-tools deploy-genesis \
         --ckb-rpc http://ckb:8114 \
         --scripts-deployment-path $CONFIG_DIR/scripts-deployment.json \
@@ -105,11 +105,11 @@ function deploy-rollup-genesis() {
         --rollup-config $CONFIG_DIR/rollup-config.json \
         -o $CONFIG_DIR/rollup-genesis-deployment.json \
         -k $ACCOUNTS_DIR/godwoken-block-producer.key
-    stop-ckb-miner
+    stop_ckb_miner
     log "Generate file \"$CONFIG_DIR/rollup-genesis-deployment.json\""
 }
 
-function generate-godwoken-config() {
+function generate_godwoken_config() {
     log "start"
     if [ -s "$CONFIG_DIR/godwoken-config.toml" ]; then
         log "$CONFIG_DIR/godwoken-config.toml already exists, skip"
@@ -148,14 +148,14 @@ EOF
     log "Generate file \"$CONFIG_DIR/godwoken-config.toml\""
 }
 
-function create-polyjuice-root-account() {
+function create_polyjuice_root_account() {
     log "start"
     if [ -s "$CONFIG_DIR/polyjuice-root-account-id" ]; then
         log "$CONFIG_DIR/polyjuice-root-account-id already exists, skip"
         return 0
     fi
 
-    start-ckb-miner-at-background
+    start_ckb_miner_at_background
 
     # Deposit for block_producer
     #
@@ -183,13 +183,13 @@ function create-polyjuice-root-account() {
         --sudt-id 1 \
     2>&1 | tee /var/tmp/gw-tools.log
 
-    stop-ckb-miner
+    stop_ckb_miner
 
     tail -n 1 /var/tmp/gw-tools.log | grep -oE '[0-9]+$' > $CONFIG_DIR/polyjuice-root-account-id
     log "Generate file \"$CONFIG_DIR/polyjuice-root-account-id\""
 }
 
-function generate-web3-indexer-config() {
+function generate_web3_indexer_config() {
     log "Start"
     if [ -s "$CONFIG_DIR/web3-indexer-config.toml" ]; then
         log "$CONFIG_DIR/web3-indexer-config.toml already exists, skip"
@@ -210,13 +210,13 @@ EOF
     log "Finished"
 }
 
-function post-godwoken-start-setup() {
-    wait-for-godwoken-started
+function post_godwoken_start_setup() {
+    wait_for_godwoken_started
 
     # Should make sure that the Polyjuice root account was created and the layer2 block was synced
-    create-polyjuice-root-account
+    create_polyjuice_root_account
 
-    generate-web3-indexer-config
+    generate_web3_indexer_config
 }
 
 function log() {
@@ -232,12 +232,12 @@ function main() {
     fi
 
     # Setup Godwoken at the first time
-    deploy-scripts
-    deploy-rollup-genesis
-    generate-godwoken-config
+    deploy_scripts
+    deploy_rollup_genesis
+    generate_godwoken_config
 
     # Exec godwoken and finish setup in the background.
-    post-godwoken-start-setup &
+    post_godwoken_start_setup &
 
     exec godwoken run -c $CONFIG_DIR/godwoken-config.toml
 }

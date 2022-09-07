@@ -12,33 +12,33 @@ function log() {
     echo "[${FUNCNAME[1]}] $1"
 }
 
-function deploy-scripts() {
+function deploy_scripts() {
     log "Start"
     if [ -s "$CONFIG_DIR/scripts-deployment.json" ]; then
         log "$CONFIG_DIR/scripts-deployment.json already exists, skip"
         return 0
     fi
 
-    start-ckb-miner-at-background
+    start_ckb_miner_at_background
     RUST_BACKTRACE=full gw-tools deploy-scripts \
         --ckb-rpc http://ckb:8114 \
         -i $CONFIG_DIR/scripts-config.json \
         -o $CONFIG_DIR/scripts-deployment.json \
         -k $ACCOUNTS_DIR/ckb-miner-and-faucet.key
-    stop-ckb-miner
+    stop_ckb_miner
 
     log "Generate file \"$CONFIG_DIR/scripts-deployment.json\""
     log "Finished"
 }
 
-function deploy-rollup-genesis() {
+function deploy_rollup_genesis() {
     log "start"
     if [ -s "$CONFIG_DIR/rollup-genesis-deployment.json" ]; then
         log "$CONFIG_DIR/rollup-genesis-deployment.json already exists, skip"
         return 0
     fi
 
-    start-ckb-miner-at-background
+    start_ckb_miner_at_background
     RUST_BACKTRACE=full gw-tools deploy-genesis \
         --ckb-rpc http://ckb:8114 \
         --scripts-deployment-path $CONFIG_DIR/scripts-deployment.json \
@@ -46,12 +46,12 @@ function deploy-rollup-genesis() {
         --rollup-config $CONFIG_DIR/rollup-config.json \
         -o $CONFIG_DIR/rollup-genesis-deployment.json \
         -k $ACCOUNTS_DIR/ckb-miner-and-faucet.key
-    stop-ckb-miner
+    stop_ckb_miner
 
     log "Generate file \"$CONFIG_DIR/rollup-genesis-deployment.json\""
 }
 
-function generate-withdrawal-to-v1-config() {
+function generate_withdrawal_to_v1_config() {
     v1_rollup_type_hash=$(cat ${V1_GODWOKEN_CONFIG} | grep rollup_type_hash | awk '{print $3}')
     v1_deposit_lock_code_hash=$(cat ${V1_GODWOKEN_CONFIG} | grep deposit_script_type_hash | awk '{print $3}')
     v1_eth_lock_code_hash=$(cat ${V1_GODWOKEN_CONFIG} | grep -C 1 "type_ = 'eth'" | awk '{print $3}' | grep '0x')
@@ -59,7 +59,7 @@ function generate-withdrawal-to-v1-config() {
     echo "\n[withdrawal_to_v1_config]\nv1_rollup_type_hash = ${v1_rollup_type_hash}\nv1_deposit_lock_code_hash = ${v1_deposit_lock_code_hash}\nv1_eth_lock_code_hash = ${v1_eth_lock_code_hash}\nv1_deposit_minimal_cancel_timeout_msecs = 604800000"
 }
 
-function generate-godwoken-config() {
+function generate_godwoken_config() {
     log "start"
     if [ -s "$CONFIG_DIR/godwoken-config.toml" ]; then
         log "$CONFIG_DIR/godwoken-config.toml already exists, skip"
@@ -100,12 +100,12 @@ function generate-godwoken-config() {
     fi
     sed -i 's#enable_methods = \[\]#err_receipt_ws_listen = '"'0.0.0.0:8120'"'#' $CONFIG_DIR/godwoken-config.toml
 
-    printf "$(generate-withdrawal-to-v1-config)" >> $CONFIG_DIR/godwoken-config.toml
+    printf "$(generate_withdrawal_to_v1_config)" >> $CONFIG_DIR/godwoken-config.toml
 
     log "Generate file \"$CONFIG_DIR/godwoken-config.toml\""
 }
 
-function start-godwoken-at-background() {
+function start_godwoken_at_background() {
     log "Starting"
     start_time=$(date +%s)
     godwoken run -c $CONFIG_DIR/godwoken-config.toml & # &> /dev/null &
@@ -125,7 +125,7 @@ function start-godwoken-at-background() {
     log "Godwoken started"
 }
 
-function deposit-for-test-accounts() {
+function deposit_for_test_accounts() {
     log "Start"
     gw-tools deposit-ckb \
         --godwoken-rpc-url http://godwoken-v0:8119 \
@@ -147,13 +147,13 @@ function deposit-for-test-accounts() {
     log "Fininshed"
 }
 
-function start-ckb-miner-at-background() {
+function start_ckb_miner_at_background() {
     ckb -C $V1_CONFIG_DIR miner &> /dev/null &
     CKB_MINER_PID=$!
     log "ckb-miner is mining..."
 }
 
-function stop-ckb-miner() {
+function stop_ckb_miner() {
     log "Kill the ckb-miner process"
     if [ ! -z "$CKB_MINER_PID" ]; then
         kill $CKB_MINER_PID
@@ -166,13 +166,13 @@ function main() {
     gw-tools --version
 
     # Setup Godwoken at the first time
-    deploy-scripts
-    deploy-rollup-genesis
-    generate-godwoken-config
+    deploy_scripts
+    deploy_rollup_genesis
+    generate_godwoken_config
     
-    start-godwoken-at-background
+    start_godwoken_at_background
 
-    deposit-for-test-accounts
+    deposit_for_test_accounts
 
     # Godwoken daemon
     while true; do
