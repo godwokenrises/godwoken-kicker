@@ -120,7 +120,7 @@ function init() {
     erun docker-compose -f docker/docker-compose.yml build --no-rm
 
     # In order to compat with old-version kicker, we execute manual-build at init
-    manual-build
+    manual_build
 }
 
 function start() {
