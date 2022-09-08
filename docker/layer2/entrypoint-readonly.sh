@@ -5,7 +5,7 @@ set -o errexit
 WORKSPACE="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 CONFIG_DIR="$WORKSPACE/config"
 
-function generate-godwoken-readonly-config() {
+function generate_godwoken_readonly_config() {
     log "start"
     if [ -s "$CONFIG_DIR/godwoken-config-readonly.toml" ]; then
         log "$CONFIG_DIR/godwoken-config-readonly.toml already exists, skip"
@@ -31,7 +31,7 @@ function main() {
     gw-tools --version
 
     # Setup Godwoken-readonly at the first time
-    generate-godwoken-readonly-config
+    generate_godwoken_readonly_config
 
     exec godwoken run -c $CONFIG_DIR/godwoken-config-readonly.toml
 }
