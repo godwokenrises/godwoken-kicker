@@ -494,12 +494,10 @@ function manual_build() {
 
     if [ "$MANUAL_BUILD_SCRIPTS" = "true" ]; then
         srcdir=$WORKSPACE/packages/godwoken-scripts
-        srcdir2=$WORKSPACE/packages/ckb-production-scripts
         dstdir=$WORKSPACE/docker/manual-artifacts/scripts/
 
         # Download repo
         prepare_repo godwoken-scripts "$SCRIPTS_GIT_URL" "$SCRIPTS_GIT_CHECKOUT"
-        prepare_repo ckb-production-scripts "$OMNI_LOCK_GIT_URL" "$OMNI_LOCK_GIT_CHECKOUT"
 
         # Install capsule
         # TODO: use cpasule from godwoken-manual-build image
@@ -507,19 +505,22 @@ function manual_build() {
             erun cargo install ckb-capsule
         fi
 
-        cd $srcdir
-        erun capsule build --release --debug-output
-        cd $srcdir/c
-        erun make all-via-docker
-        cd $srcdir2
-        erun make all-via-docker
+        erun cd $srcdir \&\& capsule build --release --debug-output
+        erun cd $srcdir/c \&\& erun make all-via-docker
 
         # Copy the built artifacts to `docker/manual-artifacts/`
         mkdir -p $dstdir
         erun cp -r $srcdir/build/release/* $dstdir
         erun cp $srcdir/c/build/*-generator $dstdir
         erun cp $srcdir/c/build/*-validator $dstdir
-        erun cp $srcdir2/build/omni_lock $dstdir
+
+        # Copy the prebuild omni-lock to `docker/manual-artifacts/`
+        erun docker-compose -f $WORKSPACE/docker/docker-compose.yml run \
+            --rm \
+            --no-deps \
+            --volume=$dstdir:/godwoken-scripts \
+            --entrypoint "\"bash -c 'cp /scripts/godwoken-scripts/omni_lock /godwoken-scripts/omni_lock'\"" \
+            godwoken
     else
         info "skip building Scripts"
     fi
