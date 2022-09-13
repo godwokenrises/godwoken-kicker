@@ -6,19 +6,19 @@ USER root
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt update -y && \
-    apt install libssl-dev libsodium-dev libunwind-dev build-essential binutils upx curl wget -y && \
+    apt install libssl-dev libsodium-dev libunwind-dev build-essential binutils upx curl wget git -y && \
     DEBIAN_FRONTEND=noninteractive apt install rustc -y && \
     DEBIAN_FRONTEND=noninteractive apt-get install cmake musl-tools clang libc++-dev autoconf libtool pkg-config unzip -y
 
 # Install Rust
-RUN curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain 1.54.0 -y
+RUN curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain 1.61.0 -y
 ENV PATH=/root/.cargo/bin:$PATH
 RUN rustup component add rustfmt
 RUN which cargo
 RUN which rustfmt
 
 # Install Capsule
-RUN cargo install ckb-capsule
+RUN cargo install ckb-capsule --version 0.8.0 --locked
 RUN which capsule
 
 # install node 14
