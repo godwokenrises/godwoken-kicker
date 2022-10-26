@@ -1,6 +1,6 @@
 # Godwoken-Kicker
 
-One line command to start a local network of [Godwoken](https://github.com/nervosnetwork/godwoken).
+One line command to start a local network of [Godwoken](https://github.com/godwokenrises/godwoken).
 
 ---
 

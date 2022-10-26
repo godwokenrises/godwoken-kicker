@@ -45,7 +45,7 @@ pubkey: 02261c3634191150993cb256adeb0ddf29a2b317b99885323564e28886933c9099
 
   The deployer of rollup genesis cell on layer1 uses this key to deploy Rollup genesis cell.
 
-  When sets up Rollup genesis cell on layer1, `gw-tools deploy-genesis` [records the public key](https://github.com/nervosnetwork/godwoken/blob/c18807b5cfaa961c230e15e3a381570c324db6f8/crates/tools/src/deploy_genesis.rs#L428-L448) using [Omnilock](https://blog.cryptape.com/omnilock-a-universal-lock-that-powers-interoperability-1).
+  When sets up Rollup genesis cell on layer1, `gw-tools deploy-genesis` [records the public key](https://github.com/godwokenrises/godwoken/blob/c18807b5cfaa961c230e15e3a381570c324db6f8/crates/tools/src/deploy_genesis.rs#L428-L448) using [Omnilock](https://blog.cryptape.com/omnilock-a-universal-lock-that-powers-interoperability-1).
 
   The key must be the same as [Godwoken block producer](./accounts.md#godwoken-block-producer). I have no idea why.
 

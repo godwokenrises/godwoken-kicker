@@ -70,7 +70,7 @@ function stop_godwoken() {
 # To avoid redeploying, this command skips scripts-deployment.json if it already
 # exists.
 #
-# More info: https://github.com/nervosnetwork/godwoken-docker-prebuilds/blob/97729b15093af6e5f002b46a74c549fcc8c28394/Dockerfile#L42-L54
+# More info: https://github.com/godwokenrises/godwoken-docker-prebuilds/blob/97729b15093af6e5f002b46a74c549fcc8c28394/Dockerfile#L42-L54
 function deploy_scripts() {
     log "Start"
     if [ -s "$CONFIG_DIR/scripts-deployment.json" ]; then
@@ -200,7 +200,7 @@ function generate_web3_indexer_config() {
         apt-get install -y jq &>/dev/null
     fi
 
-    # see: https://github.com/nervosnetwork/godwoken-web3#start-indexer
+    # see: https://github.com/godwokenrises/godwoken-web3#start-indexer
     cat <<EOF > $CONFIG_DIR/web3-indexer-config.toml
 godwoken_rpc_url="http://godwoken-readonly:8119"
 pg_url="postgres://user:password@postgres:5432/lumos"
