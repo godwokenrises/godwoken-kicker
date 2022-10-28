@@ -29,7 +29,7 @@ Let's start with an example to demonstrate how Godwoken-Kicker supports manual-b
 
   ```shell
   MANUAL_BUILD_GODWOKEN=true \
-  GODWOKEN_GIT_URL=ssh://git@github.com/nervosnetwork/godwoken \
+  GODWOKEN_GIT_URL=ssh://git@github.com/godwokenrises/godwoken \
   GODWOKEN_GIT_CHECKOUT=compatibility-breaking-changes \
   ./kicker manual-build
   ```
@@ -75,7 +75,7 @@ Pulls godwoken repository into `packages/godwoken/`, builds, and then moves the 
 
 ```shell
 MANUAL_BUILD_GODWOKEN=true \
-GODWOKEN_GIT_URL=ssh://git@github.com/nervosnetwork/godwoken \
+GODWOKEN_GIT_URL=ssh://git@github.com/godwokenrises/godwoken \
 GODWOKEN_GIT_CHECKOUT=compatibility-breaking-changes \
 ./kicker manual-build
 ```

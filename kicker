@@ -354,7 +354,7 @@ function withdraw_v0_to_v1() {
 }
 
 # @example MANUAL_BUILD_WEB3=true \
-#          WEB3_GIT_URL=ssh://git@github.com/nervosnetwork/godwoken-web3 \
+#          WEB3_GIT_URL=ssh://git@github.com/godwokenrises/godwoken-web3 \
 #          WEB3_GIT_CHECKOUT=compatibility-breaking-changes \
 #          ./kicker manual-build
 function manual_build() {
