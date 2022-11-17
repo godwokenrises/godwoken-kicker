@@ -143,8 +143,6 @@ function generate_godwoken_config() {
 [p2p_network_config]
 listen = "/ip4/0.0.0.0/tcp/9999"
 EOF
-    sed -i 's#enable_methods = \[\]#err_receipt_ws_listen = '"'0.0.0.0:8120'"'#' $CONFIG_DIR/godwoken-config.toml
-
     log "Generate file \"$CONFIG_DIR/godwoken-config.toml\""
 }
 
