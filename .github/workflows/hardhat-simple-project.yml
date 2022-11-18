@@ -51,7 +51,7 @@ jobs:
           npx hardhat --version
       - name: Adapt hardhat.config.js to our local network of Godwoken
         run: |
-          sed -i 's#solidity:#    networks: { gw_devnet_v1: { url: `http://127.0.0.1:8024`, accounts: [`0x9d5bc55413c14cf4ce360a6051eacdc0e580100a0d3f7f2f48f63623f6b05361`], } }, solidity:#g' hardhat.config.js
+          sed -i 's#solidity:#    networks: { gw_devnet_v1: { url: `http://127.0.0.1:8024/instant-finality-hack`, accounts: [`0x9d5bc55413c14cf4ce360a6051eacdc0e580100a0d3f7f2f48f63623f6b05361`], } }, solidity:#g' hardhat.config.js
           cat hardhat.config.js
         working-directory: basic
       - run: npx hardhat accounts --network gw_devnet_v1
