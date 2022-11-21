@@ -476,7 +476,7 @@ function manual_build() {
     fi
 
     if [ "$MANUAL_BUILD_POLYJUICE" = "true" ]; then
-        srcdir=$WORKSPACE/packages/godwoken-polyjuice
+        srcdir=$WORKSPACE/packages/godwoken/gwos-evm
         dstdir=$WORKSPACE/docker/manual-artifacts/polyjuice/
 
         # Download repo
@@ -493,7 +493,7 @@ function manual_build() {
     fi
 
     if [ "$MANUAL_BUILD_SCRIPTS" = "true" ]; then
-        srcdir=$WORKSPACE/packages/godwoken-scripts
+        srcdir=$WORKSPACE/packages/godwoken/gwos
         dstdir=$WORKSPACE/docker/manual-artifacts/scripts/
 
         # Download repo
@@ -505,8 +505,8 @@ function manual_build() {
             erun cargo install ckb-capsule
         fi
 
-        erun cd $srcdir \&\& capsule build --release --debug-output
         erun cd $srcdir/c \&\& erun make all-via-docker
+        erun cd $srcdir \&\& capsule build --release --debug-output
 
         # Copy the built artifacts to `docker/manual-artifacts/`
         mkdir -p $dstdir
