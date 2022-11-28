@@ -28,16 +28,37 @@ function rpc_request() {
     $rpc_url
 }
 
+# Ensure CKB chain, CKB tx-pool, and CKB Indexer synced
+function ensure_ckb_indexer_synced() {
+    ckb_tip_number=$(rpc_request "http://ckb:8114" "get_tip_block_number" '[]' | jq '.result')
+    while true; do
+        sleep 0.1
+
+        ckb_tx_pool_tip_number=$(rpc_request "http://ckb:8114" "tx_pool_info" '[]' | jq '.result.tip_number')
+        if [ "$ckb_tx_pool_tip_number" \< "$ckb_tip_number" ]; then
+            continue
+        fi
+
+        ckb_indexer_tip_number=$(rpc_request "http://ckb-indexer:8116" "get_tip" '[]' | jq '.result.block_number')
+        if [ "$ckb_indexer_tip_number" \< "$ckb_tip_number" ]; then
+            continue
+        fi
+
+        break
+    done
+}
+
 function start_ckb_miner_at_background() {
     while true; do
         tx_pool_info=$(rpc_request "http://ckb:8114" "tx_pool_info" '[]')
         if [[ $tx_pool_info == *'"pending":"0x0"'* ]] && \
            [[ $tx_pool_info == *'"proposed":"0x0"'* ]] && \
            [[ $tx_pool_info == *'"orphan":"0x0"'* ]]; then
-            sleep 1
+            sleep 0.1
             log "ckb-miner is sleeping"
         else
             rpc_request "http://ckb:8114" "generate_block" '[]'
+            ensure_ckb_indexer_synced &> /dev/null
             log "ckb-miner mined a block..."
         fi
     done
