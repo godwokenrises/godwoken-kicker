@@ -11,18 +11,42 @@ CKB_MINER_PID=""
 GODWOKEN_PID=""
 CHAIN_ID=71400
 
-function start_ckb_miner_at_background() {
-    ckb -C $CONFIG_DIR miner &> /dev/null &
-    CKB_MINER_PID=$!
-    log "ckb-miner is mining..."
+function rpc_request() {
+    rpc_url=$1
+    rpc_method=$2
+    shift
+    shift
+    rpc_params=$@
+    echo "{
+        \"id\": 2,
+        \"jsonrpc\": \"2.0\",
+        \"method\": \"$rpc_method\",
+        \"params\": $rpc_params
+    }" \
+    | tr -d '\n' \
+    | curl -H 'content-type: application/json' -d @- \
+    $rpc_url
 }
 
-function stop_ckb_miner() {
-    log "Kill the ckb-miner process"
-    if [ ! -z "$CKB_MINER_PID" ]; then
-        kill $CKB_MINER_PID
-        CKB_MINER_PID=""
-    fi
+function start_ckb_miner_at_background() {
+    while true; do
+        tx_pool_info=$(rpc_request "http://ckb:8114" "tx_pool_info" '[]')
+        if [[ $tx_pool_info == *'"pending":"0x0"'* ]] && \
+           [[ $tx_pool_info == *'"proposed":"0x0"'* ]] && \
+           [[ $tx_pool_info == *'"orphan":"0x0"'* ]]; then
+            sleep 1
+            log "ckb-miner is sleeping"
+        else
+            rpc_request "http://ckb:8114" "generate_block" '[]'
+            log "ckb-miner mined a block..."
+        fi
+    done
+}
+
+function ckb_generate_block() {
+    curl "http://ckb:8114" \
+        -H 'content-type: application/json' \
+        -d '{"id": 2, "jsonrpc": "2.0", "method": "generate_block", "params": []}'
 }
 
 function wait_for_godwoken_started() {
@@ -78,13 +102,11 @@ function deploy_scripts() {
         return 0
     fi
 
-    start_ckb_miner_at_background
     RUST_BACKTRACE=full gw-tools deploy-scripts \
         --ckb-rpc http://ckb:8114 \
         -i $CONFIG_DIR/scripts-config.json \
         -o $CONFIG_DIR/scripts-deployment.json \
         -k $ACCOUNTS_DIR/rollup-scripts-deployer.key
-    stop_ckb_miner
 
     log "Generate file \"$CONFIG_DIR/scripts-deployment.json\""
     log "Finished"
@@ -97,7 +119,6 @@ function deploy_rollup_genesis() {
         return 0
     fi
 
-    start_ckb_miner_at_background
     RUST_BACKTRACE=full gw-tools deploy-genesis \
         --ckb-rpc http://ckb:8114 \
         --scripts-deployment-path $CONFIG_DIR/scripts-deployment.json \
@@ -105,7 +126,6 @@ function deploy_rollup_genesis() {
         --rollup-config $CONFIG_DIR/rollup-config.json \
         -o $CONFIG_DIR/rollup-genesis-deployment.json \
         -k $ACCOUNTS_DIR/godwoken-block-producer.key
-    stop_ckb_miner
     log "Generate file \"$CONFIG_DIR/rollup-genesis-deployment.json\""
 }
 
@@ -153,8 +173,6 @@ function create_polyjuice_root_account() {
         return 0
     fi
 
-    start_ckb_miner_at_background
-
     # Deposit for block_producer
     #
     # Here we deposit from ckb-miner-and-faucet.key instead of
@@ -180,8 +198,6 @@ function create_polyjuice_root_account() {
         --config-path $CONFIG_DIR/godwoken-config.toml \
         --sudt-id 1 \
     2>&1 | tee /var/tmp/gw-tools.log
-
-    stop_ckb_miner
 
     tail -n 1 /var/tmp/gw-tools.log | grep -oE '[0-9]+$' > $CONFIG_DIR/polyjuice-root-account-id
     log "Generate file \"$CONFIG_DIR/polyjuice-root-account-id\""
@@ -230,6 +246,7 @@ function main() {
     fi
 
     # Setup Godwoken at the first time
+    start_ckb_miner_at_background &> /dev/null &
     deploy_scripts
     deploy_rollup_genesis
     generate_godwoken_config
