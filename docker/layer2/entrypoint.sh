@@ -29,22 +29,44 @@ function rpc_request() {
 }
 
 # Ensure CKB chain, CKB tx-pool, and CKB Indexer synced
+LAST_OBSERVED_TIP_NUMBER="0x"
 function ensure_ckb_indexer_synced() {
-    ckb_tip_number=$(rpc_request "http://ckb:8114" "get_tip_block_number" '[]' | jq '.result')
+
+    old_ckb_tip_number=$(rpc_request "http://ckb:8114" "get_tip_block_number" '[]' | jq '.result' | xargs -I {} printf "%d" {})
+
+    while true; do
+        block_template_number=$(rpc_request "http://ckb:8114" "get_block_template" '[]' | jq '.result.number' | xargs -I {} printf "%d" {})
+        if [ $block_template_number -gt $old_ckb_tip_number ]; then
+            break
+        fi
+        sleep 0.1
+        echo "bilibili 1111"
+    done
+
+
+    rpc_request "http://ckb:8114" "generate_block" '[]'
+
+    while true; do
+        ckb_tip_number=$(rpc_request "http://ckb:8114" "get_tip_block_number" '[]' | jq '.result' | xargs -I {} printf "%d" {})
+        if [ $ckb_tip_number -eq $block_template_number ]; then
+            break
+        fi
+        echo "bilibili 2222"
+        sleep 0.1
+    done
+
     while true; do
         sleep 0.1
 
-        ckb_tx_pool_tip_number=$(rpc_request "http://ckb:8114" "tx_pool_info" '[]' | jq '.result.tip_number')
-        if [ "$ckb_tx_pool_tip_number" \< "$ckb_tip_number" ]; then
-            continue
+        ckb_tx_pool_tip_number=$(rpc_request "http://ckb:8114" "tx_pool_info" '[]' | jq '.result.tip_number' | xargs -I {} printf "%d" {})
+        if [ $ckb_tx_pool_tip_number -eq $ckb_tip_number ]; then
+            break
         fi
 
-        ckb_indexer_tip_number=$(rpc_request "http://ckb-indexer:8116" "get_tip" '[]' | jq '.result.block_number')
-        if [ "$ckb_indexer_tip_number" \< "$ckb_tip_number" ]; then
-            continue
+        ckb_indexer_tip_number=$(rpc_request "http://ckb-indexer:8116" "get_tip" '[]' | jq '.result.block_number' | xargs -I {} printf "%d" {})
+        if [ $ckb_indexer_tip_number -eq $ckb_tip_number ]; then
+            break
         fi
-
-        break
     done
 }
 
@@ -57,8 +79,7 @@ function start_ckb_miner_at_background() {
             sleep 0.1
             log "ckb-miner is sleeping"
         else
-            rpc_request "http://ckb:8114" "generate_block" '[]'
-            ensure_ckb_indexer_synced &> /dev/null
+            ensure_ckb_indexer_synced # &> /dev/null
             log "ckb-miner mined a block..."
         fi
     done
@@ -267,7 +288,7 @@ function main() {
     fi
 
     # Setup Godwoken at the first time
-    start_ckb_miner_at_background &> /dev/null &
+    start_ckb_miner_at_background & # &> /dev/null &
     deploy_scripts
     deploy_rollup_genesis
     generate_godwoken_config

@@ -17,7 +17,8 @@ jobs:
       - name: Checkout Godwoken-Kicker
         uses: actions/checkout@v2
       - run: git rev-parse HEAD
-      - run: ./kicker init
+      - run: |
+          MANUAL_BUILD_GODWOKEN="true" GODWOKEN_GIT_URL=https://github.com/godwokenrises/godwoken GODWOKEN_GIT_CHECKOUT=develop ./kicker init
       - run:  |
           # Temporary workaround unreliable web3 health check
           (echo " == kicker start attempt: 1 == " && ./kicker start) || \

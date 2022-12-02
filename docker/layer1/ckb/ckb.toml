@@ -89,9 +89,9 @@ enable_deprecated_rpc = false
 
 [tx_pool]
 max_mem_size = 20_000_000 # 20mb
-max_cycles = 200_000_000_000
+max_cycles = 200_000_000_000_000
 min_fee_rate = 1_000 # shannons/KB
-max_tx_verify_cycles = 70_000_000
+max_tx_verify_cycles = 70_000_000_000
 max_ancestors_count = 25
 
 [store]
