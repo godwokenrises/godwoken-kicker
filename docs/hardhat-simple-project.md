@@ -10,8 +10,8 @@
 
 ```sh
 $ git clone --depth=1 ssh://git@github.com/NomicFoundation/hardhat
-$ mv hardhat/packages/hardhat-core/sample-projects/basic/ .
-$ cd basic/
+$ mv hardhat/packages/hardhat-core/sample-projects/javascript/ .
+$ cd javascript/
 $ ls
 LICENSE.md  README.md  cache  contracts  hardhat.config.js  scripts  test
 ```
@@ -19,8 +19,8 @@ LICENSE.md  README.md  cache  contracts  hardhat.config.js  scripts  test
 ### Install requirements
 
 ```sh
-# Enter `basic/` directory
-# $ cd basic/
+# Enter `javascript/` directory
+# $ cd javascript/
 $ npm install --save-dev hardhat @nomiclabs/hardhat-waffle
 ```
 
@@ -29,6 +29,9 @@ $ npm install --save-dev hardhat @nomiclabs/hardhat-waffle
 Add the below `network` configuration into `basic/hardhat.config.js`:
 
 ```js
+require("@nomiclabs/hardhat-waffle");
+
+/** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
 
   networks: {
@@ -37,9 +40,16 @@ module.exports = {
       accounts: [`0x9d5bc55413c14cf4ce360a6051eacdc0e580100a0d3f7f2f48f63623f6b05361`],
     }
   },
+   ...
+};
 
-  ...
-}
+task("accounts", "Prints the list of accounts", async () => {
+  const accounts = await ethers.getSigners();
+
+  for (const account of accounts) {
+    console.log(account.address);
+  }
+});
 ```
 
 * `http://127.0.0.1:8024` is the Godwoken Web3 URL, which should be deployed at [deploy-a-local-network-of-godwoken-using-godwoken-kicker](./kicker-start.md#deploy-a-local-network-of-godwoken-using-godwoken-kicker)
@@ -48,10 +58,10 @@ module.exports = {
 ### Run hardhat on our local network of Godwoken by `--network gw_devnet_v1`
 
 ```sh
-# Enter `basic/` directory
-# $ cd basic/
+# Enter `javascript/` directory
+# $ cd javascript/
 $ npx hardhat accounts --network gw_devnet_v1
 $ npx hardhat compile
 $ npx hardhat test --network gw_devnet_v1
-$ npx hardhat run --network gw_devnet_v1 scripts/sample-script.js
+$ npx hardhat run --network gw_devnet_v1 scripts/deploy.js
 ```
