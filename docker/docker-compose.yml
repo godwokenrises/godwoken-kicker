@@ -139,7 +139,7 @@ services:
         condition: service_healthy
 
   web3:
-    image: ghcr.io/godwokenrises/godwoken-web3-prebuilds:v1.9.1
+    image: ghcr.io/godwokenrises/godwoken-web3-prebuilds:v1.10.0-rc1
     init: true
     healthcheck:
       test: curl http://127.0.0.1:8024 || exit 1
@@ -173,7 +173,7 @@ services:
         condition: service_started
 
   web3-indexer:
-    image:  ghcr.io/godwokenrises/godwoken-web3-indexer-prebuilds:v1.9.1
+    image:  ghcr.io/godwokenrises/godwoken-web3-indexer-prebuilds:v1.10.0-rc1
     init: true
     volumes:
       - ./layer2/config:/var/lib/layer2/config
