@@ -10,7 +10,7 @@
 ## Deploy a local network of Godwoken using Godwoken-Kicker
 
 ```shell
-git clone -b master https://github.com/RetricSu/godwoken-kicker
+git clone -b develop https://github.com/RetricSu/godwoken-kicker
 cd godwoken-kicker
 ./kicker start
 ```
