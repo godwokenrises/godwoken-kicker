@@ -72,7 +72,7 @@ services:
         condition: service_completed_successfully
 
   godwoken:
-    image: ghcr.io/godwokenrises/godwoken-prebuilds:dev-poly1.5.0
+    image: ghcr.io/flouse/godwoken:1.8.0-rc3-smt-trie
     init: true
     healthcheck:
       test: /var/lib/layer2/healthcheck.sh
@@ -110,7 +110,7 @@ services:
         condition: service_completed_successfully
 
   godwoken-readonly:
-    image: ghcr.io/godwokenrises/godwoken-prebuilds:dev-poly1.5.0
+    image: ghcr.io/flouse/godwoken:1.8.0-rc3-smt-trie
     healthcheck:
       test: /var/lib/layer2/healthcheck.sh
       start_period: 10s
