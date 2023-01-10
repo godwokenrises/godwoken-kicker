@@ -101,7 +101,6 @@ function deploy_rollup_genesis() {
     RUST_BACKTRACE=full gw-tools deploy-genesis \
         --ckb-rpc http://ckb:8114 \
         --scripts-deployment-path $CONFIG_DIR/scripts-deployment.json \
-        --omni-lock-config-path $CONFIG_DIR/scripts-deployment.json \
         --rollup-config $CONFIG_DIR/rollup-config.json \
         -o $CONFIG_DIR/rollup-genesis-deployment.json \
         -k $ACCOUNTS_DIR/godwoken-block-producer.key
