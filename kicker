@@ -419,7 +419,7 @@ function manual_build() {
     if [ "$MANUAL_BUILD_WEB3_INDEXER" = "true" ]; then
         info "Start building godwoken-web3-indexer"
 
-        srcdir=$WORKSPACE/packages/godwoken-web3/web3
+        srcdir=$WORKSPACE/packages/godwoken-web3
         dstdir=$WORKSPACE/docker/manual-artifacts
 
         # Download repo
@@ -428,20 +428,20 @@ function manual_build() {
         # Cargo fetch Rust dependencies (in order to access network via
         # host network). The docker image must have installed cargo, molecule
         # and rustfmt.
-        erun "cd $srcdir && CARGO_HOME=$srcdir/.cargo cargo fetch --locked && cd -"
+        erun "cd $srcdir/web3 && CARGO_HOME=$srcdir/web3/.cargo cargo fetch --locked && cd -"
         erun docker run \
             --rm \
             --env CARGO_HOME=/app/.cargo \
             --volume $srcdir:/app \
             --volume $WORKSPACE/packages/.rustup:/root/.rustup \
-            --workdir /app \
+            --workdir /app/web3 \
             retricsu/godwoken-manual-build:ckb2021 cargo build --locked --release
 
         # Copy the built artifacts to `docker/manual-artifacts/gw-web3-indexer`
         #
         # More: ./docker/manual-web3-indexer.compose.yml
         erun mkdir -p $dstdir
-        erun cp $srcdir/target/release/gw-web3-indexer $dstdir
+        erun cp $srcdir/web3/target/release/gw-web3-indexer $dstdir
     else
         info "skip building godwoken-web3-indexer(gw-web3-indexer)"
     fi
