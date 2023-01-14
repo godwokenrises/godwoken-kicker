@@ -81,7 +81,6 @@ services:
       retries: 3
     environment:
       RUST_LOG: info,gw_generator=debug
-      GODWOKEN_MODE: fullnode
       RUST_BACKTRACE: full
       STORE_PATH: /var/lib/layer2/data
       ACCOUNTS_DIR: /accounts
@@ -118,7 +117,6 @@ services:
       retries: 600
     environment:
       RUST_LOG: info,gw_generator=debug
-      GODWOKEN_MODE: readonly
       RUST_BACKTRACE: full
       STORE_PATH: /var/lib/layer2/data-readonly
       ACCOUNTS_DIR: /accounts
