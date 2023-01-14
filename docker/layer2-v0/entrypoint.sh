@@ -6,7 +6,7 @@ WORKSPACE="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 CONFIG_DIR="$WORKSPACE/config"
 ACCOUNTS_DIR="${ACCOUNTS_DIR:-"ACCOUNTS_DIR is required"}"
 V1_CONFIG_DIR="$WORKSPACE/v1config"
-V1_GODWOKEN_CONFIG="$WORKSPACE/v1config/godwoken-config.toml"
+WITHDRAWAL_TO_V1_CONFIG=$V1_CONFIG_DIR/withdrawal-to-v1.toml
 
 function log() {
     echo "[${FUNCNAME[1]}] $1"
@@ -51,14 +51,6 @@ function deploy_rollup_genesis() {
     log "Generate file \"$CONFIG_DIR/rollup-genesis-deployment.json\""
 }
 
-function generate_withdrawal_to_v1_config() {
-    v1_rollup_type_hash=$(cat ${V1_GODWOKEN_CONFIG} | grep rollup_type_hash | awk '{print $3}')
-    v1_deposit_lock_code_hash=$(cat ${V1_GODWOKEN_CONFIG} | grep deposit_script_type_hash | awk '{print $3}')
-    v1_eth_lock_code_hash=$(cat ${V1_GODWOKEN_CONFIG} | grep -C 1 'type_ = "eth"' | awk '{print $3}' | grep '0x')
-
-    echo "\n[withdrawal_to_v1_config]\nv1_rollup_type_hash = ${v1_rollup_type_hash}\nv1_deposit_lock_code_hash = ${v1_deposit_lock_code_hash}\nv1_eth_lock_code_hash = ${v1_eth_lock_code_hash}\nv1_deposit_minimal_cancel_timeout_msecs = 604800000"
-}
-
 function generate_godwoken_config() {
     log "start"
     if [ -s "$CONFIG_DIR/godwoken-config.toml" ]; then
@@ -66,11 +58,11 @@ function generate_godwoken_config() {
         return 0
     fi
 
-    log "check godwoken v1 config file exists"
+    log "check withdrawal-to-v1.toml exists"
     start_time=$(date +%s)
     while true; do
         sleep 1
-        if [ -f "${V1_GODWOKEN_CONFIG}" ]; then
+        if [ -f $WITHDRAWAL_TO_V1_CONFIG ]; then
             break
         fi
         elapsed=$(( $(date +%s) - start_time ))
@@ -100,7 +92,7 @@ function generate_godwoken_config() {
     fi
     sed -i 's#enable_methods = \[\]#err_receipt_ws_listen = '"'0.0.0.0:8120'"'#' $CONFIG_DIR/godwoken-config.toml
 
-    printf "$(generate_withdrawal_to_v1_config)" >> $CONFIG_DIR/godwoken-config.toml
+    cat $WITHDRAWAL_TO_V1_CONFIG >> $CONFIG_DIR/godwoken-config.toml
 
     log "Generate file \"$CONFIG_DIR/godwoken-config.toml\""
 }
@@ -169,7 +161,7 @@ function main() {
     deploy_scripts
     deploy_rollup_genesis
     generate_godwoken_config
-    
+
     start_godwoken_at_background
 
     deposit_for_test_accounts

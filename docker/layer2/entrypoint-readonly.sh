@@ -12,12 +12,18 @@ function generate_godwoken_readonly_config() {
         return 0
     fi
 
-    cp $CONFIG_DIR/godwoken-config.toml $CONFIG_DIR/godwoken-config-readonly.toml
-
-    sed -i 's#^node_mode = .*$#node_mode = '"'$GODWOKEN_MODE'"'#' $CONFIG_DIR/godwoken-config-readonly.toml
-    sed -i 's#^path = .*$#path = '"'$STORE_PATH'"'#' $CONFIG_DIR/godwoken-config-readonly.toml
-    sed -i 's@listen = "/ip4/.*"@dial = ["/dns4/godwoken/tcp/9999"]@' $CONFIG_DIR/godwoken-config-readonly.toml
-    sed -i '/^\[block_producer.wallet_config\]/,+7d' $CONFIG_DIR/godwoken-config-readonly.toml
+    RUST_BACKTRACE=full gw-tools generate-config \
+        --ckb-rpc http://ckb:8114 \
+        --ckb-indexer-rpc http://ckb-indexer:8116 \
+        --node-mode "readonly" \
+        --store-path $STORE_PATH \
+        -c $CONFIG_DIR/scripts-config.json \
+        --scripts-deployment-path $CONFIG_DIR/scripts-deployment.json \
+        -g $CONFIG_DIR/rollup-genesis-deployment.json \
+        --rollup-config $CONFIG_DIR/rollup-config.json \
+        -o $CONFIG_DIR/godwoken-config-readonly.toml \
+        --rpc-server-url 0.0.0.0:8119 \
+        --p2p-dial /dns4/godwoken/tcp/9999
 
     log "Generate file \"$CONFIG_DIR/godwoken-config-readonly.toml\""
 }
