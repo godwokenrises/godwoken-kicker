@@ -147,7 +147,7 @@ services:
       interval: 10s
       retries: 3
     volumes:
-      - ./layer2/config/web3-config.env:/godwoken-web3/packages/api-server/.env
+      - ./layer2/config/web3-config.env:/godwoken/web3/packages/api-server/.env
       - ./web3/entrypoint.sh:/var/lib/web3/entrypoint.sh
     entrypoint: /var/lib/web3/entrypoint.sh
     ports:
