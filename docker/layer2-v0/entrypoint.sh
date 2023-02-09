@@ -54,7 +54,7 @@ function deploy_rollup_genesis() {
 function generate_withdrawal_to_v1_config() {
     v1_rollup_type_hash=$(cat ${V1_GODWOKEN_CONFIG} | grep rollup_type_hash | awk '{print $3}')
     v1_deposit_lock_code_hash=$(cat ${V1_GODWOKEN_CONFIG} | grep deposit_script_type_hash | awk '{print $3}')
-    v1_eth_lock_code_hash=$(cat ${V1_GODWOKEN_CONFIG} | grep -C 1 "type_ = 'eth'" | awk '{print $3}' | grep '0x')
+    v1_eth_lock_code_hash=$(cat ${V1_GODWOKEN_CONFIG} | grep -C 1 'type_ = "eth"' | awk '{print $3}' | grep '0x')
 
     echo "\n[withdrawal_to_v1_config]\nv1_rollup_type_hash = ${v1_rollup_type_hash}\nv1_deposit_lock_code_hash = ${v1_deposit_lock_code_hash}\nv1_eth_lock_code_hash = ${v1_eth_lock_code_hash}\nv1_deposit_minimal_cancel_timeout_msecs = 604800000"
 }
