@@ -18,7 +18,8 @@ jobs:
         uses: actions/checkout@v3
       - run: git rev-parse HEAD
       - run: ./kicker init
-      - run:  |
+      - name: Kicker start
+        run:  |
           # Temporary workaround unreliable web3 health check
           (echo " == kicker start attempt: 1 == " && ./kicker start) || \
           (echo " == kicker start attempt: 2 == " && ./kicker stop && ./kicker start) || \
