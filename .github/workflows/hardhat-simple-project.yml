@@ -15,7 +15,7 @@ jobs:
     steps:
       - run: echo "Part 1. Deploy Local Network of Godwoken"
       - name: Checkout Godwoken-Kicker
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - run: git rev-parse HEAD
       - run: ./kicker init
       - run:  |
