@@ -30,7 +30,7 @@ Let's start with an example to demonstrate how Godwoken-Kicker supports manual-b
   ```shell
   MANUAL_BUILD_GODWOKEN=true \
   GODWOKEN_GIT_URL=ssh://git@github.com/godwokenrises/godwoken \
-  GODWOKEN_GIT_CHECKOUT=compatibility-breaking-changes \
+  GODWOKEN_GIT_CHECKOUT=develop \
   ./kicker manual-build
   ```
 
