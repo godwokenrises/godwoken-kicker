@@ -215,7 +215,8 @@ function deposit() {
     ethaddr=${1:?"\"$EXECUTABLE deposit\" requires eth address as 1st argument"}
     amount=${2:?"\"$EXECUTABLE deposit\" requires amount as 2nd argument"}
 
-    pkpath=${PRIVATE_KEY_PATH:-"$WORKSPACE/accounts/ckb-miner-and-faucet.key"}
+    # Use rollup-scripts-deployer to avoid conflict with v0/v1 block submission.
+    pkpath=${PRIVATE_KEY_PATH:-"$WORKSPACE/accounts/rollup-scripts-deployer.key"}
     if [ ! -f $pkpath ]; then
         error "$pkpath: No such file or directory"
         exit 1
@@ -305,7 +306,7 @@ function to_script_hash() {
 function deposit_v0() {
     amount=${1:?"\"$EXECUTABLE deposit\" requires amount as 1nd argument"}
 
-    pkpath=${PRIVATE_KEY_PATH:-"$WORKSPACE/accounts/ckb-miner-and-faucet.key"}
+    pkpath=${PRIVATE_KEY_PATH:-"$WORKSPACE/accounts/rollup-scripts-deployer.key"}
     if [ ! -f $pkpath ]; then
         error "$pkpath: No such file or directory"
         exit 1
@@ -333,7 +334,7 @@ function withdraw_v0_to_v1() {
     ethaddr=${1:?"\"$EXECUTABLE withdraw-v0-to-v1\" requires eth address as 1st argument"}
     amount=${2:?"\"$EXECUTABLE withdraw-v0-to-v1\" requires amount as 2nd argument"}
 
-    pkpath=${PRIVATE_KEY_PATH:-"$WORKSPACE/accounts/ckb-miner-and-faucet.key"}
+    pkpath=${PRIVATE_KEY_PATH:-"$WORKSPACE/accounts/rollup-scripts-deployer.key"}
     if [ ! -f $pkpath ]; then
         error "$pkpath: No such file or directory"
         exit 1
