@@ -21,8 +21,8 @@ RUN which rustfmt
 RUN cargo install ckb-capsule --version 0.8.0 --locked
 RUN which capsule
 
-# install node 14
-RUN curl -sL https://deb.nodesource.com/setup_14.x  | DEBIAN_FRONTEND=noninteractive bash -
+# install node 18
+RUN curl -sL https://deb.nodesource.com/setup_18.x  | DEBIAN_FRONTEND=noninteractive bash -
 RUN apt install -y nodejs
 RUN npm install -g yarn
 
