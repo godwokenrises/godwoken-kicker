@@ -123,6 +123,44 @@ function init() {
     manual_build
 }
 
+function gw_rpc_request() {
+    result=$(echo "{
+        \"id\": 2,
+        \"jsonrpc\": \"2.0\",
+        \"method\": \"$1\",
+        \"params\": [\"$2\"]
+    }" \
+    | tr -d '\n' \
+    | curl -H 'content-type: application/json' -d @- \
+    http://localhost:8119/instant-finality-hack \
+    | sed -e 's/[{}]/''/g' | awk -v RS=',"' -F: '/^result/ {print $2}')
+}
+
+function try_deposit_zero_address() {
+    gw_rpc_request "gw_get_script_hash_by_registry_address" "0x02000000140000000000000000000000000000000000000000000000"
+    script_hash=$result
+
+    if [[ -z "$script_hash" ]]; then
+        # deposit
+        info "Zero address account id not found, deposit ..."
+        deposit 0x0000000000000000000000000000000000000000 1000
+        info "Zero address deposit succeed."
+    else
+        # check account id
+        gw_rpc_request "gw_get_account_id_by_script_hash" $(echo $script_hash | tr -d '"')
+        account_id=$result
+
+        if [[ -z "$account_id" ]]; then
+            # deposit
+            info "Zero address account id not found, deposit ..."
+            deposit 0x0000000000000000000000000000000000000000 1000
+            info "Zero address deposit succeed."
+        else
+            info "Zero address already deposited."
+        fi
+    fi
+}
+
 function start() {
     echo -e "\033[0;33mNOTE: The docker-compose version should be newer than 1.29.0\033[0m"
     echo -e "\033[0;33mNOTE: This might take several minutes on the first run\033[0m"
@@ -156,6 +194,8 @@ function start() {
     if [ "$?" = "0" ]; then
         info "Services started successfully"
     fi
+
+    try_deposit_zero_address
 }
 
 function stop() {
