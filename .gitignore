@@ -50,6 +50,7 @@ plugins/gw-schema/tmp
 /docker/layer2/config/godwoken-config-readonly.toml
 /docker/layer2/config/polyjuice-root-account-id
 /docker/layer2/config/web3-indexer-config.toml
+/docker/layer2/config/withdrawal-to-v1.toml
 /docker/manual-artifacts/
 /docker/layer2-v0/data/
 /docker/layer2-v0/config/scripts-deployment.json

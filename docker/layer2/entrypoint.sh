@@ -81,6 +81,7 @@ function deploy_scripts() {
     start_ckb_miner_at_background
     RUST_BACKTRACE=full gw-tools deploy-scripts \
         --ckb-rpc http://ckb:8114 \
+        --ckb-indexer-rpc http://ckb-indexer:8116 \
         -i $CONFIG_DIR/scripts-config.json \
         -o $CONFIG_DIR/scripts-deployment.json \
         -k $ACCOUNTS_DIR/rollup-scripts-deployer.key
@@ -100,8 +101,8 @@ function deploy_rollup_genesis() {
     start_ckb_miner_at_background
     RUST_BACKTRACE=full gw-tools deploy-genesis \
         --ckb-rpc http://ckb:8114 \
+        --ckb-indexer-rpc http://ckb-indexer:8116 \
         --scripts-deployment-path $CONFIG_DIR/scripts-deployment.json \
-        --omni-lock-config-path $CONFIG_DIR/scripts-deployment.json \
         --rollup-config $CONFIG_DIR/rollup-config.json \
         -o $CONFIG_DIR/rollup-genesis-deployment.json \
         -k $ACCOUNTS_DIR/godwoken-block-producer.key
@@ -121,28 +122,19 @@ function generate_godwoken_config() {
     RUST_BACKTRACE=full gw-tools generate-config \
         --ckb-rpc http://ckb:8114 \
         --ckb-indexer-rpc http://ckb-indexer:8116 \
+        --node-mode fullnode \
+        --store-path $STORE_PATH \
         -c $CONFIG_DIR/scripts-config.json \
         --scripts-deployment-path $CONFIG_DIR/scripts-deployment.json \
-        --omni-lock-config-path $CONFIG_DIR/scripts-deployment.json \
         -g $CONFIG_DIR/rollup-genesis-deployment.json \
         --rollup-config $CONFIG_DIR/rollup-config.json \
         -o $CONFIG_DIR/godwoken-config.toml \
         --rpc-server-url 0.0.0.0:8119 \
         --privkey-path $ACCOUNTS_DIR/godwoken-block-producer.key \
-        --block-producer-address 0x2e9df163055245bfadd35e3a1f05f06096447c85
+        --block-producer-address 0x2e9df163055245bfadd35e3a1f05f06096447c85 \
+        --p2p-listen /ip4/0.0.0.0/tcp/9999 \
+        --output-withdrawal-to-v1-config $CONFIG_DIR/withdrawal-to-v1.toml
 
-    # some dirty modification
-    if [ ! -z "$GODWOKEN_MODE" ]; then
-        sed -i 's#^node_mode = .*$#node_mode = '"'$GODWOKEN_MODE'"'#' $CONFIG_DIR/godwoken-config.toml
-    fi
-    if [ ! -z "$STORE_PATH" ]; then
-        sed -i 's#^path = .*$#path = '"'$STORE_PATH'"'#' $CONFIG_DIR/godwoken-config.toml
-    fi
-    cat >> $CONFIG_DIR/godwoken-config.toml <<EOF
-
-[p2p_network_config]
-listen = "/ip4/0.0.0.0/tcp/9999"
-EOF
     log "Generate file \"$CONFIG_DIR/godwoken-config.toml\""
 }
 
@@ -157,16 +149,15 @@ function create_polyjuice_root_account() {
 
     # Deposit for block_producer
     #
-    # Here we deposit from ckb-miner-and-faucet.key instead of
-    # godwoken-block-producer.key to avoid double spending cells locked by the
-    # latter -- godwoken has already started and may spend them too for block
-    # submission etc.
+    # Use rollup-scripts-deployer so that this transaction isn't in conflict
+    # with submission txs or v0 deployment/submission txs.
     log "Deposit for block_producer"
     RUST_BACKTRACE=full gw-tools deposit-ckb \
-        --privkey-path $ACCOUNTS_DIR/ckb-miner-and-faucet.key \
+        --privkey-path $ACCOUNTS_DIR/rollup-scripts-deployer.key \
         --eth-address 0x2e9df163055245bfadd35e3a1f05f06096447c85 \
         --godwoken-rpc-url http://127.0.0.1:8119 \
         --ckb-rpc http://ckb:8114 \
+        --ckb-indexer-rpc http://ckb-indexer:8116 \
         --scripts-deployment-path $CONFIG_DIR/scripts-deployment.json \
         --config-path $CONFIG_DIR/godwoken-config.toml \
         --capacity 2000

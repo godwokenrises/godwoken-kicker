@@ -227,6 +227,7 @@ function clean() {
     rm -f  docker/layer2/config/godwoken-config-readonly.toml
     rm -f  docker/layer2/config/polyjuice-root-account-id
     rm -f  docker/layer2/config/web3-indexer-config.toml
+    rm -f  docker/layer2/config/withdrawal-to-v1.toml
     rm -rf docker/ckb-indexer/
     rm -rf docker/layer1/ckb/data/
     rm -rf docker/layer1/ckb2/data/
@@ -254,7 +255,8 @@ function deposit() {
     ethaddr=${1:?"\"$EXECUTABLE deposit\" requires eth address as 1st argument"}
     amount=${2:?"\"$EXECUTABLE deposit\" requires amount as 2nd argument"}
 
-    pkpath=${PRIVATE_KEY_PATH:-"$WORKSPACE/accounts/ckb-miner-and-faucet.key"}
+    # Use rollup-scripts-deployer to avoid conflict with v0/v1 block submission.
+    pkpath=${PRIVATE_KEY_PATH:-"$WORKSPACE/accounts/rollup-scripts-deployer.key"}
     if [ ! -f $pkpath ]; then
         error "$pkpath: No such file or directory"
         exit 1
@@ -269,6 +271,7 @@ function deposit() {
         --entrypoint "gw-tools deposit-ckb \
                 --godwoken-rpc-url http://godwoken:8119 \
                 --ckb-rpc http://ckb:8114 \
+                --ckb-indexer-rpc http://ckb-indexer:8116 \
                 --scripts-deployment-path /config/scripts-deployment.json \
                 --config-path /config/godwoken-config.toml \
                 --privkey-path /privkey-path \
@@ -343,7 +346,7 @@ function to_script_hash() {
 function deposit_v0() {
     amount=${1:?"\"$EXECUTABLE deposit\" requires amount as 1nd argument"}
 
-    pkpath=${PRIVATE_KEY_PATH:-"$WORKSPACE/accounts/ckb-miner-and-faucet.key"}
+    pkpath=${PRIVATE_KEY_PATH:-"$WORKSPACE/accounts/rollup-scripts-deployer.key"}
     if [ ! -f $pkpath ]; then
         error "$pkpath: No such file or directory"
         exit 1
@@ -371,7 +374,7 @@ function withdraw_v0_to_v1() {
     ethaddr=${1:?"\"$EXECUTABLE withdraw-v0-to-v1\" requires eth address as 1st argument"}
     amount=${2:?"\"$EXECUTABLE withdraw-v0-to-v1\" requires amount as 2nd argument"}
 
-    pkpath=${PRIVATE_KEY_PATH:-"$WORKSPACE/accounts/ckb-miner-and-faucet.key"}
+    pkpath=${PRIVATE_KEY_PATH:-"$WORKSPACE/accounts/rollup-scripts-deployer.key"}
     if [ ! -f $pkpath ]; then
         error "$pkpath: No such file or directory"
         exit 1
