@@ -72,7 +72,7 @@ services:
         condition: service_completed_successfully
 
   godwoken:
-    image: ghcr.io/godwokenrises/godwoken:develop
+    image: ghcr.io/godwokenrises/godwoken:develop-smt-trie
     init: true
     healthcheck:
       test: /var/lib/layer2/healthcheck.sh
@@ -109,7 +109,7 @@ services:
         condition: service_completed_successfully
 
   godwoken-readonly:
-    image: ghcr.io/godwokenrises/godwoken:develop
+    image: ghcr.io/godwokenrises/godwoken:develop-smt-trie
     healthcheck:
       test: /var/lib/layer2/healthcheck.sh
       start_period: 10s
