@@ -9,3 +9,9 @@ ports:
     port: 8024
     onOpen: ignore
     visibility: public
+
+  - port: 5432-8120
+    onOpen: ignore
+  - port: 28119-28120
+    onOpen: ignore
+
