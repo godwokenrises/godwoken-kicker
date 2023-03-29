@@ -1,0 +1,5 @@
+tasks:
+  - init: |
+      docker-compose -f docker/docker-compose.yml pull
+  - command: |
+      ./kicker start
