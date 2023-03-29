@@ -7,4 +7,5 @@ tasks:
 ports:
   - name: web3
     port: 8024
+    onOpen: ignore
     visibility: public
