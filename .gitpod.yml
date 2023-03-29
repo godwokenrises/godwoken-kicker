@@ -1,6 +1,6 @@
 tasks:
   - init: |
-      sudo docker-compose -f docker/docker-compose.yml pull
+      docker-compose -f docker/docker-compose.yml pull
   - command: |
       ./kicker start
 
