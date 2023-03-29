@@ -3,3 +3,8 @@ tasks:
       docker-compose -f docker/docker-compose.yml pull
   - command: |
       ./kicker start
+
+ports:
+  - name: web3
+    port: 8024
+    visibility: public

@@ -68,7 +68,7 @@ EXAMPLES:
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/godwokenrises/godwoken-kicker)  
 Using kicker in gitpod is simpler
 1. There is no need to install docker and docker-compose.
-2. Pulling docker images is faster.
+2. There is no need to pull docker images.
 
 ## Bug Report
 
