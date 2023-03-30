@@ -65,6 +65,11 @@ EXAMPLES:
     $ ./kicker -- --help
 ```
 
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/godwokenrises/godwoken-kicker)  
+Using kicker in gitpod is simpler
+1. There is no need to install docker and docker-compose.
+2. There is no need to pull docker images.
+
 ## Bug Report
 
 Whenever you encounter a problem with Kicker, please let us know by providing the following information. This will help us dig into the problem:
