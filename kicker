@@ -12,10 +12,10 @@ WORKSPACE="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 # TODO cargo fetch via proxy
 
 DOCKER_COMPOSE="docker compose"
-if command -v docker compose &> /dev/null
+if docker compose version &> /dev/null
 then
   DOCKER_COMPOSE="docker compose"
-elif command -v docker-compose &> /dev/null
+elif docker-compose version &> /dev/null
 then
   DOCKER_COMPOSE="docker-compose"
 else 
