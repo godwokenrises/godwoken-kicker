@@ -11,12 +11,26 @@ WORKSPACE="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 # TODO BUILD_WEB3_INDEXER_ON_LOCAL_OVER_DOCKER
 # TODO cargo fetch via proxy
 
+DOCKER_COMPOSE="docker compose"
+if command -v docker compose &> /dev/null
+then
+  DOCKER_COMPOSE="docker compose"
+elif command -v docker-compose &> /dev/null
+then
+  DOCKER_COMPOSE="docker-compose"
+else 
+  echo "docker compose / docker-compose are not found"
+  exit 1
+fi
+
+echo "Using \`$DOCKER_COMPOSE\`"
+
 function usage() {
     echo "Usage: $EXECUTABLE [OPTIONS] <SUBCOMMAND>"
     echo
     echo "OPTIONS:"
     echo "  --help          Print usage information"
-    echo "  -- <args>...    Execute docker-compose command"
+    echo "  -- <args>...    Execute docker compose / docker-compose command"
     echo
     echo "SUBCOMMANDS:"
     echo "  init                    Init running environment"
@@ -50,7 +64,7 @@ function usage() {
     echo "    $ sudo $EXECUTABLE clean"
     echo "    $ $EXECUTABLE start"
     echo
-    echo "  * Execute docker-compose commands"
+    echo "  * Execute docker compose / docker-compose commands"
     echo
     echo "    $ $EXECUTABLE -- exec ckb ls -l"
     echo "    $ $EXECUTABLE -- top godwoken"
@@ -97,7 +111,7 @@ function compose() {
         override="$override -f docker/manual-godwoken-v0.compose.yml"
     fi
 
-    erun docker-compose -f docker/docker-compose.yml $override "$@"
+    erun $DOCKER_COMPOSE -f docker/docker-compose.yml $override "$@"
 }
 
 function gw_tools_compose_override() {
@@ -115,9 +129,9 @@ function gw_tools_compose_override() {
 }
 
 function init() {
-    echo -e "\033[0;33mNOTE: The docker-compose version should be newer than 1.29.0\033[0m"
+    echo -e "\033[0;33mNOTE: Using \`docker compose\` or the docker-compose version should be newer than 1.29.0\033[0m"
     echo
-    erun docker-compose -f docker/docker-compose.yml build --no-rm
+    erun $DOCKER_COMPOSE -f docker/docker-compose.yml build --no-rm
 
     # In order to compat with old-version kicker, we execute manual-build at init
     manual_build
@@ -162,7 +176,7 @@ function try_deposit_zero_address() {
 }
 
 function start() {
-    echo -e "\033[0;33mNOTE: The docker-compose version should be newer than 1.29.0\033[0m"
+    echo -e "\033[0;33mNOTE: Using \`docker compose\` or the docker-compose version should be newer than 1.29.0\033[0m"
     echo -e "\033[0;33mNOTE: This might take several minutes on the first run\033[0m"
     echo
 
@@ -263,7 +277,7 @@ function deposit() {
     fi
 
     abspkpath="$( cd -- "$(dirname "$pkpath")" >/dev/null 2>&1 ; pwd -P )/$(basename $pkpath)"
-    docker-compose -f docker/docker-compose.yml $(gw_tools_compose_override) run \
+    $DOCKER_COMPOSE -f docker/docker-compose.yml $(gw_tools_compose_override) run \
         --no-deps \
         --use-aliases \
         --volume=$WORKSPACE/docker/layer2/config:/config \
@@ -293,7 +307,7 @@ function transfer() {
     fi
 
     abspkpath="$( cd -- "$(dirname "$pkpath")" >/dev/null 2>&1 ; pwd -P )/$(basename $pkpath)"
-    docker-compose -f docker/docker-compose.yml run \
+    $DOCKER_COMPOSE -f docker/docker-compose.yml run \
         --no-deps \
         --use-aliases \
         --volume=$WORKSPACE/docker/layer2/config:/config \
@@ -316,7 +330,7 @@ function get_balance() {
     ethaddr=${1:?"\"$EXECUTABLE get-balance\" requires eth address as 1st argument"}
     script_hash=$(to_script_hash "$ethaddr")
     echo "script hash: ${script_hash}"
-    docker-compose -f docker/docker-compose.yml $(gw_tools_compose_override) run \
+    $DOCKER_COMPOSE -f docker/docker-compose.yml $(gw_tools_compose_override) run \
         --no-deps \
         --use-aliases \
         --entrypoint "gw-tools get-balance \
@@ -329,7 +343,7 @@ function get_balance() {
 function to_script_hash() {
     ethaddr=${1:?"\"$EXECUTABLE to-script-hash\" requires eth address as 1st argument"}
     compose_override=$(gw_tools_compose_override)
-    output=$(docker-compose -f docker/docker-compose.yml $compose_override run \
+    output=$($DOCKER_COMPOSE -f docker/docker-compose.yml $compose_override run \
         --no-deps \
         --use-aliases \
         --volume=$WORKSPACE/docker/layer2/config:/config \
@@ -353,7 +367,7 @@ function deposit_v0() {
     fi
 
     abspkpath="$( cd -- "$(dirname "$pkpath")" >/dev/null 2>&1 ; pwd -P )/$(basename $pkpath)"
-    docker-compose -f docker/docker-compose.yml -f docker/manual-godwoken-v0.compose.yml run \
+    $DOCKER_COMPOSE -f docker/docker-compose.yml -f docker/manual-godwoken-v0.compose.yml run \
         --no-deps \
         --use-aliases \
         --volume=$WORKSPACE/docker/layer2-v0/config:/config \
@@ -381,7 +395,7 @@ function withdraw_v0_to_v1() {
     fi
 
     abspkpath="$( cd -- "$(dirname "$pkpath")" >/dev/null 2>&1 ; pwd -P )/$(basename $pkpath)"
-    docker-compose -f docker/docker-compose.yml -f docker/manual-godwoken-v0.compose.yml run \
+    $DOCKER_COMPOSE -f docker/docker-compose.yml -f docker/manual-godwoken-v0.compose.yml run \
         --no-deps \
         --use-aliases \
         --volume=$WORKSPACE/docker/layer2-v0/config:/config \
@@ -437,7 +451,7 @@ function manual_build() {
         # ATTENTION: Do not use `compose run ...`. `compose run` will add
         # `-f docker/manual-web3.compose.yml`, and it will volume
         # the `docker/manual-artifacts` directory, it is not what we expect.
-        erun docker-compose -f docker/docker-compose.yml run \
+        erun $DOCKER_COMPOSE -f docker/docker-compose.yml run \
             --rm \
             --no-deps \
             --volume=$srcdir:/app \
@@ -564,7 +578,7 @@ function manual_build() {
         erun cp $srcdir/c/build/*-validator $dstdir
 
         # Copy the prebuild omni-lock to `docker/manual-artifacts/`
-        erun docker-compose -f $WORKSPACE/docker/docker-compose.yml run \
+        erun $DOCKER_COMPOSE -f $WORKSPACE/docker/docker-compose.yml run \
             --rm \
             --no-deps \
             --volume=$dstdir:/godwoken-scripts \
