@@ -32,7 +32,7 @@ jobs:
       - run: ./kicker logs web3
       - run: ./kicker -- top
       - run: ./kicker -- exec -i ckb ls -l
-      - run: ./kicker -- help
+      - run: ./kicker -- --help
       - run: ./kicker deposit 0xCD1d13450cFA630728D0390C99957C6948BF7d19 10000
 
       - run: echo "Part 2. Deploy A Simple Contract Using Hardhat"
