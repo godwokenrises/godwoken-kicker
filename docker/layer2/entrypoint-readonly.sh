@@ -14,7 +14,6 @@ function generate_godwoken_readonly_config() {
 
     RUST_BACKTRACE=full gw-tools generate-config \
         --ckb-rpc http://ckb:8114 \
-        --ckb-indexer-rpc http://ckb-indexer:8116 \
         --node-mode "readonly" \
         --store-path $STORE_PATH \
         -c $CONFIG_DIR/scripts-config.json \

@@ -285,7 +285,6 @@ function deposit() {
         --entrypoint "gw-tools deposit-ckb \
                 --godwoken-rpc-url http://godwoken:8119 \
                 --ckb-rpc http://ckb:8114 \
-                --ckb-indexer-rpc http://ckb-indexer:8116 \
                 --scripts-deployment-path /config/scripts-deployment.json \
                 --config-path /config/godwoken-config.toml \
                 --privkey-path /privkey-path \

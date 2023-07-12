@@ -22,7 +22,7 @@ services:
       - ./redis/data:/data
 
   ckb:
-    image: nervos/ckb:v0.103.0
+    image: nervos/ckb:v0.111.0-rc8
     user: root
     ports:
       - 8114:8114   # rpc
@@ -33,7 +33,7 @@ services:
 
   ckb-miner:
     init: true
-    image: nervos/ckb:v0.103.0
+    image: nervos/ckb:v0.111.0-rc8
     user: root
     volumes:
       - ./layer1/ckb:/var/lib/ckb
@@ -52,24 +52,6 @@ services:
         max_attempts: 1000
     depends_on:
       - ckb
-
-  ckb-indexer:
-    image: nervos/ckb-indexer:0.3.2
-    init: true
-    environment:
-      CKB_RPC: http://ckb:8114
-    ports:
-      - "8116:8116"
-    volumes:
-      - ./ckb-indexer:/var/lib/ckb-indexer
-    command: [ "-c", "http://ckb:8114", "-l", "0.0.0.0:8116", "-s", "/var/lib/ckb-indexer/data" ]
-    deploy:
-      restart_policy:
-        condition: on-failure
-        max_attempts: 10
-    depends_on:
-      check-ckb-started-successfully:
-        condition: service_completed_successfully
 
   godwoken:
     image: ghcr.io/godwokenrises/godwoken:develop-smt-trie
@@ -102,8 +84,6 @@ services:
       ckb:
         condition: service_started
       ckb-miner:
-        condition: service_started
-      ckb-indexer:
         condition: service_started
       check-ckb-started-successfully:
         condition: service_completed_successfully

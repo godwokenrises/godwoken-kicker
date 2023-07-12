@@ -80,7 +80,7 @@ listen_address = "0.0.0.0:8114"
 max_request_body_size = 10485760
 
 # List of API modules: ["Net", "Pool", "Miner", "Chain", "Stats", "Subscription", "Experiment", "Debug"]
-modules = ["Net", "Pool", "Miner", "Chain", "Stats", "Subscription", "Experiment", "Debug"]
+modules = ["Net", "Pool", "Miner", "Chain", "Stats", "Subscription", "Experiment", "Debug", "Indexer"]
 
 reject_ill_transactions = true
 

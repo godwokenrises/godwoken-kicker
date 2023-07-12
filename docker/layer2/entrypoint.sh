@@ -81,7 +81,6 @@ function deploy_scripts() {
     start_ckb_miner_at_background
     RUST_BACKTRACE=full gw-tools deploy-scripts \
         --ckb-rpc http://ckb:8114 \
-        --ckb-indexer-rpc http://ckb-indexer:8116 \
         -i $CONFIG_DIR/scripts-config.json \
         -o $CONFIG_DIR/scripts-deployment.json \
         -k $ACCOUNTS_DIR/rollup-scripts-deployer.key
@@ -101,7 +100,6 @@ function deploy_rollup_genesis() {
     start_ckb_miner_at_background
     RUST_BACKTRACE=full gw-tools deploy-genesis \
         --ckb-rpc http://ckb:8114 \
-        --ckb-indexer-rpc http://ckb-indexer:8116 \
         --scripts-deployment-path $CONFIG_DIR/scripts-deployment.json \
         --rollup-config $CONFIG_DIR/rollup-config.json \
         -o $CONFIG_DIR/rollup-genesis-deployment.json \
@@ -121,7 +119,6 @@ function generate_godwoken_config() {
     # `godwoken-block-producer.key`
     RUST_BACKTRACE=full gw-tools generate-config \
         --ckb-rpc http://ckb:8114 \
-        --ckb-indexer-rpc http://ckb-indexer:8116 \
         --node-mode fullnode \
         --store-path $STORE_PATH \
         -c $CONFIG_DIR/scripts-config.json \
@@ -157,7 +154,6 @@ function create_polyjuice_root_account() {
         --eth-address 0x2e9df163055245bfadd35e3a1f05f06096447c85 \
         --godwoken-rpc-url http://127.0.0.1:8119 \
         --ckb-rpc http://ckb:8114 \
-        --ckb-indexer-rpc http://ckb-indexer:8116 \
         --scripts-deployment-path $CONFIG_DIR/scripts-deployment.json \
         --config-path $CONFIG_DIR/godwoken-config.toml \
         --capacity 2000
