@@ -74,7 +74,6 @@ function generate_godwoken_config() {
 
     RUST_BACKTRACE=full gw-tools generate-config \
         --ckb-rpc http://ckb:8114 \
-        --ckb-indexer-rpc http://ckb-indexer:8116 \
         -c $CONFIG_DIR/scripts-config.json \
         --scripts-deployment-path $CONFIG_DIR/scripts-deployment.json \
         -g $CONFIG_DIR/rollup-genesis-deployment.json \

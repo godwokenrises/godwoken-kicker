@@ -9,7 +9,7 @@ services:
   #   docker-compose -f docker/docker-compose.yml -f docker/manual-godwoken-v0.compose.yml up -d godwoken
   #   ```
   godwoken-v0:
-    image: ghcr.io/zeroqn/godwoken-prebuilds:dev-feat-fast-withdrawal-to-v1.1
+    image: ghcr.io/godwokenrises/godwoken:v0.10
     healthcheck:
       test: /var/lib/layer2/healthcheck.sh
       start_period: 10s
@@ -39,8 +39,6 @@ services:
         condition: service_started
       ckb-miner:
         condition: service_started
-      ckb-indexer:
-        condition: service_started
       check-ckb-started-successfully:
         condition: service_completed_successfully
       godwoken:
@@ -56,4 +54,3 @@ services:
     depends_on:
       godwoken-v0:
         condition: service_healthy
-
