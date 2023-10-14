@@ -410,9 +410,9 @@ function withdraw_v0_to_v1() {
         godwoken-v0
 }
 
-# @example MANUAL_BUILD_WEB3=true \
-#          WEB3_GIT_URL=ssh://git@github.com/godwokenrises/godwoken-web3 \
-#          WEB3_GIT_CHECKOUT=compatibility-breaking-changes \
+# @example MANUAL_BUILD_GODWOKEN=true \
+#          GODWOKEN_GIT_URL=ssh://git@github.com/godwokenrises/godwoken \
+#          GODWOKEN_GIT_CHECKOUT=develop \
 #          ./kicker manual-build
 function manual_build() {
     DOCKER_MANUAL_BUILD_IMAGE_NAME=${DOCKER_MANUAL_BUILD_IMAGE_NAME:-"retricsu/godwoken-manual-build"}
@@ -440,6 +440,8 @@ function manual_build() {
     if [ "$MANUAL_BUILD_WEB3" = "true" ]; then
         info "Start building godwoken-web3"
 
+        # godwoken-web3 is managed in the Godwoken monorepo.
+        # See https://github.com/godwokenrises/godwoken/tree/develop/web3
         srcdir=$WORKSPACE/packages/godwoken-web3/web3
         dstdir=$WORKSPACE/docker/manual-artifacts/godwoken-web3
 
@@ -499,6 +501,9 @@ function manual_build() {
         # More: ./docker/manual-web3-indexer.compose.yml
         erun mkdir -p $dstdir
         erun cp $srcdir/web3/target/release/gw-web3-indexer $dstdir
+
+        # Remove Rust target to avoid `out of disk` issue in CI
+        sudo rm -rf $srcdir/web3/target/release
     else
         info "skip building godwoken-web3-indexer(gw-web3-indexer)"
     fi
@@ -535,10 +540,8 @@ function manual_build() {
         erun cp $srcdir/target/release/godwoken $dstdir
         erun cp $srcdir/target/release/gw-tools $dstdir
 
-        # Remove target/release/examples to avoid `out of disk` issue in CI
-        du -hd1 $srcdir/target
-        rm -rf $srcdir/target/release/examples
-        du -hd1 $srcdir/target
+        # Remove Rust target to avoid `out of disk` issue in CI
+        sudo rm -rf $srcdir/target/release
     else
         info "skip building Godwoken"
     fi
