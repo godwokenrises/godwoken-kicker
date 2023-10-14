@@ -415,25 +415,37 @@ function withdraw_v0_to_v1() {
 #          GODWOKEN_GIT_CHECKOUT=develop \
 #          ./kicker manual-build
 function manual_build() {
-    DOCKER_MANUAL_BUILD_IMAGE_NAME=${DOCKER_MANUAL_BUILD_IMAGE_NAME:-"retricsu/godwoken-manual-build"}
-    DOCKER_MANUAL_BUILD_IMAGE_TAG=${DOCKER_MANUAL_BUILD_IMAGE_TAG:-"node18"}
-    DOCKER_MANUAL_BUILD_IMAGE="${DOCKER_MANUAL_BUILD_IMAGE:-"$DOCKER_MANUAL_BUILD_IMAGE_NAME:$DOCKER_MANUAL_BUILD_IMAGE_TAG"}"
-    
+    WEB3_GIT_URL=${WEB3_GIT_URL:-"https://github.com/godwokenrises/godwoken"}
+    WEB3_GIT_CHECKOUT=${WEB3_GIT_CHECKOUT:-"develop"}
     echo "MANUAL_BUILD_WEB3         =   \"$MANUAL_BUILD_WEB3\""
     echo "WEB3_GIT_URL              =   \"$WEB3_GIT_URL\""
     echo "WEB3_GIT_CHECKOUT         =   \"$WEB3_GIT_CHECKOUT\""
     echo "MANUAL_BUILD_WEB3_INDEXER =   \"$MANUAL_BUILD_WEB3_INDEXER\""
+
+    GODWOKEN_GIT_URL=${GODWOKEN_GIT_URL:-"https://github.com/godwokenrises/godwoken"}
+    GODWOKEN_GIT_CHECKOUT=${GODWOKEN_GIT_CHECKOUT:-"develop"}
     echo "MANUAL_BUILD_GODWOKEN     =   \"$MANUAL_BUILD_GODWOKEN\""
     echo "GODWOKEN_GIT_URL          =   \"$GODWOKEN_GIT_URL\""
     echo "GODWOKEN_GIT_CHECKOUT     =   \"$GODWOKEN_GIT_CHECKOUT\""
+
+    SCRIPTS_GIT_URL=${SCRIPTS_GIT_URL:-"https://github.com/godwokenrises/godwoken"}
+    SCRIPTS_GIT_CHECKOUT=${SCRIPTS_GIT_CHECKOUT:-"develop"}
     echo "MANUAL_BUILD_SCRIPTS      =   \"$MANUAL_BUILD_SCRIPTS\""
     echo "SCRIPTS_GIT_URL           =   \"$SCRIPTS_GIT_URL\""
     echo "SCRIPTS_GIT_CHECKOUT      =   \"$SCRIPTS_GIT_CHECKOUT\""
+
     echo "OMNI_LOCK_GIT_URL         =   \"$OMNI_LOCK_GIT_URL\""
     echo "OMNI_LOCK_GIT_CHECKOUT    =   \"$OMNI_LOCK_GIT_CHECKOUT\""
+
+    POLYJUICE_GIT_URL=${POLYJUICE_GIT_URL:-"https://github.com/godwokenrises/godwoken"}
+    POLYJUICE_GIT_CHECKOUT=${POLYJUICE_GIT_CHECKOUT:-"develop"}
     echo "MANUAL_BUILD_POLYJUICE    =   \"$MANUAL_BUILD_POLYJUICE\""
     echo "POLYJUICE_GIT_URL         =   \"$POLYJUICE_GIT_URL\""
     echo "POLYJUICE_GIT_CHECKOUT    =   \"$POLYJUICE_GIT_CHECKOUT\""
+
+    DOCKER_MANUAL_BUILD_IMAGE_NAME=${DOCKER_MANUAL_BUILD_IMAGE_NAME:-"retricsu/godwoken-manual-build"}
+    DOCKER_MANUAL_BUILD_IMAGE_TAG=${DOCKER_MANUAL_BUILD_IMAGE_TAG:-"node18"}
+    DOCKER_MANUAL_BUILD_IMAGE="${DOCKER_MANUAL_BUILD_IMAGE:-"$DOCKER_MANUAL_BUILD_IMAGE_NAME:$DOCKER_MANUAL_BUILD_IMAGE_TAG"}"
     echo "DOCKER_MANUAL_BUILD_IMAGE =   \"$DOCKER_MANUAL_BUILD_IMAGE\""
     echo
 
