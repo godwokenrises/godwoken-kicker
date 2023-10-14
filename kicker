@@ -571,10 +571,13 @@ function manual_build() {
         prepare_repo godwoken-scripts "$SCRIPTS_GIT_URL" "$SCRIPTS_GIT_CHECKOUT"
 
         # Install capsule
-        # TODO: use cpasule from godwoken-manual-build image
-        if [ -z "$(command -v capsule)" ]; then
-            erun cargo install ckb-capsule
-        fi
+        # FIXME: error: Incompatible capsule version 0.10.1, this project requires a version that's compatible with 0.7.0
+        CAPSULE_VERSION=0.7.0
+        export CARGO_HOME=$WORKSPACE/packages/.cargo
+        (which capsule && test "$(capsule --version)" = "Capsule $CAPSULE_VERSION") \
+        || erun cargo install ckb-capsule --version $CAPSULE_VERSION --force
+        $WORKSPACE/packages/.cargo/bin/capsule --version
+        # FIXME: failed to install capsule 0.7.0
 
         erun cd $srcdir/c \&\& erun make all-via-docker
         erun cd $srcdir \&\& capsule build --release --debug-output
