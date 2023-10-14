@@ -563,7 +563,7 @@ function manual_build() {
         dstdir=$WORKSPACE/docker/manual-artifacts/polyjuice/
 
         # Download repo
-        prepare_repo godwoken-polyjuice "$POLYJUICE_GIT_URL" "$POLYJUICE_GIT_CHECKOUT"
+        prepare_repo godwoken "$POLYJUICE_GIT_URL" "$POLYJUICE_GIT_CHECKOUT"
 
         cd $srcdir
         erun make all-via-docker
@@ -580,7 +580,7 @@ function manual_build() {
         dstdir=$WORKSPACE/docker/manual-artifacts/scripts/
 
         # Download repo
-        prepare_repo godwoken-scripts "$SCRIPTS_GIT_URL" "$SCRIPTS_GIT_CHECKOUT"
+        prepare_repo godwoken "$SCRIPTS_GIT_URL" "$SCRIPTS_GIT_CHECKOUT"
 
         # Install capsule
         # TODO: use cpasule from godwoken-manual-build image
