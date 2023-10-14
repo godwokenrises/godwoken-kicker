@@ -534,6 +534,11 @@ function manual_build() {
         erun mkdir -p $dstdir
         erun cp $srcdir/target/release/godwoken $dstdir
         erun cp $srcdir/target/release/gw-tools $dstdir
+
+        # Remove target/release/examples to avoid `out of disk` issue in CI
+        du -hd1 $srcdir/target
+        rm -rf $srcdir/target/release/examples
+        du -hd1 $srcdir/target
     else
         info "skip building Godwoken"
     fi
