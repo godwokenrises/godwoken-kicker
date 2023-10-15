@@ -2,6 +2,15 @@
 
 set -o errexit
 
+GITHUB_ACTIONS_CLEAN_MID_ARTIFACTS=false
+# https://docs.github.com/en/actions/learn-github-actions/variables#default-environment-variables
+if [ "$CI" = "true" ] && [ -n "$GITHUB_RUN_ID" ]; then
+  echo "This script is running in GitHub Actions. GITHUB_RUN_ID: $GITHUB_RUN_ID"
+
+  # Diskspace is limited in GitHub Actions, so we need to manually clean the middle artifacts
+  GITHUB_ACTIONS_CLEAN_MID_ARTIFACTS=true
+fi
+
 EXECUTABLE=$0
 WORKSPACE="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
@@ -486,6 +495,10 @@ function manual_build() {
             $srcdir/node_modules \
             $srcdir/yarn.lock \
             $dstdir
+
+        if [[ "$GITHUB_ACTIONS_CLEAN_MID_ARTIFACTS" = "true" ]]; then
+            erun sudo rm -rf $srcdir/node_modules
+        fi
     else
         info "skip building godwoken-web3"
     fi
@@ -508,17 +521,20 @@ function manual_build() {
             --workdir /app/web3 \
             --volume $srcdir:/app \
             --volume $WORKSPACE/packages/.rustup:/root/.rustup \
-            --env CARGO_HOME=$WORKSPACE/packages/.cargo \
-            $DOCKER_MANUAL_BUILD_IMAGE cargo build --locked
+            --volume $WORKSPACE/packages/.cargo:/app/web3/.cargo \
+            --env CARGO_HOME=/app/web3/.cargo \
+            $DOCKER_MANUAL_BUILD_IMAGE cargo build --release --locked
 
         # Copy the built artifacts to `docker/manual-artifacts/gw-web3-indexer`
         #
         # More: ./docker/manual-web3-indexer.compose.yml
         erun mkdir -p $dstdir
-        erun cp $srcdir/web3/target/debug/gw-web3-indexer $dstdir
+        erun cp $srcdir/web3/target/release/gw-web3-indexer $dstdir
 
         # Remove Rust target to avoid `out of disk` issue in CI
-        sudo rm -rf $srcdir/target
+        if [[ "$GITHUB_ACTIONS_CLEAN_MID_ARTIFACTS" = "true" ]]; then
+            sudo rm -rf $srcdir/web3/target
+        fi
     else
         info "skip building godwoken-web3-indexer (gw-web3-indexer)"
     fi
@@ -534,19 +550,21 @@ function manual_build() {
 
         # Cargo fetch Rust dependencies (in order to access network via
         # host network).
+        erun "cd $srcdir && CARGO_HOME=$WORKSPACE/packages/.cargo cargo fetch --locked && cd -"
+
         # Note:
         # 1. The docker image must have installed cargo and molecule
         # 2. The builtin consensus config and binaries are not required on a 
         #    Godwoken devnet, so `--features gw-config/no-builtin` is appended
         #    to `cargo build` arguments.
-        erun docker run \
-            --rm \
-            --env CARGO_HOME=$WORKSPACE/packages/.cargo \
+        erun docker run --rm \
+            --workdir /app \
             --volume $srcdir:/app \
             --volume $WORKSPACE/packages/.rustup:/root/.rustup \
-            --workdir /app \
-            godwoken \
-            cargo build --locked --release --features gw-config/no-builtin
+            --volume $WORKSPACE/packages/.cargo:/app/.cargo \
+            --env CARGO_HOME=/app/.cargo \
+            $DOCKER_MANUAL_BUILD_IMAGE \
+            cargo build --release --locked --features gw-config/no-builtin
 
         # Copy the built artifacts to `docker/manual-artifacts/`
         #
@@ -556,7 +574,9 @@ function manual_build() {
         erun cp $srcdir/target/release/gw-tools $dstdir
 
         # Remove Rust target to avoid `out of disk` issue in CI
-        sudo rm -rf $srcdir/target/release
+        if [[ "$GITHUB_ACTIONS_CLEAN_MID_ARTIFACTS" = "true" ]]; then
+            sudo rm -rf $srcdir/target
+        fi
     else
         info "skip building Godwoken"
     fi
@@ -605,8 +625,7 @@ function manual_build() {
 
         # Copy the prebuild omni-lock to `docker/manual-artifacts/`
         erun $DOCKER_COMPOSE -f $WORKSPACE/docker/docker-compose.yml run \
-            --rm \
-            --no-deps \
+            --rm --no-deps \
             --volume=$dstdir:/godwoken-scripts \
             --entrypoint "\"bash -c 'cp /scripts/godwoken-scripts/omni_lock /godwoken-scripts/omni_lock'\"" \
             godwoken
@@ -614,7 +633,12 @@ function manual_build() {
         info "skip building Scripts"
     fi
 
-    docker rmi $DOCKER_MANUAL_BUILD_IMAGE
+    if [[ "$GITHUB_ACTIONS_CLEAN_MID_ARTIFACTS" = "true" ]]; then
+        docker images --format '{{.Repository}}:{{.Tag}}' \
+        | grep '$DOCKER_MANUAL_BUILD_IMAGE' | xargs docker rmi \
+        && echo "Image removed." \
+        || echo "Image does not exist."
+    fi
 
     info "End building." | tee --append /tmp/kicker.log
     du -hd6 $WORKSPACE | egrep G | tee --append /tmp/kicker.log
