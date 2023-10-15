@@ -604,6 +604,7 @@ function manual_build() {
         prepare_repo godwoken "$SCRIPTS_GIT_URL" "$SCRIPTS_GIT_CHECKOUT"
 
         # Install capsule
+        # Fixme: error: Incompatible capsule version 0.10.1, this project requires a version that's compatible with 0.7.0
         CAPSULE_VERSION=0.7.0
         export CARGO_HOME=$WORKSPACE/packages/.cargo
         (which capsule && test "$(capsule --version)" = "Capsule $CAPSULE_VERSION") \
