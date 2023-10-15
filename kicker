@@ -521,7 +521,7 @@ function manual_build() {
             --workdir /app/web3 \
             --volume $srcdir:/app \
             --volume $WORKSPACE/packages/.rustup:/root/.rustup \
-            --env CARGO_HOME=$WORKSPACE/packages/.cargo \
+            --volume $WORKSPACE/packages/.cargo:/root/.cargo \
             $DOCKER_MANUAL_BUILD_IMAGE cargo build --locked
 
         # Copy the built artifacts to `docker/manual-artifacts/gw-web3-indexer`
@@ -557,10 +557,10 @@ function manual_build() {
         #    Godwoken devnet, so `--features gw-config/no-builtin` is appended
         #    to `cargo build` arguments.
         erun docker run --rm \
-            --env CARGO_HOME=$WORKSPACE/packages/.cargo \
+            --workdir /app \
             --volume $srcdir:/app \
             --volume $WORKSPACE/packages/.rustup:/root/.rustup \
-            --workdir /app \
+            --volume $WORKSPACE/packages/.cargo:/root/.cargo \
             $DOCKER_MANUAL_BUILD_IMAGE \
             cargo build --locked --features gw-config/no-builtin
 
@@ -604,10 +604,11 @@ function manual_build() {
         prepare_repo godwoken "$SCRIPTS_GIT_URL" "$SCRIPTS_GIT_CHECKOUT"
 
         # Install capsule
-        # TODO: use cpasule from godwoken-manual-build image
-        if [ -z "$(command -v capsule)" ]; then
-            erun cargo install ckb-capsule
-        fi
+        CAPSULE_VERSION=0.7.0
+        export CARGO_HOME=$WORKSPACE/packages/.cargo
+        (which capsule && test "$(capsule --version)" = "Capsule $CAPSULE_VERSION") \
+        || erun cargo install ckb-capsule --version $CAPSULE_VERSION --force
+        $WORKSPACE/packages/.cargo/bin/capsule --version
 
         erun cd $srcdir/c \&\& erun make all-via-docker
         erun cd $srcdir \&\& capsule build --release --debug-output
@@ -620,8 +621,7 @@ function manual_build() {
 
         # Copy the prebuild omni-lock to `docker/manual-artifacts/`
         erun $DOCKER_COMPOSE -f $WORKSPACE/docker/docker-compose.yml run \
-            --rm \
-            --no-deps \
+            --rm --no-deps \
             --volume=$dstdir:/godwoken-scripts \
             --entrypoint "\"bash -c 'cp /scripts/godwoken-scripts/omni_lock /godwoken-scripts/omni_lock'\"" \
             godwoken
