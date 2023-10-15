@@ -2,8 +2,7 @@
 
 set -o errexit
 
-# FIXME
-GITHUB_ACTIONS_CLEAN_MID_ARTIFACTS=true
+GITHUB_ACTIONS_CLEAN_MID_ARTIFACTS=false
 # https://docs.github.com/en/actions/learn-github-actions/variables#default-environment-variables
 if [ "$CI" = "true" ] && [ -n "$GITHUB_RUN_ID" ]; then
   echo "This script is running in GitHub Actions. GITHUB_RUN_ID: $GITHUB_RUN_ID"
