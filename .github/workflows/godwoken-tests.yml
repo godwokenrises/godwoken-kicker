@@ -9,8 +9,25 @@ on:
 
 jobs:
   godwoken-tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        MANUAL_BUILD_GODWOKEN: ["true", "false"]
+        MANUAL_BUILD_WEB3: ["true", "false"]
+        MANUAL_BUILD_WEB3_INDEXER: ["true", "false"]
+        # Disable MANUAL_BUILD of gwos and gwos-evm temporarily,
+        # because there is a MANUAL_BUILD_SCRIPTS bug related to capsule.
+        # See https://github.com/godwokenrises/godwoken-kicker/blob/a6c66edb5537181/kicker#L608-L614
+        # MANUAL_BUILD_POLYJUICE: ["true", "false"]
+        # MANUAL_BUILD_SCRIPTS: ["true", "false"]
+
     uses: godwokenrises/godwoken-tests/.github/workflows/reusable-integration-test-v1.yml@develop
     with:
       extra_github_env: |
         GODWOKEN_KICKER_REPO=${{ github.repository }}
         GODWOKEN_KICKER_REF=${{ github.ref }}
+        MANUAL_BUILD_GODWOKEN=${{ matrix.MANUAL_BUILD_GODWOKEN }}
+        MANUAL_BUILD_WEB3=${{ matrix.MANUAL_BUILD_WEB3 }}
+        MANUAL_BUILD_WEB3_INDEXER=${{ matrix.MANUAL_BUILD_WEB3_INDEXER }}
+        MANUAL_BUILD_POLYJUICE=${{ matrix.MANUAL_BUILD_POLYJUICE }}
+        MANUAL_BUILD_SCRIPTS=${{ matrix.MANUAL_BUILD_SCRIPTS }}

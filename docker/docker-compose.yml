@@ -21,6 +21,7 @@ services:
     volumes:
       - ./redis/data:/data
 
+  # TODO: update CKB version
   ckb:
     image: nervos/ckb:v0.103.0
     user: root
@@ -31,6 +32,7 @@ services:
       - ./layer1/ckb:/var/lib/ckb
     command: [ "run", "-C", "/var/lib/ckb" ]
 
+  # TODO: update CKB version
   ckb-miner:
     init: true
     image: nervos/ckb:v0.103.0
